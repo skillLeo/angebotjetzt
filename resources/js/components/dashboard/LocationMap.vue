@@ -42,5 +42,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div ref="mapEl" class="h-56 w-full rounded-card border border-ink-100" role="img" :aria-label="`Karte: ${plz} ${ort}`" />
+    <div ref="mapEl" class="isolate relative z-0 h-56 w-full rounded-card border border-ink-100" role="img" :aria-label="`Karte: ${plz} ${ort}`" />
 </template>

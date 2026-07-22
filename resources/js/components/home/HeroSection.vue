@@ -24,8 +24,16 @@ function submit() {
 
 <template>
     <section class="bg-white px-4 pt-4 pb-8 sm:px-6 lg:pb-14">
-        <div class="mx-auto max-w-[1360px] overflow-hidden rounded-panel bg-sand-100">
-            <div class="grid items-center gap-8 px-6 py-12 sm:px-10 lg:grid-cols-[55fr_45fr] lg:gap-6 lg:px-14 lg:py-16">
+        <div class="relative mx-auto max-w-[1360px] overflow-hidden rounded-panel bg-sand-100">
+            <div
+                class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-green-100/60 blur-3xl"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-navy-100/50 blur-3xl"
+                aria-hidden="true"
+            />
+            <div class="relative grid items-center gap-8 px-6 py-12 sm:px-10 lg:grid-cols-[55fr_45fr] lg:gap-6 lg:px-14 lg:py-16">
                 <!-- Left column -->
                 <div>
                     <Motion

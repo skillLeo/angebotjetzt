@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
 <template>
     <div
         ref="mapEl"
-        class="h-[420px] w-full rounded-panel border border-ink-100 shadow-card lg:h-[520px]"
+        class="isolate relative z-0 h-[420px] w-full rounded-panel border border-ink-100 shadow-card lg:h-[520px]"
         role="img"
         aria-label="Karte von Deutschland mit den Servicegebieten unserer Gutachter"
     />

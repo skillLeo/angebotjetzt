@@ -10,35 +10,13 @@ withDefaults(
 
 <template>
     <span class="inline-flex flex-col leading-none select-none">
-        <svg
-            viewBox="0 0 232 34"
-            class="h-7 w-auto md:h-8"
-            role="img"
+        <span
+            class="font-display flex items-baseline gap-1.5 text-2xl font-extrabold tracking-tight md:text-[28px]"
             aria-label="AngebotJetzt"
         >
-            <text
-                x="0"
-                y="27"
-                font-family="'Cabinet Grotesk', sans-serif"
-                font-weight="800"
-                font-size="30"
-                letter-spacing="-0.8"
-                :fill="inverted ? '#ffffff' : '#14375E'"
-            >
-                Angebot
-            </text>
-            <text
-                x="123"
-                y="27"
-                font-family="'Cabinet Grotesk', sans-serif"
-                font-weight="800"
-                font-size="30"
-                letter-spacing="-0.8"
-                fill="#3EAE2B"
-            >
-                Jetzt
-            </text>
-        </svg>
+            <span :class="inverted ? 'text-white' : 'text-navy-700'">Angebot</span>
+            <span class="text-green-500">Jetzt</span>
+        </span>
         <span
             v-if="tagline"
             class="mt-1 text-[10px] font-bold tracking-wide"

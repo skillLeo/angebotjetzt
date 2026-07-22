@@ -98,7 +98,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <HowItWorks />
 
     <!-- 06 LIVE REQUESTS CAROUSEL -->
-    <section class="bg-sand-50 py-14 lg:py-20">
+    <section v-if="recentRequests.length" class="bg-sand-50 py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Aktuelle Anfragen" line1="Diese Fahrzeuge suchen" line2="gerade einen Gutachter" />
             <div class="mt-8">
@@ -114,10 +114,10 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <StatsBand :stats="stats" />
 
     <!-- 09 TESTIMONIAL BAND -->
-    <TestimonialBand :reviews="reviews" :person-image="testimonialPerson" />
+    <TestimonialBand v-if="reviews.length" :reviews="reviews" :person-image="testimonialPerson" />
 
     <!-- 10 PROVIDER CARDS CAROUSEL -->
-    <section class="bg-white py-14 lg:py-20">
+    <section v-if="providers.length" class="bg-white py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Unser Netzwerk" line1="Unsere geprüften" line2="Gutachter" />
             <div class="mt-8">
