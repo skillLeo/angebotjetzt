@@ -11,7 +11,8 @@ withDefaults(
 <template>
     <span class="inline-flex flex-col leading-none select-none">
         <span
-            class="font-display flex items-baseline gap-1.5 text-2xl font-extrabold tracking-tight md:text-[28px]"
+            class="font-display notranslate flex items-baseline gap-1.5 text-2xl font-extrabold tracking-tight md:text-[28px]"
+            translate="no"
             aria-label="AngebotJetzt"
         >
             <span :class="inverted ? 'text-white' : 'text-navy-700'">Angebot</span>

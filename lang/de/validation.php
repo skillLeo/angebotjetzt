@@ -31,6 +31,13 @@ return [
         'string' => 'Das Feld :attribute muss mindestens :min Zeichen lang sein.',
     ],
     'numeric' => 'Das Feld :attribute muss eine Zahl sein.',
+    'password' => [
+        'letters' => 'Das Feld :attribute muss mindestens einen Buchstaben enthalten.',
+        'mixed' => 'Das Feld :attribute muss mindestens einen Groß- und einen Kleinbuchstaben enthalten.',
+        'numbers' => 'Das Feld :attribute muss mindestens eine Zahl enthalten.',
+        'symbols' => 'Das Feld :attribute muss mindestens ein Sonderzeichen enthalten.',
+        'uncompromised' => 'Das eingegebene :attribute wurde in einem Datenleck gefunden. Bitte wählen Sie ein anderes :attribute.',
+    ],
     'regex' => 'Das Format von :attribute ist ungültig.',
     'required' => 'Das Feld :attribute ist erforderlich.',
     'required_if' => 'Das Feld :attribute ist erforderlich, wenn :other :value ist.',
