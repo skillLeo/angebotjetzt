@@ -41,12 +41,13 @@ defineProps<{
                     </Reveal>
                 </div>
 
-                <div class="relative h-full min-h-[320px]">
+                <div class="relative h-full min-h-[320px] bg-navy-800">
                     <img
                         :src="image"
                         width="600"
                         height="500"
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                         alt="Kfz-Gutachter bei der Fahrzeugbegutachtung"
                         class="h-full w-full object-cover lg:absolute lg:inset-0"
                     />

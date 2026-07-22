@@ -41,13 +41,14 @@ function scroll(dir: number) {
                         <!-- Insert the person photograph in the middle of the row -->
                         <div
                             v-if="i === 3"
-                            class="relative w-[280px] shrink-0 snap-start overflow-hidden rounded-panel"
+                            class="relative w-[280px] shrink-0 snap-start overflow-hidden rounded-panel bg-green-700"
                         >
                             <img
                                 :src="personImage"
                                 width="280"
                                 height="360"
                                 loading="lazy"
+                                decoding="async"
                                 alt="Zufriedene Kundin mit Smartphone"
                                 class="h-full w-full object-cover"
                             />
