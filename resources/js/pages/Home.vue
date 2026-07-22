@@ -85,10 +85,10 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     </section>
 
     <!-- 04 SERVICE CATEGORY GRID -->
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Kfz-Gutachten" line1="Für jeden Anlass" line2="das richtige Gutachten" />
-            <div class="mt-14">
+            <div class="mt-10">
                 <ServiceGrid :service-types="serviceTypes" />
             </div>
         </div>
@@ -98,10 +98,10 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <HowItWorks />
 
     <!-- 06 LIVE REQUESTS CAROUSEL -->
-    <section class="bg-sand-50 py-20 lg:py-28">
+    <section class="bg-sand-50 py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Aktuelle Anfragen" line1="Diese Fahrzeuge suchen" line2="gerade einen Gutachter" />
-            <div class="mt-12">
+            <div class="mt-8">
                 <LiveRequestsCarousel :requests="recentRequests" />
             </div>
         </div>
@@ -117,10 +117,10 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <TestimonialBand :reviews="reviews" :person-image="testimonialPerson" />
 
     <!-- 10 PROVIDER CARDS CAROUSEL -->
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-white py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Unser Netzwerk" line1="Unsere geprüften" line2="Gutachter" />
-            <div class="mt-12">
+            <div class="mt-8">
                 <ProviderCarousel :providers="providers" />
             </div>
         </div>
@@ -133,7 +133,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <RecruitmentCta :image="recruitmentImage" />
 
     <!-- 13 PRESS STRIP -->
-    <section class="bg-sand-50 py-14">
+    <section class="bg-sand-50 py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="rounded-panel bg-white px-6 py-8 shadow-card">
                 <p class="text-eyebrow mb-6 text-center text-ink-500">Bekannt aus</p>
@@ -151,20 +151,20 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     </section>
 
     <!-- 14 FAQ ACCORDION -->
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-white py-16 lg:py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <SectionHeading centered eyebrow="Häufige Fragen" line1="Alles, was Sie" line2="wissen müssen" />
-            <div class="mt-12">
+            <div class="mt-10">
                 <FaqAccordion :items="faqItems" />
             </div>
         </div>
     </section>
 
     <!-- 15 CITY SEO GRID -->
-    <section class="bg-sand-50 py-20 lg:py-24">
+    <section class="bg-sand-50 py-14 lg:py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading line1="Kfz-Gutachter" line2="in Ihrer Stadt finden" />
-            <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <Reveal v-for="(city, i) in cities" :key="city" :delay="(i % 6) * 0.03">
                     <Link
                         href="/kfz-gutachten"

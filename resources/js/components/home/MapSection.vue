@@ -18,11 +18,11 @@ const activity = [
 </script>
 
 <template>
-    <section class="bg-sand-50 py-20 lg:py-28">
+    <section class="bg-white py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="Bundesweit" line1="Geprüfte Gutachter" line2="in ganz Deutschland" />
 
-            <div class="mt-14 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+            <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
                 <GermanyMap :city-counts="cityCounts" />
 
                 <div class="rounded-panel border border-ink-100 bg-white p-6 shadow-card">

@@ -2,16 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\Inspector;
 use App\Models\Offer;
 use App\Models\Payment;
 use App\Models\Review;
-use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
-use App\Models\Setting;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\CommissionService;
@@ -56,59 +53,15 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        Setting::set('commission_percent', 10);
+        // Categories, service types, commission setting, admin account —
+        // safe on production, run on its own via EssentialDataSeeder.
+        $this->call(EssentialDataSeeder::class);
 
-        Admin::updateOrCreate(
-            ['email' => 'admin@angebotjetzt.de'],
-            ['name' => 'Plattform-Administrator', 'password' => Hash::make('AdminSecure2026!'), 'email_verified_at' => now()]
-        );
-
-        $this->seedCategories();
+        // Everything below is fake demo data for local development only —
+        // never run this on a live client database.
         $inspectors = $this->seedInspectors();
         $customers = $this->seedCustomers();
         $this->seedMarketplaceActivity($inspectors, $customers);
-    }
-
-    private function seedCategories(): void
-    {
-        $categories = [
-            ['Transport', 'transport', 'truck', 'Umzüge, Lieferungen und Transporte aller Art.', false, 1],
-            ['Kfz-Gutachten', 'kfz-gutachten', 'car', 'Unabhängige Kfz-Sachverständige für Gutachten und Bewertungen.', true, 2],
-            ['Handwerk', 'handwerk', 'hammer', 'Qualifizierte Handwerker für jedes Projekt.', false, 3],
-            ['Haus & Garten', 'haus-garten', 'flower-2', 'Gartenpflege, Hausmeisterservice und mehr.', false, 4],
-            ['Reinigung', 'reinigung', 'sparkles', 'Professionelle Reinigungsdienste.', false, 5],
-            ['Bau & Renovierung', 'bau-renovierung', 'paintbrush', 'Bauprojekte und Renovierungen.', false, 6],
-            ['Prüfung & Beratung', 'pruefung-beratung', 'clipboard-check', 'Sachverständige und Berater.', false, 7],
-            ['IT & Digital', 'it-digital', 'monitor', 'IT-Dienstleistungen und digitale Lösungen.', false, 8],
-            ['Events & Kreativ', 'events-kreativ', 'party-popper', 'Eventplanung und kreative Dienstleistungen.', false, 9],
-            ['Sicherheit', 'sicherheit', 'shield', 'Sicherheitsdienste und -technik.', false, 10],
-        ];
-
-        foreach ($categories as [$name, $slug, $icon, $desc, $active, $order]) {
-            ServiceCategory::updateOrCreate(['slug' => $slug], [
-                'name' => $name, 'icon' => $icon, 'description' => $desc,
-                'is_active' => $active, 'sort_order' => $order,
-            ]);
-        }
-
-        $auto = ServiceCategory::where('slug', 'kfz-gutachten')->first();
-
-        $types = [
-            ['Unfallschadengutachten', 'unfallschadengutachten', 'Umfassende Begutachtung und Dokumentation von Fahrzeugschäden nach einem Unfall für Versicherungsansprüche und rechtliche Zwecke.'],
-            ['Fahrzeugbewertung', 'fahrzeugbewertung', 'Ermittlung des aktuellen Marktwerts von PKW, Motorrädern, Nutzfahrzeugen und Oldtimern.'],
-            ['Gebrauchtwagencheck', 'gebrauchtwagencheck', 'Unabhängige Prüfung von Gebrauchtwagen vor dem Kauf zur Aufdeckung versteckter Mängel und Bewertung des Gesamtzustands.'],
-            ['Reparaturkosten- und Totalschadengutachten', 'reparaturkosten-totalschaden', 'Berechnung der Reparaturkosten und Bewertung, ob ein Fahrzeug reparabel oder ein wirtschaftlicher Totalschaden ist.'],
-            ['Wertminderungs- und Restwertgutachten', 'wertminderung-restwert', 'Bewertung des Wertverlusts eines Fahrzeugs nach einem Unfall und Ermittlung des verbleibenden Werts.'],
-            ['Versicherungs- und Rechtsgutachten', 'versicherung-rechtsgutachten', 'Unabhängige Sachverständigengutachten für Versicherungen, Gerichte, Anwälte und Streitbeilegung.'],
-            ['Spezialgutachten', 'spezialgutachten', 'Zustandsbewertungen für Leasingrückgaben, Elektrofahrzeuge, Flotten, Oldtimer sowie Hagel-, Wasser-, Brand- und Vandalismusschäden.'],
-        ];
-
-        foreach ($types as $i => [$name, $slug, $desc]) {
-            ServiceType::updateOrCreate(['slug' => $slug], [
-                'service_category_id' => $auto->id, 'name' => $name,
-                'description' => $desc, 'sort_order' => $i + 1, 'is_active' => true,
-            ]);
-        }
     }
 
     /** @return array<int, Inspector> */

@@ -23,11 +23,11 @@ const steps = [
 </script>
 
 <template>
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading eyebrow="In drei Schritten" line1="So funktioniert" line2="AngebotJetzt" />
 
-            <div class="mt-14 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div class="mt-10 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <ol class="relative">
                     <div
                         class="absolute top-4 bottom-4 left-[27px] w-0.5 bg-gradient-to-b from-green-500 via-green-400 to-transparent lg:left-[35px]"

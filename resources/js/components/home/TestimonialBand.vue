@@ -22,7 +22,7 @@ function scroll(dir: number) {
 </script>
 
 <template>
-    <section class="bg-green-500 py-20 lg:py-28">
+    <section class="bg-green-500 py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
                 centered
@@ -32,7 +32,7 @@ function scroll(dir: number) {
                 line2="vertrauen AngebotJetzt"
             />
 
-            <div class="relative mt-14">
+            <div class="relative mt-10">
                 <div
                     ref="track"
                     class="flex snap-x snap-mandatory items-stretch gap-5 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

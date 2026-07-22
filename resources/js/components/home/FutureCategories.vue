@@ -33,7 +33,7 @@ const icons: Record<string, Component> = {
 </script>
 
 <template>
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-white py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
                 eyebrow="Bald verfügbar"
@@ -45,7 +45,7 @@ const icons: Record<string, Component> = {
                 sich benachrichtigen, sobald es losgeht.
             </p>
 
-            <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
+            <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
                 <template v-for="cat in categories" :key="cat.id">
                     <Reveal v-if="!cat.is_active">
                         <Link
