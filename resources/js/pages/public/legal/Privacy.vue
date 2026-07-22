@@ -1,0 +1,65 @@
+<script setup lang="ts">
+import LegalPage from '@/components/marketing/LegalPage.vue';
+</script>
+
+<template>
+    <LegalPage title="Datenschutzerklärung" updated="Juli 2026">
+        <p>
+            Der Schutz Ihrer personenbezogenen Daten ist uns ein wichtiges Anliegen. Nachfolgend
+            informieren wir Sie gemäß der Datenschutz-Grundverordnung (DSGVO) über die Verarbeitung
+            Ihrer Daten auf AngebotJetzt.
+        </p>
+
+        <h2>1. Verantwortlicher</h2>
+        <p>
+            AngebotJetzt GmbH, Musterstraße 1, 10115 Berlin, E-Mail: datenschutz@angebotjetzt.de.
+        </p>
+
+        <h2>2. Welche Daten wir verarbeiten</h2>
+        <p>
+            Im Rahmen einer Anfrage erheben wir die von Ihnen angegebenen Fahrzeug-, Kontakt- und
+            Standortdaten (Name, E-Mail, Telefon, PLZ, Ort). Diese Daten werden ausschließlich zur
+            Vermittlung passender Gutachter und zur Abwicklung Ihres Auftrags verwendet.
+        </p>
+
+        <h2>3. Rechtsgrundlage</h2>
+        <p>
+            Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
+            sowie Art. 6 Abs. 1 lit. a DSGVO (Einwilligung), soweit Sie eingewilligt haben.
+        </p>
+
+        <h2>4. Weitergabe an Gutachter</h2>
+        <p>
+            Zur Erbringung der Dienstleistung geben wir Ihre Anfrage an geprüfte Gutachter in Ihrer
+            Region weiter. Vollständige Kontaktdaten werden erst nach verbindlicher Beauftragung
+            offengelegt.
+        </p>
+
+        <h2>5. Zahlungsabwicklung</h2>
+        <p>
+            Zahlungen werden über den Zahlungsdienstleister Stripe abgewickelt. Dabei werden die für
+            die Zahlung erforderlichen Daten an Stripe übermittelt. Es gelten ergänzend die
+            Datenschutzbestimmungen von Stripe.
+        </p>
+
+        <h2>6. Speicherdauer</h2>
+        <p>
+            Wir speichern Ihre Daten nur so lange, wie es für die genannten Zwecke erforderlich ist
+            oder gesetzliche Aufbewahrungsfristen dies vorschreiben.
+        </p>
+
+        <h2>7. Ihre Rechte</h2>
+        <p>
+            Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
+            Datenübertragbarkeit sowie Widerspruch. Zudem können Sie sich bei einer Aufsichtsbehörde
+            beschweren.
+        </p>
+
+        <h2>8. Cookies</h2>
+        <p>
+            Details zur Verwendung von Cookies finden Sie in unserer
+            <a href="/cookie-richtlinie">Cookie-Richtlinie</a>. Nicht notwendige Cookies werden nur mit
+            Ihrer Einwilligung gesetzt.
+        </p>
+    </LegalPage>
+</template>

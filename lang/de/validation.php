@@ -1,0 +1,59 @@
+<?php
+
+return [
+    'accepted' => 'Das Feld :attribute muss akzeptiert werden.',
+    'active_url' => 'Das Feld :attribute ist keine gültige URL.',
+    'after' => 'Das Feld :attribute muss ein Datum nach :date sein.',
+    'after_or_equal' => 'Das Feld :attribute muss ein Datum nach oder gleich :date sein.',
+    'alpha' => 'Das Feld :attribute darf nur Buchstaben enthalten.',
+    'alpha_num' => 'Das Feld :attribute darf nur Buchstaben und Zahlen enthalten.',
+    'before' => 'Das Feld :attribute muss ein Datum vor :date sein.',
+    'between' => [
+        'numeric' => 'Das Feld :attribute muss zwischen :min und :max liegen.',
+        'string' => 'Das Feld :attribute muss zwischen :min und :max Zeichen lang sein.',
+    ],
+    'confirmed' => 'Die Bestätigung für :attribute stimmt nicht überein.',
+    'date' => 'Das Feld :attribute ist kein gültiges Datum.',
+    'digits' => 'Das Feld :attribute muss :digits Ziffern lang sein.',
+    'email' => 'Das Feld :attribute muss eine gültige E-Mail-Adresse sein.',
+    'gte' => [
+        'numeric' => 'Das Feld :attribute muss größer oder gleich :value sein.',
+    ],
+    'image' => 'Das Feld :attribute muss ein Bild sein.',
+    'max' => [
+        'numeric' => 'Das Feld :attribute darf maximal :max sein.',
+        'file' => 'Das Feld :attribute darf maximal :max Kilobyte groß sein.',
+        'string' => 'Das Feld :attribute darf maximal :max Zeichen lang sein.',
+        'array' => 'Das Feld :attribute darf maximal :max Elemente haben.',
+    ],
+    'min' => [
+        'numeric' => 'Das Feld :attribute muss mindestens :min sein.',
+        'string' => 'Das Feld :attribute muss mindestens :min Zeichen lang sein.',
+    ],
+    'numeric' => 'Das Feld :attribute muss eine Zahl sein.',
+    'regex' => 'Das Format von :attribute ist ungültig.',
+    'required' => 'Das Feld :attribute ist erforderlich.',
+    'required_if' => 'Das Feld :attribute ist erforderlich, wenn :other :value ist.',
+    'size' => [
+        'string' => 'Das Feld :attribute muss :size Zeichen lang sein.',
+    ],
+    'unique' => ':attribute ist bereits vergeben.',
+
+    'attributes' => [
+        'email' => 'E-Mail-Adresse',
+        'password' => 'Passwort',
+        'name' => 'Name',
+        'phone' => 'Telefon',
+        'plz' => 'Postleitzahl',
+        'ort' => 'Ort',
+        'price' => 'Preis',
+        'amount' => 'Betrag',
+        'iban' => 'IBAN',
+        'contact_email' => 'E-Mail-Adresse',
+        'contact_name' => 'Name',
+        'contact_phone' => 'Telefon',
+        'vehicle_make' => 'Marke',
+        'vehicle_model' => 'Modell',
+        'vin' => 'FIN',
+    ],
+];

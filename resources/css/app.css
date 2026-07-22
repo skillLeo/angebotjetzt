@@ -1,0 +1,333 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   AngebotJetzt — Brand Design Tokens
+   Navy = structure. Green = action. Sand = warm backgrounds.
+   Ink = custom warm-grey neutral scale (never Tailwind gray/slate/zinc).
+   ============================================================ */
+
+@theme {
+    /* Brand navy */
+    --color-navy-950: #071b33;
+    --color-navy-900: #0b2545;
+    --color-navy-800: #0f2c52;
+    --color-navy-700: #14375e;
+    --color-navy-600: #1d4a7a;
+    --color-navy-500: #2a5f94;
+    --color-navy-100: #dce6f0;
+    --color-navy-50: #f1f6fb;
+
+    /* Brand green */
+    --color-green-700: #24801c;
+    --color-green-600: #2f9422;
+    --color-green-500: #3eae2b;
+    --color-green-400: #58c443;
+    --color-green-100: #dbf3d4;
+    --color-green-50: #eff9ec;
+
+    /* Warm sand */
+    --color-sand-100: #f5f2ed;
+    --color-sand-50: #faf8f5;
+
+    /* Warm ink neutrals */
+    --color-ink-900: #14161a;
+    --color-ink-700: #3a3f47;
+    --color-ink-500: #6e747e;
+    --color-ink-300: #c7cbd1;
+    --color-ink-100: #edeff2;
+
+    /* Typography */
+    --font-display:
+        'Cabinet Grotesk', 'Satoshi', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
+
+    /* Radii system: pills 999px, cards 16px, large containers 28px */
+    --radius-pill: 999px;
+    --radius-card: 16px;
+    --radius-panel: 28px;
+
+    /* Shadows — soft, navy-tinted, never black */
+    --shadow-card:
+        0 2px 8px rgba(11, 37, 69, 0.06), 0 12px 32px rgba(11, 37, 69, 0.05);
+    --shadow-lift:
+        0 4px 12px rgba(11, 37, 69, 0.08), 0 24px 48px rgba(11, 37, 69, 0.1);
+
+    /* Easing for reveals */
+    --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* shadcn/reka-ui semantic mapping (existing ui components consume these) */
+@theme inline {
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-sidebar: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-ink-100, currentColor);
+    }
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #14161a;
+    --card: #ffffff;
+    --card-foreground: #14161a;
+    --popover: #ffffff;
+    --popover-foreground: #14161a;
+    --primary: #14375e;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f6fb;
+    --secondary-foreground: #14375e;
+    --muted: #edeff2;
+    --muted-foreground: #6e747e;
+    --accent: #eff9ec;
+    --accent-foreground: #24801c;
+    --destructive: #b3261e;
+    --destructive-foreground: #ffffff;
+    --border: #edeff2;
+    --input: #c7cbd1;
+    --ring: #3eae2b;
+    --radius: 0.75rem;
+    --sidebar-background: #071b33;
+    --sidebar-foreground: #dce6f0;
+    --sidebar-primary: #3eae2b;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #0f2c52;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #0f2c52;
+    --sidebar-ring: #3eae2b;
+    --sidebar: #071b33;
+}
+
+.dark {
+    --background: #0b1420;
+    --foreground: #f1f6fb;
+    --card: #0f2c52;
+    --card-foreground: #f1f6fb;
+    --popover: #0f2c52;
+    --popover-foreground: #f1f6fb;
+    --primary: #3eae2b;
+    --primary-foreground: #ffffff;
+    --secondary: #14375e;
+    --secondary-foreground: #f1f6fb;
+    --muted: #14375e;
+    --muted-foreground: #c7cbd1;
+    --accent: #14375e;
+    --accent-foreground: #dbf3d4;
+    --destructive: #e5534b;
+    --destructive-foreground: #ffffff;
+    --border: #14375e;
+    --input: #1d4a7a;
+    --ring: #3eae2b;
+    --sidebar-background: #071b33;
+    --sidebar-foreground: #dce6f0;
+    --sidebar-primary: #3eae2b;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #0f2c52;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #0f2c52;
+    --sidebar-ring: #3eae2b;
+    --sidebar: #071b33;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    html {
+        scroll-behavior: smooth;
+        /* Hard guard against any horizontal scroll (client requirement).
+           overflow-x:clip does not create a scroll container, so it never
+           breaks position:sticky on descendants the way overflow:hidden would. */
+        overflow-x: clip;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-sans);
+        font-feature-settings: 'ss01';
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        color: var(--color-navy-700);
+        letter-spacing: -0.02em;
+    }
+}
+
+/* ============================================================
+   Editorial type scale
+   ============================================================ */
+@utility text-hero {
+    font-family: var(--font-display);
+    font-size: 40px;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    @media (width >= 64rem) {
+        font-size: 72px;
+        line-height: 0.95;
+    }
+}
+
+@utility text-section {
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    @media (width >= 64rem) {
+        font-size: 52px;
+        line-height: 1;
+    }
+}
+
+@utility text-subsection {
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 700;
+    @media (width >= 64rem) {
+        font-size: 28px;
+    }
+}
+
+@utility text-lead {
+    font-size: 17px;
+    line-height: 1.6;
+    font-weight: 400;
+    @media (width >= 64rem) {
+        font-size: 19px;
+    }
+}
+
+@utility text-eyebrow {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   Motion helpers
+   ============================================================ */
+@keyframes aj-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+@keyframes aj-float-alt {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(7px);
+    }
+}
+
+@keyframes aj-pulse-ring {
+    0% {
+        transform: scale(0.6);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(2.1);
+        opacity: 0;
+    }
+}
+
+@utility animate-float {
+    animation: aj-float 5s ease-in-out infinite;
+}
+
+@utility animate-float-alt {
+    animation: aj-float-alt 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-alt {
+        animation: none;
+    }
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* Leaflet marker pulse */
+.aj-marker-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: rgba(62, 174, 43, 0.5);
+    animation: aj-pulse-ring 2.2s var(--ease-reveal) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aj-marker-pulse::after {
+        animation: none;
+        display: none;
+    }
+}
+
+/* Styled Leaflet popup */
+.leaflet-container .leaflet-popup-content-wrapper {
+    border-radius: 16px;
+    box-shadow: var(--shadow-lift);
+    font-family: var(--font-sans);
+}
+.leaflet-container .leaflet-popup-content {
+    margin: 14px 18px;
+}
