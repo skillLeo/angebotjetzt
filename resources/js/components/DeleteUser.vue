@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
 import { useTemplateRef } from 'vue';
-import { useI18n } from 'vue-i18n';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -19,31 +18,30 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
-const { t } = useI18n();
 
 const passwordInput = useTemplateRef('passwordInput');
 </script>
 
 <template>
-    <div class="space-y-6">
+    <div class="mt-10 space-y-6 border-t border-ink-100 pt-8">
         <Heading
             variant="small"
-            :title="t('dashboard.settingsPage.deleteAccount')"
-            :description="t('dashboard.settingsPage.deleteAccountDesc')"
+            :title="'Konto löschen'"
+            :description="'Löschen Sie Ihr Konto und alle zugehörigen Daten'"
         />
         <div
-            class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
+            class="space-y-4 rounded-card border border-red-100 bg-red-50 p-4"
         >
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-                <p class="font-medium">{{ t('dashboard.settingsPage.warning') }}</p>
+                <p class="font-medium">{{ 'Warnung' }}</p>
                 <p class="text-sm">
-                    {{ t('dashboard.settingsPage.deleteWarningText') }}
+                    {{ 'Bitte mit Vorsicht fortfahren, dies kann nicht rückgängig gemacht werden.' }}
                 </p>
             </div>
             <Dialog>
                 <DialogTrigger as-child>
                     <Button variant="destructive" data-test="delete-user-button"
-                        >{{ t('dashboard.settingsPage.deleteAccount') }}</Button
+                        >{{ 'Konto löschen' }}</Button
                     >
                 </DialogTrigger>
                 <DialogContent>
@@ -58,19 +56,19 @@ const passwordInput = useTemplateRef('passwordInput');
                         v-slot="{ errors, processing, reset, clearErrors }"
                     >
                         <DialogHeader class="space-y-3">
-                            <DialogTitle>{{ t('dashboard.settingsPage.deleteAccountConfirmTitle') }}</DialogTitle>
+                            <DialogTitle>{{ 'Sind Sie sicher, dass Sie Ihr Konto löschen möchten?' }}</DialogTitle>
                             <DialogDescription>
-                                {{ t('dashboard.settingsPage.deleteAccountConfirmDesc') }}
+                                {{ 'Sobald Ihr Konto gelöscht ist, werden auch alle zugehörigen Ressourcen und Daten dauerhaft gelöscht. Bitte geben Sie Ihr Passwort ein, um zu bestätigen, dass Sie Ihr Konto dauerhaft löschen möchten.' }}
                             </DialogDescription>
                         </DialogHeader>
 
                         <div class="grid gap-2">
-                            <Label for="password" class="sr-only">{{ t('dashboard.settingsPage.password') }}</Label>
+                            <Label for="password" class="sr-only">{{ 'Passwort' }}</Label>
                             <PasswordInput
                                 id="password"
                                 name="password"
                                 ref="passwordInput"
-                                :placeholder="t('dashboard.settingsPage.password')"
+                                :placeholder="'Passwort'"
                             />
                             <InputError :message="errors.password" />
                         </div>
@@ -86,7 +84,7 @@ const passwordInput = useTemplateRef('passwordInput');
                                         }
                                     "
                                 >
-                                    {{ t('dashboard.settingsPage.cancel') }}
+                                    {{ 'Abbrechen' }}
                                 </Button>
                             </DialogClose>
 
@@ -96,7 +94,7 @@ const passwordInput = useTemplateRef('passwordInput');
                                 :disabled="processing"
                                 data-test="confirm-delete-user-button"
                             >
-                                {{ t('dashboard.settingsPage.deleteAccount') }}
+                                {{ 'Konto löschen' }}
                             </Button>
                         </DialogFooter>
                     </Form>

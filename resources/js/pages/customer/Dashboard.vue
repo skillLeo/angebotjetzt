@@ -5,9 +5,7 @@ import StatCard from '@/components/dashboard/StatCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { FileText, Package, Tag } from 'lucide-vue-next';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     stats: { requests: number; openOffers: number; bookings: number };
@@ -16,19 +14,19 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>{{ t('dashboard.customerPages.dashboardTitle') }}</title></Head>
+    <Head><title>{{ 'Übersicht' }}</title></Head>
 
     <div class="grid gap-4 sm:grid-cols-3">
-        <StatCard :label="t('dashboard.customerPages.myRequests')" :value="stats.requests" :icon="FileText" />
-        <StatCard :label="t('dashboard.customerPages.openOffers')" :value="stats.openOffers" :icon="Tag" accent :hint="t('dashboard.customerPages.waitingDecision')" />
-        <StatCard :label="t('dashboard.customerPages.myBookings')" :value="stats.bookings" :icon="Package" />
+        <StatCard :label="'Meine Anfragen'" :value="stats.requests" :icon="FileText" />
+        <StatCard :label="'Offene Angebote'" :value="stats.openOffers" :icon="Tag" accent :hint="'Warten auf Ihre Entscheidung'" />
+        <StatCard :label="'Meine Aufträge'" :value="stats.bookings" :icon="Package" />
     </div>
 
     <div class="mt-6">
-        <PageCard :title="t('dashboard.customerPages.latestRequests')">
+        <PageCard :title="'Neueste Anfragen'">
             <template #actions>
                 <Link href="/request" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
-                    {{ t('dashboard.customerPages.newRequest') }}
+                    {{ 'Neue Anfrage' }}
                 </Link>
             </template>
             <div v-if="recentRequests.length" class="divide-y divide-ink-100">
@@ -44,14 +42,14 @@ defineProps<{
                     </div>
                     <div class="flex items-center gap-3">
                         <span v-if="r.offers > 0" class="rounded-pill bg-green-50 px-3 py-1 text-sm font-bold text-green-700">
-                            {{ r.offers }} {{ t('dashboard.customerPages.offersCount') }}
+                            {{ r.offers }} {{ 'Angebote' }}
                         </span>
                         <StatusBadge :status="r.status" />
                     </div>
                 </Link>
             </div>
-            <EmptyState v-else :title="t('dashboard.customerPages.noRequestsYet')" :description="t('dashboard.customerPages.noRequestsDesc')">
-                <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ t('dashboard.customerPages.submitRequest') }}</Link>
+            <EmptyState v-else :title="'Noch keine Anfragen'" :description="'Stellen Sie Ihre erste Anfrage und erhalten Sie Angebote von geprüften Gutachtern.'">
+                <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ 'Anfrage stellen' }}</Link>
             </EmptyState>
         </PageCard>
     </div>

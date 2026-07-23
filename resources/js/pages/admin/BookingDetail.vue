@@ -45,7 +45,7 @@ function confirm() {
                     </div>
                     <div v-if="booking.review"><p class="text-sm text-ink-500">Bewertung</p><p class="font-semibold text-navy-700">{{ booking.review.rating }}/5</p></div>
                 </div>
-                <div v-if="booking.status === 'completed_by_inspector'" class="border-t border-ink-100 p-5 sm:p-6">
+                <div v-if="booking.status === 'completed_by_inspector'" class="border-t border-ink-100 p-6 sm:p-8">
                     <button type="button" class="rounded-pill bg-green-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-green-600" @click="confirm">
                         Abschluss bestätigen & Guthaben freigeben
                     </button>

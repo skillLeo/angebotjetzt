@@ -3,28 +3,26 @@ import GermanyMap from '@/components/marketing/GermanyMap.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { MapPin } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     cityCounts: Record<string, number>;
 }>();
 
 const activity = computed(() => [
-    { city: 'Hamburg', service: t('home.map.serviceAccident'), time: t('home.map.minutesAgo', { n: 4 }) },
-    { city: 'München', service: t('home.map.serviceUsedCarCheck'), time: t('home.map.minutesAgo', { n: 11 }) },
-    { city: 'Köln', service: t('home.map.serviceValuation'), time: t('home.map.minutesAgo', { n: 18 }) },
-    { city: 'Berlin', service: t('home.map.serviceDepreciation'), time: t('home.map.minutesAgo', { n: 26 }) },
-    { city: 'Frankfurt am Main', service: t('home.map.serviceSpecial'), time: t('home.map.minutesAgo', { n: 34 }) },
-    { city: 'Stuttgart', service: t('home.map.serviceAccident'), time: t('home.map.minutesAgo', { n: 41 }) },
+    { city: 'Hamburg', service: 'Unfallschaden', time: `vor ${4} Minuten` },
+    { city: 'München', service: 'Gebrauchtwagencheck', time: `vor ${11} Minuten` },
+    { city: 'Köln', service: 'Fahrzeugbewertung', time: `vor ${18} Minuten` },
+    { city: 'Berlin', service: 'Wertminderung', time: `vor ${26} Minuten` },
+    { city: 'Frankfurt am Main', service: 'Spezialgutachten', time: `vor ${34} Minuten` },
+    { city: 'Stuttgart', service: 'Unfallschaden', time: `vor ${41} Minuten` },
 ]);
 </script>
 
 <template>
-    <section class="bg-white py-16 lg:py-20">
+    <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="t('home.map.eyebrow')" :line1="t('home.map.line1')" :line2="t('home.map.line2')" />
+            <SectionHeading :eyebrow="'Bundesweit'" :line1="'Geprüfte Gutachter'" :line2="'in ganz Deutschland'" />
 
             <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
                 <GermanyMap :city-counts="cityCounts" />
@@ -37,7 +35,7 @@ const activity = computed(() => [
                             />
                             <span class="relative inline-flex h-2.5 w-2.5 rounded-pill bg-green-500" />
                         </span>
-                        <h3 class="font-display text-lg font-bold text-navy-700">{{ t('home.map.liveActivity') }}</h3>
+                        <h3 class="font-display text-lg font-bold text-navy-700">{{ 'Live-Aktivität' }}</h3>
                     </div>
                     <ul class="mt-5 space-y-3">
                         <li
@@ -52,7 +50,7 @@ const activity = computed(() => [
                             </span>
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-navy-700">
-                                    {{ t('home.map.newRequestIn') }} {{ item.city }}
+                                    {{ 'Neue Anfrage in' }} {{ item.city }}
                                 </p>
                                 <p class="text-sm text-ink-500">{{ item.service }} · {{ item.time }}</p>
                             </div>

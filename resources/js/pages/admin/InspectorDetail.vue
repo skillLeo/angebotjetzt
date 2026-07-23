@@ -47,7 +47,7 @@ function toggle() {
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
         <PageCard title="Profil">
-            <div class="space-y-3 p-5 sm:p-6">
+            <div class="space-y-3 p-6 sm:p-8">
                 <div><p class="text-sm text-ink-500">Telefon</p><p class="font-semibold text-navy-700">{{ inspector.phone ?? '–' }}</p></div>
                 <div><p class="text-sm text-ink-500">Dabei seit</p><p class="font-semibold text-navy-700">{{ inspector.since ?? '–' }}</p></div>
                 <div v-if="inspector.bio"><p class="text-sm text-ink-500">Über</p><p class="text-navy-700">{{ inspector.bio }}</p></div>

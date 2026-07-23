@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { Check, Copy, ScanLine } from '@lucide/vue';
+import { Check, Copy, ScanLine } from 'lucide-vue-next';
 import { useClipboard } from '@vueuse/core';
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 import AlertError from '@/components/AlertError.vue';

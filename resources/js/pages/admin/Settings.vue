@@ -23,7 +23,7 @@ function submit() {
 
     <div class="grid gap-6 lg:grid-cols-2">
         <PageCard title="Provision">
-            <form class="space-y-5 p-5 sm:p-6" @submit.prevent="submit">
+            <form class="space-y-5 p-6 sm:p-8" @submit.prevent="submit">
                 <div>
                     <label for="comm" class="mb-1.5 block text-sm font-semibold text-navy-700">Plattform-Provision (%)</label>
                     <input id="comm" v-model="form.commission_percent" type="number" step="0.1" min="0" max="50" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
@@ -37,7 +37,7 @@ function submit() {
         </PageCard>
 
         <PageCard title="Zahlungsanbindung">
-            <div class="p-5 sm:p-6">
+            <div class="p-6 sm:p-8">
                 <div class="flex items-center gap-3 rounded-card px-4 py-3" :class="settings.stripe_configured ? 'bg-green-50' : 'bg-amber-50'">
                     <CheckCircle2 v-if="settings.stripe_configured" :size="20" class="text-green-600" aria-hidden="true" />
                     <XCircle v-else :size="20" class="text-amber-600" aria-hidden="true" />

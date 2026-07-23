@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import { Toaster } from '@/components/ui/sonner';
+import { onClickOutside } from '@vueuse/core';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Bell, LogOut, Menu, X } from 'lucide-vue-next';
+import { Bell, BellOff, LogOut, Menu, X } from 'lucide-vue-next';
 import type { Component } from 'vue';
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
+import { computed, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
     title: string;
@@ -19,6 +17,9 @@ const props = defineProps<{
 
 const sidebarOpen = ref(false);
 const notifOpen = ref(false);
+const notifRef = useTemplateRef('notifRef');
+onClickOutside(notifRef, () => (notifOpen.value = false));
+
 const page = usePage();
 const notifications = computed(() => (page.props.notifications as { count: number; items: Array<{ id: number; title: string; body: string | null; link: string | null; read: boolean; date: string }> }) ?? { count: 0, items: [] });
 
@@ -36,15 +37,19 @@ function logout() {
                     <BrandLogo inverted />
                 </Link>
             </div>
-            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" :aria-label="t('dashboard.portalNav')">
+            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" :aria-label="'Portal-Navigation'">
                 <Link
                     v-for="item in nav"
                     :key="item.href"
                     :href="item.href"
-                    class="flex items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-medium transition"
-                    :class="item.active ? 'bg-green-500 text-white' : 'text-navy-100 hover:bg-navy-800 hover:text-white'"
+                    class="group flex items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-semibold transition-all duration-150"
+                    :class="
+                        item.active
+                            ? 'bg-green-500 text-white shadow-[0_2px_10px_rgba(62,174,43,0.35)]'
+                            : 'text-navy-100 hover:translate-x-0.5 hover:bg-navy-800 hover:text-white'
+                    "
                 >
-                    <component :is="item.icon" :size="19" aria-hidden="true" />
+                    <component :is="item.icon" :size="19" aria-hidden="true" class="shrink-0 transition-transform group-hover:scale-110" />
                     {{ item.label }}
                 </Link>
             </nav>
@@ -55,7 +60,7 @@ function logout() {
                     @click="logout"
                 >
                     <LogOut :size="19" aria-hidden="true" />
-                    {{ t('dashboard.logout') }}
+                    {{ 'Abmelden' }}
                 </button>
             </div>
         </aside>
@@ -72,7 +77,7 @@ function logout() {
                 <aside class="absolute inset-y-0 left-0 flex w-72 flex-col bg-navy-950">
                     <div class="flex h-16 items-center justify-between border-b border-navy-800 px-6">
                         <BrandLogo inverted />
-                        <button type="button" :aria-label="t('dashboard.menuClose')" @click="sidebarOpen = false">
+                        <button type="button" :aria-label="'Menü schließen'" @click="sidebarOpen = false">
                             <X :size="24" class="text-white" aria-hidden="true" />
                         </button>
                     </div>
@@ -81,11 +86,11 @@ function logout() {
                             v-for="item in nav"
                             :key="item.href"
                             :href="item.href"
-                            class="flex items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-medium transition"
-                            :class="item.active ? 'bg-green-500 text-white' : 'text-navy-100 hover:bg-navy-800'"
+                            class="flex items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-semibold transition"
+                            :class="item.active ? 'bg-green-500 text-white shadow-[0_2px_10px_rgba(62,174,43,0.35)]' : 'text-navy-100 hover:bg-navy-800 hover:text-white'"
                             @click="sidebarOpen = false"
                         >
-                            <component :is="item.icon" :size="19" aria-hidden="true" />
+                            <component :is="item.icon" :size="19" aria-hidden="true" class="shrink-0" />
                             {{ item.label }}
                         </Link>
                     </nav>
@@ -95,7 +100,7 @@ function logout() {
                             class="flex w-full items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-medium text-navy-100 hover:bg-navy-800"
                             @click="logout"
                         >
-                            <LogOut :size="19" aria-hidden="true" /> {{ t('dashboard.logout') }}
+                            <LogOut :size="19" aria-hidden="true" /> {{ 'Abmelden' }}
                         </button>
                     </div>
                 </aside>
@@ -104,12 +109,12 @@ function logout() {
 
         <div class="lg:pl-64">
             <!-- Top bar -->
-            <header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-100 bg-white px-4 sm:px-6">
+            <header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-100 bg-white/90 px-4 backdrop-blur-sm sm:px-6">
                 <div class="flex items-center gap-3">
                     <button
                         type="button"
                         class="flex h-10 w-10 items-center justify-center rounded-pill text-navy-700 lg:hidden"
-                        :aria-label="t('dashboard.menuOpen')"
+                        :aria-label="'Menü öffnen'"
                         @click="sidebarOpen = true"
                     >
                         <Menu :size="24" aria-hidden="true" />
@@ -118,44 +123,56 @@ function logout() {
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <div class="relative">
+                    <div ref="notifRef" class="relative">
                         <button
                             type="button"
-                            class="relative flex h-10 w-10 items-center justify-center rounded-pill text-ink-700 transition hover:bg-sand-50"
-                            :aria-label="t('dashboard.notifications')"
+                            class="relative flex h-10 w-10 items-center justify-center rounded-pill text-ink-700 transition hover:bg-sand-100"
+                            :aria-label="'Benachrichtigungen'"
                             @click="notifOpen = !notifOpen"
                         >
                             <Bell :size="20" aria-hidden="true" />
                             <span
                                 v-if="notifications.count > 0"
-                                class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-pill bg-green-500 px-1 text-[10px] font-bold text-white"
+                                class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-pill bg-green-500 px-1 text-[10px] font-bold text-white ring-2 ring-white"
                             >
                                 {{ notifications.count }}
                             </span>
                         </button>
-                        <div
-                            v-if="notifOpen"
-                            class="absolute right-0 mt-2 w-80 overflow-hidden rounded-card border border-ink-100 bg-white shadow-lift"
+                        <Transition
+                            enter-active-class="transition duration-150 ease-out"
+                            enter-from-class="opacity-0 -translate-y-1 scale-95"
+                            leave-active-class="transition duration-100 ease-in"
+                            leave-to-class="opacity-0 -translate-y-1 scale-95"
                         >
-                            <div class="border-b border-ink-100 px-4 py-3">
-                                <p class="font-display text-sm font-bold text-navy-700">{{ t('dashboard.notifications') }}</p>
+                            <div
+                                v-if="notifOpen"
+                                class="absolute right-0 mt-2 w-80 origin-top-right overflow-hidden rounded-card border border-ink-100 bg-white shadow-lift"
+                            >
+                                <div class="border-b border-ink-100 px-4 py-3">
+                                    <p class="font-display text-sm font-bold text-navy-700">{{ 'Benachrichtigungen' }}</p>
+                                </div>
+                                <div v-if="notifications.items.length" class="max-h-96 overflow-y-auto">
+                                    <Link
+                                        v-for="n in notifications.items"
+                                        :key="n.id"
+                                        :href="n.link ?? '#'"
+                                        class="block border-b border-ink-100 px-4 py-3 transition hover:bg-sand-50"
+                                        :class="!n.read ? 'bg-green-50/40' : ''"
+                                        @click="notifOpen = false"
+                                    >
+                                        <p class="text-sm font-semibold text-navy-700">{{ n.title }}</p>
+                                        <p v-if="n.body" class="mt-0.5 text-xs text-ink-500">{{ n.body }}</p>
+                                        <p class="mt-1 text-xs text-ink-300">{{ n.date }}</p>
+                                    </Link>
+                                </div>
+                                <div v-else class="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-pill bg-sand-100 text-ink-500">
+                                        <BellOff :size="18" aria-hidden="true" />
+                                    </span>
+                                    <p class="text-sm text-ink-500">{{ 'Keine Benachrichtigungen' }}</p>
+                                </div>
                             </div>
-                            <div v-if="notifications.items.length" class="max-h-96 overflow-y-auto">
-                                <Link
-                                    v-for="n in notifications.items"
-                                    :key="n.id"
-                                    :href="n.link ?? '#'"
-                                    class="block border-b border-ink-100 px-4 py-3 transition hover:bg-sand-50"
-                                    :class="!n.read ? 'bg-green-50/40' : ''"
-                                    @click="notifOpen = false"
-                                >
-                                    <p class="text-sm font-semibold text-navy-700">{{ n.title }}</p>
-                                    <p v-if="n.body" class="mt-0.5 text-xs text-ink-500">{{ n.body }}</p>
-                                    <p class="mt-1 text-xs text-ink-300">{{ n.date }}</p>
-                                </Link>
-                            </div>
-                            <p v-else class="px-4 py-6 text-center text-sm text-ink-500">{{ t('dashboard.noNotifications') }}</p>
-                        </div>
+                        </Transition>
                     </div>
 
                     <div class="hidden items-center gap-3 sm:flex">
@@ -164,7 +181,7 @@ function logout() {
                             <p class="text-xs text-ink-500">{{ userRole }}</p>
                         </div>
                         <span
-                            class="flex h-9 w-9 items-center justify-center rounded-pill bg-navy-700 font-display text-sm font-bold text-white"
+                            class="flex h-9 w-9 items-center justify-center rounded-pill bg-navy-700 font-display text-sm font-bold text-white ring-2 ring-navy-50"
                         >
                             {{ userName.charAt(0) }}
                         </span>

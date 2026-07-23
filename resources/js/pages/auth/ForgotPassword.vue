@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { KeyRound } from 'lucide-vue-next';
 import { watchEffect } from 'vue';
-import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
 
-const { t } = useI18n();
 
 watchEffect(() => {
-    setLayoutProps({ title: t('auth.forgotPassword.title'), description: t('auth.forgotPassword.description') });
+    setLayoutProps({ title: 'Passwort vergessen', description: 'Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu erhalten', icon: KeyRound });
 });
 
 defineProps<{
@@ -23,7 +22,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head :title="t('auth.forgotPassword.head')" />
+    <Head :title="'Passwort vergessen'" />
 
     <div
         v-if="status"
@@ -35,14 +34,14 @@ defineProps<{
     <div class="space-y-6">
         <Form v-bind="email.form()" v-slot="{ errors, processing }">
             <div class="grid gap-2">
-                <Label for="email">{{ t('auth.forgotPassword.email') }}</Label>
+                <Label for="email">{{ 'E-Mail-Adresse' }}</Label>
                 <Input
                     id="email"
                     type="email"
                     name="email"
                     autocomplete="off"
                     autofocus
-                    :placeholder="t('auth.forgotPassword.emailPlaceholder')"
+                    :placeholder="'ihre@email.de'"
                 />
                 <InputError :message="errors.email" />
             </div>
@@ -54,14 +53,14 @@ defineProps<{
                     data-test="email-password-reset-link-button"
                 >
                     <Spinner v-if="processing" />
-                    {{ t('auth.forgotPassword.submit') }}
+                    {{ 'Link zum Zurücksetzen senden' }}
                 </Button>
             </div>
         </Form>
 
         <div class="space-x-1 text-center text-sm text-muted-foreground">
-            <span>{{ t('auth.forgotPassword.backToLogin') }}</span>
-            <TextLink :href="login()">{{ t('auth.forgotPassword.login') }}</TextLink>
+            <span>{{ 'Oder zurück zur' }}</span>
+            <TextLink :href="login()">{{ 'Anmeldung' }}</TextLink>
         </div>
     </div>
 </template>

@@ -12,8 +12,8 @@ defineProps<{
             <Link
                 v-if="link.url"
                 :href="link.url"
-                class="flex h-9 min-w-9 items-center justify-center rounded-card px-3 text-sm font-medium transition"
-                :class="link.active ? 'bg-green-500 text-white' : 'text-ink-700 hover:bg-sand-50'"
+                class="flex h-9 min-w-9 items-center justify-center rounded-card px-3 text-sm font-semibold transition"
+                :class="link.active ? 'bg-green-500 text-white shadow-[0_2px_8px_rgba(62,174,43,0.3)]' : 'text-ink-700 hover:bg-sand-100 hover:text-navy-700'"
                 v-html="link.label"
             />
             <span

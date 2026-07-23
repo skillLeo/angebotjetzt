@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\InspectorAuthController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Customer\CustomerAreaController;
 use App\Http\Controllers\Inspector\InspectorAreaController;
-use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\RequestWizardController;
 use App\Http\Controllers\SeoController;
@@ -14,8 +13,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
-
-Route::post('/locale', [LocaleController::class, 'update'])->name('locale.switch');
 
 /*
 |--------------------------------------------------------------------------

@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ status: string }>();
-
-const { t, te } = useI18n();
 
 const clsMap: Record<string, string> = {
     open: 'bg-navy-50 text-navy-600',
@@ -26,13 +23,30 @@ const clsMap: Record<string, string> = {
     failed: 'bg-red-100 text-red-700',
 };
 
-const badge = computed(() => {
-    const key = `status.${props.status}`;
-    return {
-        label: te(key) ? t(key) : props.status,
-        cls: clsMap[props.status] ?? 'bg-ink-100 text-ink-700',
-    };
-});
+const labelMap: Record<string, string> = {
+    open: 'Offen',
+    offers_received: 'Angebote erhalten',
+    accepted: 'Angenommen',
+    completed: 'Abgeschlossen',
+    cancelled: 'Storniert',
+    expired: 'Abgelaufen',
+    unmatched: 'Kein Gutachter',
+    rejected: 'Abgelehnt',
+    withdrawn: 'Zurückgezogen',
+    awaiting_payment: 'Zahlung ausstehend',
+    paid: 'Bezahlt',
+    in_progress: 'In Bearbeitung',
+    completed_by_inspector: 'Abgeschlossen (Gutachter)',
+    confirmed: 'Bestätigt',
+    refunded: 'Erstattet',
+    pending: 'Ausstehend',
+    failed: 'Fehlgeschlagen',
+};
+
+const badge = computed(() => ({
+    label: labelMap[props.status] ?? props.status,
+    cls: clsMap[props.status] ?? 'bg-ink-100 text-ink-700',
+}));
 </script>
 
 <template>

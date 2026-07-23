@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid } from '@lucide/vue';
+import { LayoutGrid } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -16,13 +16,11 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 const mainNavItems = computed<NavItem[]>(() => [
     {
-        title: t('dashboard.settingsPage.dashboard'),
+        title: 'Übersicht',
         href: dashboard(),
         icon: LayoutGrid,
     },

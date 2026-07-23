@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { ShieldCheck } from '@lucide/vue';
+import { ShieldCheck } from 'lucide-vue-next';
 import { onUnmounted, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import TwoFactorRecoveryCodes from '@/components/TwoFactorRecoveryCodes.vue';
@@ -39,7 +39,7 @@ onUnmounted(() => clearTwoFactorAuthData());
             v-if="!twoFactorEnabled"
             class="flex flex-col items-start justify-start space-y-4"
         >
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-ink-500">
                 When you enable two-factor authentication, you will be prompted
                 for a secure pin during login. This pin can be retrieved from a
                 TOTP-supported application on your phone.
@@ -63,7 +63,7 @@ onUnmounted(() => clearTwoFactorAuthData());
         </div>
 
         <div v-else class="flex flex-col items-start justify-start space-y-4">
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-ink-500">
                 You will be prompted for a secure, random pin during login,
                 which you can retrieve from the TOTP-supported application on
                 your phone.

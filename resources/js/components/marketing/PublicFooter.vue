@@ -4,46 +4,44 @@ import StarRating from '@/components/marketing/StarRating.vue';
 import { Link } from '@inertiajs/vue3';
 import { Facebook, Instagram, Linkedin } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 const columns = computed(() => [
     {
-        title: t('footer.about'),
+        title: 'Über AngebotJetzt',
         links: [
-            { label: t('footer.aboutUs'), href: '/about' },
-            { label: t('footer.howItWorks'), href: '/how-it-works' },
-            { label: t('footer.reviews'), href: '/reviews' },
-            { label: t('footer.prices'), href: '/pricing' },
-            { label: t('footer.contact'), href: '/contact' },
+            { label: 'Über uns', href: '/about' },
+            { label: 'So funktioniert\'s', href: '/how-it-works' },
+            { label: 'Bewertungen', href: '/reviews' },
+            { label: 'Preise', href: '/pricing' },
+            { label: 'Kontakt', href: '/contact' },
         ],
     },
     {
-        title: t('footer.services'),
+        title: 'Dienstleistungen',
         links: [
-            { label: t('footer.accidentReport'), href: '/vehicle-reports/unfallschadengutachten' },
-            { label: t('footer.vehicleValuation'), href: '/vehicle-reports/fahrzeugbewertung' },
-            { label: t('footer.usedCarCheck'), href: '/vehicle-reports/gebrauchtwagencheck' },
-            { label: t('footer.depreciationReport'), href: '/vehicle-reports/wertminderung-restwert' },
-            { label: t('footer.allServices'), href: '/vehicle-reports' },
+            { label: 'Unfallschadengutachten', href: '/vehicle-reports/unfallschadengutachten' },
+            { label: 'Fahrzeugbewertung', href: '/vehicle-reports/fahrzeugbewertung' },
+            { label: 'Gebrauchtwagencheck', href: '/vehicle-reports/gebrauchtwagencheck' },
+            { label: 'Wertminderungsgutachten', href: '/vehicle-reports/wertminderung-restwert' },
+            { label: 'Alle Kfz-Gutachten', href: '/vehicle-reports' },
         ],
     },
     {
-        title: t('footer.forInspectors'),
+        title: 'Für Gutachter',
         links: [
-            { label: t('footer.becomeInspector'), href: '/for-inspectors' },
-            { label: t('footer.inspectorLogin'), href: '/inspector/login' },
-            { label: t('footer.faq'), href: '/faq' },
+            { label: 'Gutachter werden', href: '/for-inspectors' },
+            { label: 'Gutachter-Login', href: '/inspector/login' },
+            { label: 'Häufige Fragen', href: '/faq' },
         ],
     },
     {
-        title: t('footer.legal'),
+        title: 'Rechtliches',
         links: [
-            { label: t('footer.imprint'), href: '/imprint' },
-            { label: t('footer.privacy'), href: '/privacy' },
-            { label: t('footer.terms'), href: '/terms' },
-            { label: t('footer.cookiePolicy'), href: '/cookie-policy' },
+            { label: 'Impressum', href: '/imprint' },
+            { label: 'Datenschutz', href: '/privacy' },
+            { label: 'AGB', href: '/terms' },
+            { label: 'Cookie-Richtlinie', href: '/cookie-policy' },
         ],
     },
 ]);
@@ -79,13 +77,13 @@ const columns = computed(() => [
                     <span class="font-display text-3xl font-extrabold text-white">4,9</span>
                     <div>
                         <StarRating :rating="5" :size="15" />
-                        <p class="mt-0.5 text-sm text-navy-100">{{ t('footer.basedOnReviews') }}</p>
+                        <p class="mt-0.5 text-sm text-navy-100">{{ 'basierend auf Kundenbewertungen' }}</p>
                     </div>
                 </div>
 
                 <div class="text-sm leading-relaxed text-navy-100 md:text-right">
-                    {{ t('footer.addressLine') }}<br />
-                    © {{ new Date().getFullYear() }} AngebotJetzt. {{ t('footer.copyright') }}
+                    {{ 'AngebotJetzt · Musterstraße 1, 10115 Berlin' }}<br />
+                    © {{ new Date().getFullYear() }} AngebotJetzt. {{ 'Alle Rechte vorbehalten.' }}
                 </div>
             </div>
 
@@ -94,21 +92,21 @@ const columns = computed(() => [
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        :aria-label="t('footer.facebookLabel')"
+                        :aria-label="'AngebotJetzt auf Facebook'"
                     >
                         <Facebook :size="18" aria-hidden="true" />
                     </a>
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        :aria-label="t('footer.instagramLabel')"
+                        :aria-label="'AngebotJetzt auf Instagram'"
                     >
                         <Instagram :size="18" aria-hidden="true" />
                     </a>
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        :aria-label="t('footer.linkedinLabel')"
+                        :aria-label="'AngebotJetzt auf LinkedIn'"
                     >
                         <Linkedin :size="18" aria-hidden="true" />
                     </a>

@@ -14,7 +14,7 @@ withDefaults(
 </script>
 
 <template>
-    <div class="rounded-card border border-ink-100 bg-white p-5 shadow-card">
+    <div class="group rounded-card border border-ink-100 bg-white p-6 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <p class="text-sm font-medium text-ink-500">{{ label }}</p>
@@ -25,7 +25,7 @@ withDefaults(
             </div>
             <span
                 v-if="icon"
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card"
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card transition-transform duration-200 group-hover:scale-105"
                 :class="accent ? 'bg-green-50 text-green-600' : 'bg-navy-50 text-navy-700'"
             >
                 <component :is="icon" :size="21" aria-hidden="true" />

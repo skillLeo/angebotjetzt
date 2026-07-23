@@ -2,13 +2,11 @@
 import Reveal from '@/components/marketing/Reveal.vue';
 import { Link } from '@inertiajs/vue3';
 import { ArrowRight } from 'lucide-vue-next';
-import { useI18n } from 'vue-i18n';
 
 defineProps<{
     serviceTypes: Array<{ id: number; name: string; slug: string; description: string; image: string }>;
 }>();
 
-const { t } = useI18n();
 </script>
 
 <template>
@@ -29,7 +27,7 @@ const { t } = useI18n();
                         :width="i === 0 ? 800 : 440"
                         :height="i === 0 ? 400 : 275"
                         loading="lazy"
-                        :alt="`${type.name} ${t('home.services.imageAltSuffix')}`"
+                        :alt="`${type.name} ${'durch einen Kfz-Sachverständigen'}`"
                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <span
@@ -43,7 +41,7 @@ const { t } = useI18n();
                         {{ type.description }}
                     </p>
                     <span class="mt-5 inline-flex items-center gap-2 text-[15px] font-bold text-green-600">
-                        {{ t('home.services.cta') }}
+                        {{ 'Angebote erhalten' }}
                         <ArrowRight
                             :size="18"
                             class="transition-transform duration-300 group-hover:translate-x-1.5"

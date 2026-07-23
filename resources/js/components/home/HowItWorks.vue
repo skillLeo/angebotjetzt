@@ -3,21 +3,19 @@ import Reveal from '@/components/marketing/Reveal.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { CheckCircle2, MapPin } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 const steps = computed(() => [
-    { n: '01', title: t('home.howItWorks.step1Title'), text: t('home.howItWorks.step1Text') },
-    { n: '02', title: t('home.howItWorks.step2Title'), text: t('home.howItWorks.step2Text') },
-    { n: '03', title: t('home.howItWorks.step3Title'), text: t('home.howItWorks.step3Text') },
+    { n: '01', title: 'Anfrage stellen', text: 'Beschreiben Sie Ihr Fahrzeug, das benötigte Gutachten und Ihre Region. In zwei Minuten erledigt – kostenlos und unverbindlich.' },
+    { n: '02', title: 'Angebote vergleichen', text: 'Geprüfte Gutachter aus Ihrer Nähe senden Ihnen individuelle Preisangebote. Sie sehen alle Angebote übersichtlich nebeneinander.' },
+    { n: '03', title: 'Gutachter beauftragen', text: 'Wählen Sie das beste Angebot, bezahlen Sie sicher online und beauftragen Sie Ihren Gutachter – alles in einem Schritt.' },
 ]);
 </script>
 
 <template>
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="t('home.howItWorks.eyebrow')" :line1="t('home.howItWorks.line1')" :line2="t('home.howItWorks.line2')" />
+            <SectionHeading :eyebrow="'In drei Schritten'" :line1="'So funktioniert'" :line2="'AngebotJetzt'" />
 
             <div class="mt-10 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <ol class="relative">
@@ -48,8 +46,8 @@ const steps = computed(() => [
                         <div class="rounded-[40px] border-[10px] border-navy-900 bg-navy-900 shadow-lift">
                             <div class="overflow-hidden rounded-[30px] bg-sand-50">
                                 <div class="bg-navy-700 px-5 pt-6 pb-5 text-white">
-                                    <p class="text-xs text-navy-100">{{ t('home.howItWorks.mockupInquiry') }}</p>
-                                    <p class="mt-1 font-display text-lg font-bold">{{ t('home.howItWorks.mockupOffersReceived') }}</p>
+                                    <p class="text-xs text-navy-100">{{ 'Anfrage AJ-2026-000842' }}</p>
+                                    <p class="mt-1 font-display text-lg font-bold">{{ '3 Angebote erhalten' }}</p>
                                 </div>
                                 <div class="space-y-3 p-4">
                                     <div

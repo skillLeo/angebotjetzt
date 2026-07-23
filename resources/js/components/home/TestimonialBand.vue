@@ -2,9 +2,7 @@
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     reviews: Array<{
@@ -30,9 +28,9 @@ function scroll(dir: number) {
             <SectionHeading
                 centered
                 inverted
-                :eyebrow="t('home.testimonials.eyebrow')"
-                :line1="t('home.testimonials.line1')"
-                :line2="t('home.testimonials.line2')"
+                :eyebrow="'Kundenstimmen'"
+                :line1="'Tausende zufriedene Kunden'"
+                :line2="'vertrauen AngebotJetzt'"
             />
 
             <div class="relative mt-10">
@@ -52,14 +50,14 @@ function scroll(dir: number) {
                                 height="360"
                                 loading="lazy"
                                 decoding="async"
-                                :alt="t('home.testimonials.personImageAlt')"
+                                :alt="'Zufriedene Kundin mit Smartphone'"
                                 class="h-full w-full object-cover"
                             />
                             <span
                                 class="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-white px-4 py-2.5 text-sm font-bold whitespace-nowrap text-green-700 shadow-lift"
                             >
                                 <CheckCircle2 :size="16" aria-hidden="true" />
-                                {{ t('home.testimonials.reviewSubmitted') }}
+                                {{ 'Bewertung abgegeben' }}
                             </span>
                         </div>
 
@@ -69,7 +67,7 @@ function scroll(dir: number) {
                             <span
                                 class="w-fit rounded-pill bg-green-50 px-3 py-1 text-xs font-bold tracking-wide text-green-700 uppercase"
                             >
-                                {{ t('home.testimonials.positive') }}
+                                {{ 'Positiv' }}
                             </span>
                             <p class="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
                                 „{{ rev.text }}"
@@ -98,7 +96,7 @@ function scroll(dir: number) {
                     <button
                         type="button"
                         class="flex h-11 w-11 items-center justify-center rounded-pill bg-white/20 text-white transition hover:bg-white/30"
-                        :aria-label="t('home.testimonials.back')"
+                        :aria-label="'Zurück'"
                         @click="scroll(-1)"
                     >
                         <ChevronLeft :size="20" aria-hidden="true" />
@@ -106,7 +104,7 @@ function scroll(dir: number) {
                     <button
                         type="button"
                         class="flex h-11 w-11 items-center justify-center rounded-pill bg-white/20 text-white transition hover:bg-white/30"
-                        :aria-label="t('home.testimonials.forward')"
+                        :aria-label="'Weiter'"
                         @click="scroll(1)"
                     >
                         <ChevronRight :size="20" aria-hidden="true" />

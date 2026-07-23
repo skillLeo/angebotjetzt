@@ -1,35 +1,33 @@
 <script setup lang="ts">
 import LegalPage from '@/components/marketing/LegalPage.vue';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 </script>
 
 <template>
-    <LegalPage :title="t('public.legalContent.imprint.title')">
-        <h2>{{ t('public.legalContent.imprint.h1') }}</h2>
-        <p v-html="t('public.legalContent.imprint.company')" />
+    <LegalPage :title="'Impressum'">
+        <h2>{{ 'Angaben gemäß § 5 TMG' }}</h2>
+        <p v-html="'AngebotJetzt GmbH<br />Musterstraße 1<br />10115 Berlin<br />Deutschland'" />
 
-        <h2>{{ t('public.legalContent.imprint.h2') }}</h2>
-        <p>{{ t('public.legalContent.imprint.ceo') }}</p>
+        <h2>{{ 'Vertreten durch' }}</h2>
+        <p>{{ 'Geschäftsführer: Max Beispielmann' }}</p>
 
-        <h2>{{ t('public.legalContent.imprint.h3') }}</h2>
-        <p v-html="t('public.legalContent.imprint.contactInfo')" />
+        <h2>{{ 'Kontakt' }}</h2>
+        <p v-html="'Telefon: +49 30 1234567<br />E-Mail: kontakt@angebotjetzt.de'" />
 
-        <h2>{{ t('public.legalContent.imprint.h4') }}</h2>
-        <p v-html="t('public.legalContent.imprint.registerInfo')" />
+        <h2>{{ 'Registereintrag' }}</h2>
+        <p v-html="'Eintragung im Handelsregister.<br />Registergericht: Amtsgericht Berlin-Charlottenburg<br />Registernummer: HRB 000000'" />
 
-        <h2>{{ t('public.legalContent.imprint.h5') }}</h2>
-        <p v-html="t('public.legalContent.imprint.vatInfo')" />
+        <h2>{{ 'Umsatzsteuer-ID' }}</h2>
+        <p v-html="'Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />DE000000000'" />
 
-        <h2>{{ t('public.legalContent.imprint.h6') }}</h2>
-        <p>{{ t('public.legalContent.imprint.responsible') }}</p>
+        <h2>{{ 'Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV' }}</h2>
+        <p>{{ 'Max Beispielmann, Anschrift wie oben.' }}</p>
 
-        <h2>{{ t('public.legalContent.imprint.h7') }}</h2>
+        <h2>{{ 'Streitschlichtung' }}</h2>
         <p>
-            {{ t('public.legalContent.imprint.disputeText') }}
+            {{ 'Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:' }}
             <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr</a>.
-            {{ t('public.legalContent.imprint.disputeText2') }}
+            {{ 'Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.' }}
         </p>
     </LegalPage>
 </template>

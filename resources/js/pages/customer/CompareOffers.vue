@@ -4,9 +4,7 @@ import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, BadgeCheck, CalendarClock, Check } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
 
 const props = defineProps<{
     request: { id: number; number: string; service: string; vehicle: string; ort: string };
@@ -28,14 +26,14 @@ function accept(offerId: number) {
 </script>
 
 <template>
-    <Head><title>{{ t('dashboard.customerPages.compareOffers') }}</title></Head>
+    <Head><title>{{ 'Angebote vergleichen' }}</title></Head>
 
     <Link :href="`/account/requests/${request.id}`" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
-        <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.customerPages.back') }}
+        <ArrowLeft :size="16" aria-hidden="true" /> {{ 'Zurück' }}
     </Link>
 
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-bold text-navy-700">{{ t('dashboard.customerPages.offersForRequest', { count: offers.length }) }}</h1>
+        <h1 class="font-display text-2xl font-bold text-navy-700">{{ `${offers.length} Angebote für Ihre Anfrage` }}</h1>
         <p class="text-ink-500">{{ request.vehicle }} · {{ request.service }} · {{ request.ort }}</p>
     </div>
 
@@ -47,7 +45,7 @@ function accept(offerId: number) {
             :class="o.price === lowest ? 'border-green-500 ring-1 ring-green-500' : 'border-ink-100'"
         >
             <div v-if="o.price === lowest" class="mb-3 w-fit rounded-pill bg-green-500 px-3 py-1 text-xs font-bold text-white">
-                {{ t('dashboard.customerPages.cheapestOffer') }}
+                {{ 'Günstigstes Angebot' }}
             </div>
             <div class="flex items-center gap-3">
                 <span class="flex h-12 w-12 items-center justify-center rounded-pill bg-navy-700 font-display text-lg font-bold text-white">
@@ -61,17 +59,17 @@ function accept(offerId: number) {
 
             <div class="mt-3 flex flex-wrap items-center gap-2">
                 <span v-if="o.inspector.verified" class="inline-flex items-center gap-1 rounded-pill bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700">
-                    <BadgeCheck :size="13" aria-hidden="true" /> {{ t('dashboard.customerPages.verified') }}
+                    <BadgeCheck :size="13" aria-hidden="true" /> {{ 'Geprüft' }}
                 </span>
                 <span v-if="o.inspector.rating" class="inline-flex items-center gap-1 text-xs text-ink-500">
-                    <StarRating :rating="o.inspector.rating" :size="13" /> {{ o.inspector.rating.toFixed(1).replace('.', locale === 'de' ? ',' : '.') }} ({{ o.inspector.reviews }})
+                    <StarRating :rating="o.inspector.rating" :size="13" /> {{ o.inspector.rating.toFixed(1).replace('.', ',') }} ({{ o.inspector.reviews }})
                 </span>
             </div>
 
             <p class="mt-5 font-display text-3xl font-extrabold text-navy-700">{{ formatEuro(o.price) }}</p>
 
             <p v-if="o.estimatedDate" class="mt-2 flex items-center gap-1.5 text-sm text-ink-500">
-                <CalendarClock :size="15" aria-hidden="true" /> {{ t('dashboard.customerPages.doneBy', { date: o.estimatedDate }) }}
+                <CalendarClock :size="15" aria-hidden="true" /> {{ `Fertig bis ${o.estimatedDate}` }}
             </p>
             <p v-if="o.message" class="mt-3 flex-1 rounded-card bg-sand-50 p-3 text-sm leading-relaxed text-ink-700">
                 „{{ o.message }}"
@@ -85,12 +83,12 @@ function accept(offerId: number) {
                 @click="accept(o.id)"
             >
                 <Check :size="18" aria-hidden="true" />
-                {{ accepting === o.id ? t('dashboard.customerPages.redirecting') : t('dashboard.customerPages.acceptAndPay') }}
+                {{ accepting === o.id ? 'Weiterleitung …' : 'Angebot annehmen & bezahlen' }}
             </button>
         </article>
     </div>
 
     <p v-if="!offers.length" class="rounded-card border border-ink-100 bg-white py-12 text-center text-ink-500">
-        {{ t('dashboard.customerPages.noOffersForRequest') }}
+        {{ 'Für diese Anfrage liegen noch keine Angebote vor.' }}
     </p>
 </template>

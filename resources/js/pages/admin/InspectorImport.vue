@@ -29,7 +29,7 @@ function confirmImport() {
     </Link>
 
     <PageCard title="Gutachter per CSV importieren" subtitle="Spalten: name; company; email; phone; city; plz_von; plz_bis (Semikolon oder Komma getrennt)">
-        <div class="p-5 sm:p-6">
+        <div class="p-6 sm:p-8">
             <label class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-ink-300 px-6 py-10 text-center transition hover:border-green-500 hover:bg-green-50">
                 <UploadCloud :size="30" class="text-ink-500" aria-hidden="true" />
                 <span class="text-sm font-medium text-ink-700">CSV-Datei auswählen</span>
@@ -38,7 +38,7 @@ function confirmImport() {
             <p v-if="form.errors.file" class="mt-2 text-sm text-red-600">{{ form.errors.file }}</p>
         </div>
 
-        <div v-if="report" class="border-t border-ink-100 p-5 sm:p-6">
+        <div v-if="report" class="border-t border-ink-100 p-6 sm:p-8">
             <div class="mb-4 flex items-center justify-between">
                 <p class="font-display font-bold text-navy-700">
                     Validierung: {{ report.filter((r) => r.ok).length }} gültig, {{ report.filter((r) => !r.ok).length }} fehlerhaft

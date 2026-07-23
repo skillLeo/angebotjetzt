@@ -48,19 +48,29 @@
         'Cabinet Grotesk', 'Satoshi', ui-sans-serif, system-ui, sans-serif;
     --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
 
-    /* Radii system: pills 999px, cards 16px, large containers 28px */
-    --radius-pill: 999px;
+    /* Radii scale: 8 / 12 / 16 / 24, plus 999 for pills. Never an arbitrary value. */
+    --radius-xs: 8px;
+    --radius-sm: 12px;
     --radius-card: 16px;
-    --radius-panel: 28px;
+    --radius-panel: 24px;
+    --radius-pill: 999px;
 
-    /* Shadows — soft, navy-tinted, never black */
+    /* Elevation system — 4 tiers, each a soft tight+ambient pair (navy-tinted, never black).
+       flat:     borders only, no shadow (default resting state)
+       raised:   shadow-card    — cards, list rows on hover
+       floating: shadow-lift    — popovers, dropdowns, sticky headers
+       modal:    shadow-modal   — dialogs, the auth/legal hero panels */
     --shadow-card:
-        0 2px 8px rgba(11, 37, 69, 0.06), 0 12px 32px rgba(11, 37, 69, 0.05);
+        0 1px 2px rgba(11, 37, 69, 0.05), 0 8px 24px rgba(11, 37, 69, 0.06);
     --shadow-lift:
-        0 4px 12px rgba(11, 37, 69, 0.08), 0 24px 48px rgba(11, 37, 69, 0.1);
+        0 2px 6px rgba(11, 37, 69, 0.07), 0 16px 40px rgba(11, 37, 69, 0.09);
+    --shadow-modal:
+        0 4px 10px rgba(11, 37, 69, 0.1), 0 32px 64px rgba(11, 37, 69, 0.16);
 
-    /* Easing for reveals */
+    /* Motion — every interactive element transitions in this range */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-interactive: 180ms;
 }
 
 /* shadcn/reka-ui semantic mapping (existing ui components consume these) */
@@ -251,6 +261,20 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   Interaction standard — every interactive element uses this:
+   180ms ease-out transition, 2px green focus ring, offset from edge.
+   ============================================================ */
+@utility focus-ring {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: var(--duration-interactive);
+    transition-timing-function: var(--ease-out);
+    outline: none;
+    &:focus-visible {
+        box-shadow: 0 0 0 2px var(--color-green-500);
+    }
 }
 
 /* ============================================================

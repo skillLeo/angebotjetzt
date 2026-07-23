@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { ShieldCheck } from 'lucide-vue-next';
 import { computed, ref, watchEffect } from 'vue';
-import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ import {
 import { store } from '@/routes/two-factor/login';
 import type { TwoFactorConfigContent } from '@/types';
 
-const { t } = useI18n();
 
 const showRecoveryInput = ref<boolean>(false);
 const code = ref<string>('');
@@ -21,16 +20,16 @@ const code = ref<string>('');
 const authConfigContent = computed<TwoFactorConfigContent>(() => {
     if (showRecoveryInput.value) {
         return {
-            title: t('auth.twoFactor.recoveryTitle'),
-            description: t('auth.twoFactor.recoveryDescription'),
-            buttonText: t('auth.twoFactor.recoveryButton'),
+            title: 'Wiederherstellungscode',
+            description: 'Bitte bestätigen Sie den Zugriff auf Ihr Konto, indem Sie einen Ihrer Wiederherstellungscodes eingeben.',
+            buttonText: 'mit Authentifizierungscode anmelden',
         };
     }
 
     return {
-        title: t('auth.twoFactor.authTitle'),
-        description: t('auth.twoFactor.authDescription'),
-        buttonText: t('auth.twoFactor.authButton'),
+        title: 'Authentifizierungscode',
+        description: 'Geben Sie den Code aus Ihrer Authenticator-App ein.',
+        buttonText: 'mit Wiederherstellungscode anmelden',
     };
 });
 
@@ -38,6 +37,7 @@ watchEffect(() => {
     setLayoutProps({
         title: authConfigContent.value.title,
         description: authConfigContent.value.description,
+        icon: ShieldCheck,
     });
 });
 
@@ -49,7 +49,7 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
 </script>
 
 <template>
-    <Head :title="t('auth.twoFactor.head')" />
+    <Head :title="'Zwei-Faktor-Authentifizierung'" />
 
     <div class="space-y-6">
         <template v-if="!showRecoveryInput">
@@ -84,10 +84,10 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
                     <InputError :message="errors.code" />
                 </div>
                 <Button type="submit" class="w-full" :disabled="processing"
-                    >{{ t('auth.twoFactor.continue') }}</Button
+                    >{{ 'Weiter' }}</Button
                 >
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>{{ t('auth.twoFactor.or') }}</span>
+                    <span>{{ 'oder Sie können sich ' }}</span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
@@ -109,17 +109,17 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
                 <Input
                     name="recovery_code"
                     type="text"
-                    :placeholder="t('auth.twoFactor.recoveryPlaceholder')"
+                    :placeholder="'Wiederherstellungscode eingeben'"
                     :autofocus="showRecoveryInput"
                     required
                 />
                 <InputError :message="errors.recovery_code" />
                 <Button type="submit" class="w-full" :disabled="processing"
-                    >{{ t('auth.twoFactor.continue') }}</Button
+                    >{{ 'Weiter' }}</Button
                 >
 
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>{{ t('auth.twoFactor.or') }}</span>
+                    <span>{{ 'oder Sie können sich ' }}</span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

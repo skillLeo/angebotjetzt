@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { KeyRound, Trash2 } from '@lucide/vue';
+import { KeyRound, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {

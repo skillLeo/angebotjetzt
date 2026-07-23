@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { LogIn } from 'lucide-vue-next';
 import { watchEffect } from 'vue';
-import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -15,10 +15,9 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
-const { t } = useI18n();
 
 watchEffect(() => {
-    setLayoutProps({ title: t('auth.login.title'), description: t('auth.login.description') });
+    setLayoutProps({ title: 'Bei Ihrem Konto anmelden', description: 'Geben Sie unten Ihre E-Mail-Adresse und Ihr Passwort ein', icon: LogIn });
 });
 
 defineProps<{
@@ -28,7 +27,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head :title="t('auth.login.head')" />
+    <Head :title="'Anmelden'" />
 
     <div
         v-if="status"
@@ -47,7 +46,7 @@ defineProps<{
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">{{ t('auth.login.email') }}</Label>
+                <Label for="email">{{ 'E-Mail-Adresse' }}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -56,21 +55,21 @@ defineProps<{
                     autofocus
                     :tabindex="1"
                     autocomplete="email"
-                    :placeholder="t('auth.login.emailPlaceholder')"
+                    :placeholder="'ihre@email.de'"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
-                    <Label for="password">{{ t('auth.login.password') }}</Label>
+                    <Label for="password">{{ 'Passwort' }}</Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
                         class="text-sm"
                         :tabindex="5"
                     >
-                        {{ t('auth.login.forgotPassword') }}
+                        {{ 'Passwort vergessen?' }}
                     </TextLink>
                 </div>
                 <PasswordInput
@@ -79,7 +78,7 @@ defineProps<{
                     required
                     :tabindex="2"
                     autocomplete="current-password"
-                    :placeholder="t('auth.login.passwordPlaceholder')"
+                    :placeholder="'Passwort'"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -87,7 +86,7 @@ defineProps<{
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex items-center space-x-3">
                     <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>{{ t('auth.login.rememberMe') }}</span>
+                    <span>{{ 'Angemeldet bleiben' }}</span>
                 </Label>
             </div>
 
@@ -99,13 +98,13 @@ defineProps<{
                 data-test="login-button"
             >
                 <Spinner v-if="processing" />
-                {{ t('auth.login.submit') }}
+                {{ 'Anmelden' }}
             </Button>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
-            {{ t('auth.login.noAccount') }}
-            <TextLink :href="register()" :tabindex="5">{{ t('auth.login.registerNow') }}</TextLink>
+            {{ 'Noch kein Konto?' }}
+            <TextLink :href="register()" :tabindex="5">{{ 'Jetzt registrieren' }}</TextLink>
         </div>
     </Form>
 </template>

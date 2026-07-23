@@ -5,9 +5,7 @@ import Pagination from '@/components/dashboard/Pagination.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight } from 'lucide-vue-next';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     requests: {
@@ -18,12 +16,12 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>{{ t('dashboard.customerPages.myRequests') }}</title></Head>
+    <Head><title>{{ 'Meine Anfragen' }}</title></Head>
 
-    <PageCard :title="t('dashboard.customerPages.myRequests')">
+    <PageCard :title="'Meine Anfragen'">
         <template #actions>
             <Link href="/request" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
-                {{ t('dashboard.customerPages.newRequest') }}
+                {{ 'Neue Anfrage' }}
             </Link>
         </template>
 
@@ -40,15 +38,15 @@ defineProps<{
                 </div>
                 <div class="flex shrink-0 items-center gap-3">
                     <span v-if="r.offers > 0" class="hidden rounded-pill bg-green-50 px-3 py-1 text-sm font-bold text-green-700 sm:inline">
-                        {{ r.offers }} {{ t('dashboard.customerPages.offersCount') }}
+                        {{ r.offers }} {{ 'Angebote' }}
                     </span>
                     <StatusBadge :status="r.status" />
                     <ChevronRight :size="18" class="text-ink-300" aria-hidden="true" />
                 </div>
             </Link>
         </div>
-        <EmptyState v-else :title="t('dashboard.customerPages.noRequestsYet')" :description="t('dashboard.customerPages.requestsAppearHere')">
-            <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ t('dashboard.customerPages.submitRequest') }}</Link>
+        <EmptyState v-else :title="'Noch keine Anfragen'" :description="'Ihre Anfragen erscheinen hier.'">
+            <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ 'Anfrage stellen' }}</Link>
         </EmptyState>
 
         <Pagination :links="requests.links" />

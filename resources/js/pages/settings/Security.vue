@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { watchEffect } from 'vue';
-import { useI18n } from 'vue-i18n';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -21,25 +20,24 @@ type Props = {
 
 const props = defineProps<Props>();
 
-const { t } = useI18n();
 
 watchEffect(() => {
     setLayoutProps({
-        breadcrumbs: [{ title: t('dashboard.settingsPage.securitySettings'), href: edit() }],
+        breadcrumbs: [{ title: 'Sicherheitseinstellungen', href: edit() }],
     });
 });
 </script>
 
 <template>
-    <Head :title="t('dashboard.settingsPage.securitySettings')" />
+    <Head :title="'Sicherheitseinstellungen'" />
 
-    <h1 class="sr-only">{{ t('dashboard.settingsPage.securitySettings') }}</h1>
+    <h1 class="sr-only">{{ 'Sicherheitseinstellungen' }}</h1>
 
     <div class="space-y-6">
         <Heading
             variant="small"
-            :title="t('dashboard.settingsPage.updatePassword')"
-            :description="t('dashboard.settingsPage.updatePasswordDesc')"
+            :title="'Passwort aktualisieren'"
+            :description="'Stellen Sie sicher, dass Ihr Konto ein langes, zufälliges Passwort verwendet, um sicher zu bleiben'"
         />
 
         <Form
@@ -57,38 +55,38 @@ watchEffect(() => {
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
-                <Label for="current_password">{{ t('dashboard.settingsPage.currentPassword') }}</Label>
+                <Label for="current_password">{{ 'Aktuelles Passwort' }}</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
-                    :placeholder="t('dashboard.settingsPage.currentPassword')"
+                    :placeholder="'Aktuelles Passwort'"
                 />
                 <InputError :message="errors.current_password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">{{ t('dashboard.settingsPage.newPassword') }}</Label>
+                <Label for="password">{{ 'Neues Passwort' }}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    :placeholder="t('dashboard.settingsPage.newPassword')"
+                    :placeholder="'Neues Passwort'"
                     :passwordrules="props.passwordRules"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">{{ t('dashboard.settingsPage.confirmPassword') }}</Label>
+                <Label for="password_confirmation">{{ 'Passwort bestätigen' }}</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    :placeholder="t('dashboard.settingsPage.confirmPassword')"
+                    :placeholder="'Passwort bestätigen'"
                     :passwordrules="props.passwordRules"
                 />
                 <InputError :message="errors.password_confirmation" />
@@ -99,7 +97,7 @@ watchEffect(() => {
                     :disabled="processing"
                     data-test="update-password-button"
                 >
-                    {{ t('dashboard.settingsPage.save') }}
+                    {{ 'Speichern' }}
                 </Button>
             </div>
         </Form>

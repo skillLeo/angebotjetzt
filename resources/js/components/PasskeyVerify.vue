@@ -2,14 +2,12 @@
 import type { UrlMethodPair } from '@inertiajs/core';
 import { router } from '@inertiajs/vue3';
 import { usePasskeyVerify } from '@laravel/passkeys/vue';
-import { KeyRound } from '@lucide/vue';
+import { KeyRound } from 'lucide-vue-next';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 type Props = {
     routes?: {
@@ -52,8 +50,8 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
                 <KeyRound v-else class="h-4 w-4" />
                 {{
                     isLoading
-                        ? (props.loadingLabel ?? t('auth.passkey.loading'))
-                        : (props.label ?? t('auth.passkey.label'))
+                        ? (props.loadingLabel ?? 'Wird authentifiziert …')
+                        : (props.label ?? 'Mit Passkey anmelden')
                 }}
             </Button>
 
@@ -68,7 +66,7 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
             </div>
             <div class="relative flex justify-center text-xs uppercase">
                 <span class="bg-background px-2 text-muted-foreground">
-                    {{ props.separator ?? t('auth.passkey.separator') }}
+                    {{ props.separator ?? 'Oder mit E-Mail fortfahren' }}
                 </span>
             </div>
         </div>

@@ -50,14 +50,14 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <PageCard title="Provision je Woche (letzte 12 Wochen)">
-                <div class="p-5 sm:p-6">
+                <div class="p-6 sm:p-8">
                     <BarChart :data="chartData" />
                 </div>
             </PageCard>
         </div>
         <div>
             <PageCard title="Conversion-Funnel">
-                <div class="space-y-4 p-5 sm:p-6">
+                <div class="space-y-4 p-6 sm:p-8">
                     <div v-for="step in funnelSteps" :key="step.label">
                         <div class="mb-1 flex justify-between text-sm">
                             <span class="text-ink-500">{{ step.label }}</span>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { Lock } from 'lucide-vue-next';
 import { watchEffect } from 'vue';
-import { useI18n } from 'vue-i18n';
 import {
     index as confirmOptions,
     store as confirmStore,
@@ -14,24 +14,23 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 
-const { t } = useI18n();
 
 watchEffect(() => {
-    setLayoutProps({ title: t('auth.confirmPassword.title'), description: t('auth.confirmPassword.description') });
+    setLayoutProps({ title: 'Passwort bestätigen', description: 'Dies ist ein geschützter Bereich. Bitte bestätigen Sie Ihr Passwort, um fortzufahren.', icon: Lock });
 });
 </script>
 
 <template>
-    <Head :title="t('auth.confirmPassword.head')" />
+    <Head :title="'Passwort bestätigen'" />
 
     <PasskeyVerify
         :routes="{
             options: confirmOptions(),
             submit: confirmStore(),
         }"
-        :label="t('auth.confirmPassword.passkeyLabel')"
-        :loading-label="t('auth.confirmPassword.passkeyLoading')"
-        :separator="t('auth.confirmPassword.passkeySeparator')"
+        :label="'Mit Passkey bestätigen'"
+        :loading-label="'Wird bestätigt …'"
+        :separator="'Oder mit Passwort bestätigen'"
     />
 
     <Form
@@ -41,7 +40,7 @@ watchEffect(() => {
     >
         <div class="space-y-6">
             <div class="grid gap-2">
-                <Label htmlFor="password">{{ t('auth.confirmPassword.password') }}</Label>
+                <Label htmlFor="password">{{ 'Passwort' }}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
@@ -61,7 +60,7 @@ watchEffect(() => {
                     data-test="confirm-password-button"
                 >
                     <Spinner v-if="processing" />
-                    {{ t('auth.confirmPassword.submit') }}
+                    {{ 'Passwort bestätigen' }}
                 </Button>
             </div>
         </div>

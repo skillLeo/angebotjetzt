@@ -2,13 +2,11 @@
 import HandDrawnFrame from '@/components/marketing/HandDrawnFrame.vue';
 import Reveal from '@/components/marketing/Reveal.vue';
 import { Link } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 
 defineProps<{
     image: string;
 }>();
 
-const { t } = useI18n();
 </script>
 
 <template>
@@ -17,26 +15,26 @@ const { t } = useI18n();
             <div class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="p-8 sm:p-12 lg:p-16">
                     <Reveal>
-                        <p class="text-eyebrow mb-5 text-green-400">{{ t('home.recruitment.eyebrow') }}</p>
+                        <p class="text-eyebrow mb-5 text-green-400">{{ 'Für Gutachter' }}</p>
                         <h2 class="text-section text-white">
-                            {{ t('home.recruitment.titleLine1') }}<br />
-                            <span class="text-green-400">{{ t('home.recruitment.titleLine2') }}</span>
+                            {{ 'Mehr Aufträge.' }}<br />
+                            <span class="text-green-400">{{ 'Kein Papierkram.' }}</span>
                         </h2>
                         <p class="text-lead mt-6 max-w-lg text-navy-100">
-                            {{ t('home.recruitment.description') }}
+                            {{ 'Erhalten Sie passende Anfragen aus Ihrem Servicegebiet automatisch per E-Mail. Sie bestimmen Ihre Preise selbst, verwalten Ihr Guthaben im Wallet und lassen sich auszahlen, wann immer Sie möchten.' }}
                         </p>
                         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                             <Link
                                 href="/for-inspectors"
                                 class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
                             >
-                                {{ t('home.recruitment.ctaRegister') }}
+                                {{ 'Als Gutachter registrieren' }}
                             </Link>
                             <Link
                                 href="/for-inspectors"
                                 class="rounded-pill border border-navy-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-navy-800"
                             >
-                                {{ t('home.recruitment.ctaLearnMore') }}
+                                {{ 'Mehr erfahren' }}
                             </Link>
                         </div>
                     </Reveal>
@@ -49,10 +47,10 @@ const { t } = useI18n();
                         height="500"
                         loading="eager"
                         decoding="async"
-                        :alt="t('home.recruitment.imageAlt')"
+                        :alt="'Kfz-Gutachter bei der Fahrzeugbegutachtung'"
                         class="h-full w-full object-cover lg:absolute lg:inset-0"
                     />
-                    <HandDrawnFrame :label="t('home.recruitment.badgeLabel')" />
+                    <HandDrawnFrame :label="'Thomas B. 5/5'" />
                 </div>
             </div>
         </div>

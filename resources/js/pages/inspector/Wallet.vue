@@ -5,9 +5,7 @@ import StatCard from '@/components/dashboard/StatCard.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowDownLeft, ArrowUpRight, TrendingUp, Wallet as WalletIcon } from 'lucide-vue-next';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     wallet: { available: number; pending: number; lifetime: number };
@@ -19,22 +17,22 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>{{ t('dashboard.inspectorPages.walletTitle') }}</title></Head>
+    <Head><title>{{ 'Wallet' }}</title></Head>
 
     <div class="grid gap-4 sm:grid-cols-3">
-        <StatCard :label="t('dashboard.inspectorPages.availableBalanceCard')" :value="formatEuro(wallet.available)" :icon="WalletIcon" accent />
-        <StatCard :label="t('dashboard.inspectorPages.pending')" :value="formatEuro(wallet.pending)" :icon="TrendingUp" :hint="t('dashboard.inspectorPages.pendingHint')" />
-        <StatCard :label="t('dashboard.inspectorPages.totalEarnings')" :value="formatEuro(wallet.lifetime)" :icon="TrendingUp" />
+        <StatCard :label="'Verfügbares Guthaben'" :value="formatEuro(wallet.available)" :icon="WalletIcon" accent />
+        <StatCard :label="'Ausstehend'" :value="formatEuro(wallet.pending)" :icon="TrendingUp" :hint="'Wird nach Bestätigung freigegeben'" />
+        <StatCard :label="'Gesamtverdienst'" :value="formatEuro(wallet.lifetime)" :icon="TrendingUp" />
     </div>
 
     <div class="mt-4 flex justify-end">
         <Link href="/inspector/wallet/payout" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
-            {{ t('dashboard.inspectorPages.requestPayout') }}
+            {{ 'Auszahlung anfordern' }}
         </Link>
     </div>
 
     <div class="mt-6">
-        <PageCard :title="t('dashboard.inspectorPages.transactionHistory')">
+        <PageCard :title="'Transaktionsverlauf'">
             <div v-if="transactions.data.length" class="divide-y divide-ink-100">
                 <div v-for="tx in transactions.data" :key="tx.id" class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
                     <div class="flex items-center gap-3">
@@ -51,11 +49,11 @@ defineProps<{
                         <p class="font-display font-bold" :class="tx.amount >= 0 ? 'text-green-600' : 'text-navy-700'">
                             {{ tx.amount >= 0 ? '+' : '' }}{{ formatEuro(tx.amount) }}
                         </p>
-                        <p class="text-xs text-ink-500">{{ t('dashboard.inspectorPages.balance', { amount: formatEuro(tx.balanceAfter) }) }}</p>
+                        <p class="text-xs text-ink-500">{{ `Saldo ${formatEuro(tx.balanceAfter)}` }}</p>
                     </div>
                 </div>
             </div>
-            <p v-else class="px-5 py-8 text-center text-sm text-ink-500">{{ t('dashboard.inspectorPages.noTransactionsYet') }}</p>
+            <p v-else class="px-5 py-8 text-center text-sm text-ink-500">{{ 'Noch keine Transaktionen.' }}</p>
             <Pagination :links="transactions.links" />
         </PageCard>
     </div>

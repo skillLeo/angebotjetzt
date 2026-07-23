@@ -6,9 +6,7 @@ import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { Tag } from 'lucide-vue-next';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 
 defineProps<{
     offers: {
@@ -19,9 +17,9 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>{{ t('dashboard.inspectorPages.myOffers') }}</title></Head>
+    <Head><title>{{ 'Meine Angebote' }}</title></Head>
 
-    <PageCard :title="t('dashboard.inspectorPages.myOffers')">
+    <PageCard :title="'Meine Angebote'">
         <div v-if="offers.data.length" class="divide-y divide-ink-100">
             <Link v-for="o in offers.data" :key="o.id" :href="`/inspector/requests/${o.requestId}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
                 <div class="min-w-0">
@@ -31,13 +29,13 @@ defineProps<{
                 <div class="flex shrink-0 items-center gap-4">
                     <div class="text-right">
                         <p class="font-display font-bold text-navy-700">{{ formatEuro(o.price) }}</p>
-                        <p class="text-xs text-ink-500">{{ t('dashboard.inspectorPages.net', { amount: formatEuro(o.net) }) }}</p>
+                        <p class="text-xs text-ink-500">{{ `netto ${formatEuro(o.net)}` }}</p>
                     </div>
                     <StatusBadge :status="o.status" />
                 </div>
             </Link>
         </div>
-        <EmptyState v-else :icon="Tag" :title="t('dashboard.inspectorPages.noOffersYet')" :description="t('dashboard.inspectorPages.offersAppearHere')" />
+        <EmptyState v-else :icon="Tag" :title="'Noch keine Angebote'" :description="'Ihre abgegebenen Angebote erscheinen hier.'" />
         <Pagination :links="offers.links" />
     </PageCard>
 </template>

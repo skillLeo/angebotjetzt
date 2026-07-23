@@ -45,8 +45,15 @@ const columns = [
 
         <AdminTable :columns="columns" :rows="inspectors.data" row-key="id">
             <template #name="{ row }">
-                <Link :href="`/admin/inspectors/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>
-                <p class="text-xs text-ink-500">{{ row.company }}</p>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-green-50 font-display text-sm font-bold text-green-700">
+                        {{ String(row.name).charAt(0) }}
+                    </span>
+                    <div class="min-w-0">
+                        <Link :href="`/admin/inspectors/${row.id}`" class="font-semibold text-navy-700 hover:text-green-600 hover:underline">{{ row.name }}</Link>
+                        <p class="truncate text-xs text-ink-500">{{ row.company }}</p>
+                    </div>
+                </div>
             </template>
             <template #balance="{ value }">{{ formatEuro(value as number) }}</template>
             <template #active="{ value }">

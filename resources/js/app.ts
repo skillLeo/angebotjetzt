@@ -1,6 +1,5 @@
-import { createInertiaApp, router } from '@inertiajs/vue3';
+import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
-import { i18n, setI18nLocale } from '@/i18n';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
@@ -23,7 +22,7 @@ createInertiaApp({
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
+                return [CustomerLayout, SettingsLayout];
             case name.startsWith('customer/'):
                 return CustomerLayout;
             case name.startsWith('inspector/'):
@@ -37,16 +36,6 @@ createInertiaApp({
     progress: {
         color: '#3EAE2B',
     },
-    withApp(app, { page }) {
-        app.use(i18n);
-        const locale = (page.props as { locale?: string }).locale;
-        if (locale) setI18nLocale(locale);
-    },
-});
-
-router.on('success', (event) => {
-    const locale = (event.detail.page.props as { locale?: string }).locale;
-    if (locale) setI18nLocale(locale);
 });
 
 // This will set light / dark mode on page load...
