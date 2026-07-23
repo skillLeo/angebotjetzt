@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{ title: string; updated?: string }>();
 </script>
@@ -11,7 +14,7 @@ defineProps<{ title: string; updated?: string }>();
     <section class="bg-white px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         <div class="mx-auto max-w-3xl">
             <h1 class="text-section text-navy-700">{{ title }}</h1>
-            <p v-if="updated" class="mt-3 text-sm text-ink-500">Stand: {{ updated }}</p>
+            <p v-if="updated" class="mt-3 text-sm text-ink-500">{{ t('public.legal.stand') }} {{ updated }}</p>
             <div class="legal-prose mt-10 space-y-5 text-[15px] leading-relaxed text-ink-700">
                 <slot />
             </div>

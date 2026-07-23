@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 
-defineOptions({
-    layout: {
-        title: 'E-Mail-Adresse bestätigen',
-        description:
-            'Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gerade gesendet haben.',
-    },
+const { t } = useI18n();
+
+watchEffect(() => {
+    setLayoutProps({ title: t('auth.verifyEmail.title'), description: t('auth.verifyEmail.description') });
 });
 
 defineProps<{
@@ -20,14 +20,13 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="E-Mail-Adresse bestätigen" />
+    <Head :title="t('auth.verifyEmail.head')" />
 
     <div
         v-if="status === 'verification-link-sent'"
         class="mb-4 text-center text-sm font-medium text-green-600"
     >
-        Ein neuer Bestätigungslink wurde an die bei der Registrierung angegebene
-        E-Mail-Adresse gesendet.
+        {{ t('auth.verifyEmail.linkSent') }}
     </div>
 
     <Form
@@ -37,11 +36,11 @@ defineProps<{
     >
         <Button :disabled="processing" variant="secondary">
             <Spinner v-if="processing" />
-            Bestätigungs-E-Mail erneut senden
+            {{ t('auth.verifyEmail.resend') }}
         </Button>
 
         <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
-            Abmelden
+            {{ t('auth.verifyEmail.logout') }}
         </TextLink>
     </Form>
 </template>

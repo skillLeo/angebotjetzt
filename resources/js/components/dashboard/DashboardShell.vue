@@ -5,6 +5,9 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { Bell, LogOut, Menu, X } from 'lucide-vue-next';
 import type { Component } from 'vue';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     title: string;
@@ -33,7 +36,7 @@ function logout() {
                     <BrandLogo inverted />
                 </Link>
             </div>
-            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" aria-label="Portal-Navigation">
+            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" :aria-label="t('dashboard.portalNav')">
                 <Link
                     v-for="item in nav"
                     :key="item.href"
@@ -52,7 +55,7 @@ function logout() {
                     @click="logout"
                 >
                     <LogOut :size="19" aria-hidden="true" />
-                    Abmelden
+                    {{ t('dashboard.logout') }}
                 </button>
             </div>
         </aside>
@@ -69,7 +72,7 @@ function logout() {
                 <aside class="absolute inset-y-0 left-0 flex w-72 flex-col bg-navy-950">
                     <div class="flex h-16 items-center justify-between border-b border-navy-800 px-6">
                         <BrandLogo inverted />
-                        <button type="button" aria-label="Menü schließen" @click="sidebarOpen = false">
+                        <button type="button" :aria-label="t('dashboard.menuClose')" @click="sidebarOpen = false">
                             <X :size="24" class="text-white" aria-hidden="true" />
                         </button>
                     </div>
@@ -92,7 +95,7 @@ function logout() {
                             class="flex w-full items-center gap-3 rounded-card px-3.5 py-2.5 text-sm font-medium text-navy-100 hover:bg-navy-800"
                             @click="logout"
                         >
-                            <LogOut :size="19" aria-hidden="true" /> Abmelden
+                            <LogOut :size="19" aria-hidden="true" /> {{ t('dashboard.logout') }}
                         </button>
                     </div>
                 </aside>
@@ -106,7 +109,7 @@ function logout() {
                     <button
                         type="button"
                         class="flex h-10 w-10 items-center justify-center rounded-pill text-navy-700 lg:hidden"
-                        aria-label="Menü öffnen"
+                        :aria-label="t('dashboard.menuOpen')"
                         @click="sidebarOpen = true"
                     >
                         <Menu :size="24" aria-hidden="true" />
@@ -119,7 +122,7 @@ function logout() {
                         <button
                             type="button"
                             class="relative flex h-10 w-10 items-center justify-center rounded-pill text-ink-700 transition hover:bg-sand-50"
-                            aria-label="Benachrichtigungen"
+                            :aria-label="t('dashboard.notifications')"
                             @click="notifOpen = !notifOpen"
                         >
                             <Bell :size="20" aria-hidden="true" />
@@ -135,7 +138,7 @@ function logout() {
                             class="absolute right-0 mt-2 w-80 overflow-hidden rounded-card border border-ink-100 bg-white shadow-lift"
                         >
                             <div class="border-b border-ink-100 px-4 py-3">
-                                <p class="font-display text-sm font-bold text-navy-700">Benachrichtigungen</p>
+                                <p class="font-display text-sm font-bold text-navy-700">{{ t('dashboard.notifications') }}</p>
                             </div>
                             <div v-if="notifications.items.length" class="max-h-96 overflow-y-auto">
                                 <Link
@@ -151,7 +154,7 @@ function logout() {
                                     <p class="mt-1 text-xs text-ink-300">{{ n.date }}</p>
                                 </Link>
                             </div>
-                            <p v-else class="px-4 py-6 text-center text-sm text-ink-500">Keine Benachrichtigungen</p>
+                            <p v-else class="px-4 py-6 text-center text-sm text-ink-500">{{ t('dashboard.noNotifications') }}</p>
                         </div>
                     </div>
 

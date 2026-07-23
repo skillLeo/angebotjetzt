@@ -14,10 +14,13 @@ import {
     Truck,
 } from 'lucide-vue-next';
 import type { Component } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{
     categories: Array<{ id: number; name: string; slug: string; icon: string; is_active: boolean }>;
 }>();
+
+const { t } = useI18n();
 
 const icons: Record<string, Component> = {
     truck: Truck,
@@ -36,13 +39,12 @@ const icons: Record<string, Component> = {
     <section class="bg-white py-16 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
-                eyebrow="Bald verfügbar"
-                line1="Ein Marktplatz für"
-                line2="alle Dienstleistungen"
+                :eyebrow="t('home.futureCategories.eyebrow')"
+                :line1="t('home.futureCategories.line1')"
+                :line2="t('home.futureCategories.line2')"
             />
             <p class="text-lead mt-5 max-w-2xl text-ink-500">
-                AngebotJetzt wächst. Weitere Kategorien werden in Kürze freigeschaltet – lassen Sie
-                sich benachrichtigen, sobald es losgeht.
+                {{ t('home.futureCategories.description') }}
             </p>
 
             <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
@@ -62,7 +64,7 @@ const icons: Record<string, Component> = {
                                 <span
                                     class="mt-1 inline-block rounded-pill bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-500"
                                 >
-                                    Demnächst
+                                    {{ t('home.futureCategories.comingSoon') }}
                                 </span>
                             </div>
                         </Link>

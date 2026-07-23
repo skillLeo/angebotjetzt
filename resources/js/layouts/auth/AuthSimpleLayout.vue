@@ -3,17 +3,21 @@ import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { Link } from '@inertiajs/vue3';
 import { BadgeCheck, CheckCircle2, ShieldCheck } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{
     title?: string;
     description?: string;
 }>();
 
-const highlights = [
-    { icon: CheckCircle2, text: 'Kostenlos Angebote von geprüften Kfz-Gutachtern erhalten' },
-    { icon: ShieldCheck, text: 'Sicher bezahlen, erst wenn Sie zufrieden sind' },
-    { icon: BadgeCheck, text: 'Über 8.000 vermittelte Gutachten in ganz Deutschland' },
-];
+const { t } = useI18n();
+
+const highlights = computed(() => [
+    { icon: CheckCircle2, text: t('auth.layout.highlight1') },
+    { icon: ShieldCheck, text: t('auth.layout.highlight2') },
+    { icon: BadgeCheck, text: t('auth.layout.highlight3') },
+]);
 </script>
 
 <template>
@@ -29,8 +33,8 @@ const highlights = [
 
             <div class="relative">
                 <h2 class="font-display text-3xl leading-tight font-extrabold text-white">
-                    Kfz-Gutachten<br />
-                    <span class="text-green-400">einfach vergleichen.</span>
+                    {{ t('auth.layout.titleLine1') }}<br />
+                    <span class="text-green-400">{{ t('auth.layout.titleLine2') }}</span>
                 </h2>
                 <ul class="mt-8 space-y-4">
                     <li v-for="(item, i) in highlights" :key="i" class="flex items-start gap-3">

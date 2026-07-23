@@ -2,7 +2,10 @@
 import PageCard from '@/components/dashboard/PageCard.vue';
 import FormField from '@/components/forms/FormField.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     profile: { name: string; company_name: string | null; email: string; phone: string | null; city: string | null; bio: string | null; qualifications: string | null; years_experience: number | null };
@@ -21,34 +24,34 @@ const form = useForm({
 function submit() {
     form.post('/gutachter/profil', {
         preserveScroll: true,
-        onSuccess: () => toast.success('Profil aktualisiert.'),
+        onSuccess: () => toast.success(t('dashboard.inspectorPages.profileUpdated')),
     });
 }
 </script>
 
 <template>
-    <Head><title>Profil</title></Head>
+    <Head><title>{{ t('dashboard.inspectorPages.profileTitle') }}</title></Head>
 
-    <PageCard title="Öffentliches Profil" subtitle="Diese Angaben sehen Kunden bei Ihren Angeboten.">
+    <PageCard :title="t('dashboard.inspectorPages.publicProfile')" :subtitle="t('dashboard.inspectorPages.publicProfileSubtitle')">
         <form class="space-y-5 p-5 sm:p-6" @submit.prevent="submit">
             <div class="grid gap-5 sm:grid-cols-2">
-                <FormField v-model="form.name" label="Name" required :error="form.errors.name" />
-                <FormField v-model="form.company_name" label="Firma" :error="form.errors.company_name" />
-                <FormField v-model="form.phone" label="Telefon" :error="form.errors.phone" />
-                <FormField v-model="form.city" label="Stadt" :error="form.errors.city" />
-                <FormField v-model="form.years_experience" label="Jahre Erfahrung" type="number" :error="form.errors.years_experience" />
+                <FormField v-model="form.name" :label="t('dashboard.inspectorPages.name')" required :error="form.errors.name" />
+                <FormField v-model="form.company_name" :label="t('dashboard.inspectorPages.company')" :error="form.errors.company_name" />
+                <FormField v-model="form.phone" :label="t('dashboard.inspectorPages.phone')" :error="form.errors.phone" />
+                <FormField v-model="form.city" :label="t('dashboard.inspectorPages.city')" :error="form.errors.city" />
+                <FormField v-model="form.years_experience" :label="t('dashboard.inspectorPages.yearsExperience')" type="number" :error="form.errors.years_experience" />
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-semibold text-navy-700">Über mich</label>
+                <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ t('dashboard.inspectorPages.aboutMe') }}</label>
                 <textarea v-model="form.bio" rows="4" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
             </div>
             <div>
-                <label class="mb-1.5 block text-sm font-semibold text-navy-700">Qualifikationen & Zertifikate</label>
+                <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ t('dashboard.inspectorPages.qualifications') }}</label>
                 <textarea v-model="form.qualifications" rows="3" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
             </div>
-            <div class="rounded-card bg-sand-50 px-4 py-3 text-sm text-ink-500">E-Mail: {{ profile.email }} (Änderung über den Support)</div>
+            <div class="rounded-card bg-sand-50 px-4 py-3 text-sm text-ink-500">{{ t('dashboard.inspectorPages.emailChangeNote', { email: profile.email }) }}</div>
             <button type="submit" :disabled="form.processing" class="rounded-pill bg-green-500 px-7 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60">
-                Speichern
+                {{ t('dashboard.inspectorPages.save') }}
             </button>
         </form>
     </PageCard>

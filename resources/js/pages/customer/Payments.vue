@@ -6,6 +6,9 @@ import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head } from '@inertiajs/vue3';
 import { CreditCard } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     payments: {
@@ -16,9 +19,9 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>Zahlungen</title></Head>
+    <Head><title>{{ t('dashboard.customerPages.paymentsTitle') }}</title></Head>
 
-    <PageCard title="Meine Zahlungen">
+    <PageCard :title="t('dashboard.customerPages.myPayments')">
         <div v-if="payments.data.length" class="divide-y divide-ink-100">
             <div v-for="p in payments.data" :key="p.id" class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
                 <div class="min-w-0">
@@ -31,7 +34,7 @@ defineProps<{
                 </div>
             </div>
         </div>
-        <EmptyState v-else :icon="CreditCard" title="Noch keine Zahlungen" description="Ihre Zahlungen erscheinen hier, sobald Sie einen Auftrag beauftragt haben." />
+        <EmptyState v-else :icon="CreditCard" :title="t('dashboard.customerPages.noPaymentsYet')" :description="t('dashboard.customerPages.paymentsAppearHere')" />
         <Pagination :links="payments.links" />
     </PageCard>
 </template>

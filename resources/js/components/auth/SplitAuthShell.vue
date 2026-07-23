@@ -2,11 +2,14 @@
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{
     quote?: string;
     quoteAuthor?: string;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -35,7 +38,7 @@ defineProps<{
                 <footer v-if="quoteAuthor" class="mt-5 text-navy-100">— {{ quoteAuthor }}</footer>
             </blockquote>
 
-            <p class="relative text-sm text-navy-100">Anfragen. Vergleichen. Beauftragen.</p>
+            <p class="relative text-sm text-navy-100">{{ t('home.hero.eyebrow') }}</p>
         </div>
     </div>
     <Toaster position="top-center" rich-colors />

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
 import { computed, ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,24 +13,24 @@ import {
 import { store } from '@/routes/two-factor/login';
 import type { TwoFactorConfigContent } from '@/types';
 
+const { t } = useI18n();
+
 const showRecoveryInput = ref<boolean>(false);
 const code = ref<string>('');
 
 const authConfigContent = computed<TwoFactorConfigContent>(() => {
     if (showRecoveryInput.value) {
         return {
-            title: 'Wiederherstellungscode',
-            description:
-                'Bitte bestätigen Sie den Zugriff auf Ihr Konto, indem Sie einen Ihrer Wiederherstellungscodes eingeben.',
-            buttonText: 'mit Authentifizierungscode anmelden',
+            title: t('auth.twoFactor.recoveryTitle'),
+            description: t('auth.twoFactor.recoveryDescription'),
+            buttonText: t('auth.twoFactor.recoveryButton'),
         };
     }
 
     return {
-        title: 'Authentifizierungscode',
-        description:
-            'Geben Sie den Code aus Ihrer Authenticator-App ein.',
-        buttonText: 'mit Wiederherstellungscode anmelden',
+        title: t('auth.twoFactor.authTitle'),
+        description: t('auth.twoFactor.authDescription'),
+        buttonText: t('auth.twoFactor.authButton'),
     };
 });
 
@@ -48,7 +49,7 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
 </script>
 
 <template>
-    <Head title="Zwei-Faktor-Authentifizierung" />
+    <Head :title="t('auth.twoFactor.head')" />
 
     <div class="space-y-6">
         <template v-if="!showRecoveryInput">
@@ -83,10 +84,10 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
                     <InputError :message="errors.code" />
                 </div>
                 <Button type="submit" class="w-full" :disabled="processing"
-                    >Weiter</Button
+                    >{{ t('auth.twoFactor.continue') }}</Button
                 >
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>oder Sie können sich </span>
+                    <span>{{ t('auth.twoFactor.or') }}</span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
@@ -108,17 +109,17 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
                 <Input
                     name="recovery_code"
                     type="text"
-                    placeholder="Wiederherstellungscode eingeben"
+                    :placeholder="t('auth.twoFactor.recoveryPlaceholder')"
                     :autofocus="showRecoveryInput"
                     required
                 />
                 <InputError :message="errors.recovery_code" />
                 <Button type="submit" class="w-full" :disabled="processing"
-                    >Weiter</Button
+                    >{{ t('auth.twoFactor.continue') }}</Button
                 >
 
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>oder Sie können sich </span>
+                    <span>{{ t('auth.twoFactor.or') }}</span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

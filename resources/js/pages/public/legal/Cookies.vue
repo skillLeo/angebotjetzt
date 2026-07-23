@@ -1,42 +1,26 @@
 <script setup lang="ts">
 import LegalPage from '@/components/marketing/LegalPage.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 </script>
 
 <template>
-    <LegalPage title="Cookie-Richtlinie" updated="Juli 2026">
-        <p>
-            Diese Cookie-Richtlinie erklärt, welche Cookies AngebotJetzt verwendet und wie Sie Ihre
-            Einwilligung verwalten können.
-        </p>
+    <LegalPage :title="t('public.legalContent.cookies.title')" :updated="t('public.legal.updatedJuly2026')">
+        <p>{{ t('public.legalContent.cookies.intro') }}</p>
 
-        <h2>Was sind Cookies?</h2>
-        <p>
-            Cookies sind kleine Textdateien, die auf Ihrem Gerät gespeichert werden, um die Website
-            funktionsfähig zu halten und die Nutzung zu verbessern.
-        </p>
+        <h2>{{ t('public.legalContent.cookies.h1') }}</h2>
+        <p>{{ t('public.legalContent.cookies.p1') }}</p>
 
-        <h2>Kategorien</h2>
-        <h3>Notwendige Cookies</h3>
-        <p>
-            Diese Cookies sind für den Betrieb der Website erforderlich, etwa zur Sitzungsverwaltung und
-            Sicherheit. Sie können nicht deaktiviert werden.
-        </p>
-        <h3>Statistik-Cookies</h3>
-        <p>
-            Helfen uns zu verstehen, wie Besucher die Website nutzen. Sie werden nur mit Ihrer
-            Einwilligung gesetzt.
-        </p>
-        <h3>Marketing-Cookies</h3>
-        <p>
-            Werden verwendet, um Inhalte und Angebote relevanter zu gestalten. Sie werden nur mit Ihrer
-            Einwilligung gesetzt.
-        </p>
+        <h2>{{ t('public.legalContent.cookies.h2') }}</h2>
+        <h3>{{ t('public.legalContent.cookies.h2a') }}</h3>
+        <p>{{ t('public.legalContent.cookies.p2a') }}</p>
+        <h3>{{ t('public.legalContent.cookies.h2b') }}</h3>
+        <p>{{ t('public.legalContent.cookies.p2b') }}</p>
+        <h3>{{ t('public.legalContent.cookies.h2c') }}</h3>
+        <p>{{ t('public.legalContent.cookies.p2c') }}</p>
 
-        <h2>Einwilligung verwalten</h2>
-        <p>
-            Beim ersten Besuch können Sie Ihre Auswahl im Cookie-Banner treffen. Sie können Ihre
-            Einwilligung jederzeit widerrufen, indem Sie die gespeicherten Cookies in Ihrem Browser
-            löschen.
-        </p>
+        <h2>{{ t('public.legalContent.cookies.h3') }}</h2>
+        <p>{{ t('public.legalContent.cookies.p3') }}</p>
     </LegalPage>
 </template>

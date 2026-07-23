@@ -4,6 +4,9 @@ import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 defineProps<{
     request: {
@@ -17,10 +20,10 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>Anfrage {{ request.number }}</title></Head>
+    <Head><title>{{ t('dashboard.customerPages.requestTitle') }} {{ request.number }}</title></Head>
 
     <Link href="/konto/anfragen" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
-        <ArrowLeft :size="16" aria-hidden="true" /> Zurück zu Anfragen
+        <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.customerPages.backToRequests') }}
     </Link>
 
     <div class="grid gap-6 lg:grid-cols-3">
@@ -28,21 +31,21 @@ defineProps<{
             <PageCard :title="`${request.vehicle.make} ${request.vehicle.model}`" :subtitle="`${request.service} · ${request.number}`">
                 <template #actions><StatusBadge :status="request.status" /></template>
                 <div class="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
-                    <div><p class="text-sm text-ink-500">Erstzulassung</p><p class="font-semibold text-navy-700">{{ request.vehicle.firstRegistration ?? '–' }}</p></div>
-                    <div><p class="text-sm text-ink-500">Kilometerstand</p><p class="font-semibold text-navy-700">{{ request.vehicle.mileage ? request.vehicle.mileage.toLocaleString('de-DE') + ' km' : '–' }}</p></div>
-                    <div><p class="text-sm text-ink-500">Kraftstoff</p><p class="font-semibold text-navy-700">{{ request.vehicle.fuel ?? '–' }}</p></div>
-                    <div><p class="text-sm text-ink-500">Getriebe</p><p class="font-semibold text-navy-700">{{ request.vehicle.transmission ?? '–' }}</p></div>
-                    <div><p class="text-sm text-ink-500">Ort</p><p class="font-semibold text-navy-700">{{ request.plz }} {{ request.ort }}</p></div>
-                    <div v-if="request.notes" class="sm:col-span-2"><p class="text-sm text-ink-500">Anmerkungen</p><p class="text-navy-700">{{ request.notes }}</p></div>
+                    <div><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.firstRegistration') }}</p><p class="font-semibold text-navy-700">{{ request.vehicle.firstRegistration ?? '–' }}</p></div>
+                    <div><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.mileage') }}</p><p class="font-semibold text-navy-700">{{ request.vehicle.mileage ? request.vehicle.mileage.toLocaleString(locale === 'de' ? 'de-DE' : 'en-US') + ' km' : '–' }}</p></div>
+                    <div><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.fuel') }}</p><p class="font-semibold text-navy-700">{{ request.vehicle.fuel ?? '–' }}</p></div>
+                    <div><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.transmission') }}</p><p class="font-semibold text-navy-700">{{ request.vehicle.transmission ?? '–' }}</p></div>
+                    <div><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.location') }}</p><p class="font-semibold text-navy-700">{{ request.plz }} {{ request.ort }}</p></div>
+                    <div v-if="request.notes" class="sm:col-span-2"><p class="text-sm text-ink-500">{{ t('dashboard.customerPages.notes') }}</p><p class="text-navy-700">{{ request.notes }}</p></div>
                 </div>
                 <div v-if="request.photos.length" class="grid grid-cols-3 gap-3 px-5 pb-6 sm:grid-cols-4 sm:px-6">
-                    <img v-for="(p, i) in request.photos" :key="i" :src="p" alt="Fahrzeugfoto" class="aspect-square w-full rounded-card object-cover" />
+                    <img v-for="(p, i) in request.photos" :key="i" :src="p" :alt="t('dashboard.customerPages.vehiclePhotoAlt')" class="aspect-square w-full rounded-card object-cover" />
                 </div>
             </PageCard>
         </div>
 
         <div>
-            <PageCard title="Angebote">
+            <PageCard :title="t('dashboard.customerPages.offers')">
                 <div v-if="offers.length" class="space-y-3 p-5">
                     <div v-for="o in offers" :key="o.id" class="rounded-card border border-ink-100 p-4">
                         <div class="flex items-center justify-between">
@@ -52,11 +55,11 @@ defineProps<{
                         <p class="text-sm text-ink-500">{{ o.inspector.city }}</p>
                     </div>
                     <Link :href="`/konto/anfragen/${request.id}/angebote`" class="mt-2 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
-                        Angebote vergleichen
+                        {{ t('dashboard.customerPages.compareOffers') }}
                     </Link>
                 </div>
                 <p v-else class="px-5 py-8 text-center text-sm text-ink-500">
-                    Noch keine Angebote. Wir haben {{ request.matched }} Gutachter benachrichtigt.
+                    {{ t('dashboard.customerPages.noOffersYet', { count: request.matched }) }}
                 </p>
             </PageCard>
         </div>

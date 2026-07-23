@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -10,20 +12,22 @@ import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+const { t } = useI18n();
+
+const sidebarNavItems = computed<NavItem[]>(() => [
     {
-        title: 'Profile',
+        title: t('dashboard.settingsPage.profile'),
         href: editProfile(),
     },
     {
-        title: 'Security',
+        title: t('dashboard.settingsPage.security'),
         href: editSecurity(),
     },
     {
-        title: 'Appearance',
+        title: t('dashboard.settingsPage.appearance'),
         href: editAppearance(),
     },
-];
+]);
 
 const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
@@ -31,8 +35,8 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 <template>
     <div class="px-4 py-6">
         <Heading
-            title="Settings"
-            description="Manage your profile and account settings"
+            :title="t('dashboard.settingsPage.settings')"
+            :description="t('dashboard.settingsPage.manageSettings')"
         />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">

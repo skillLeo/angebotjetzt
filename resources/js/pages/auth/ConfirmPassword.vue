@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
     index as confirmOptions,
     store as confirmStore,
@@ -12,26 +14,24 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 
-defineOptions({
-    layout: {
-        title: 'Passwort bestätigen',
-        description:
-            'Dies ist ein geschützter Bereich. Bitte bestätigen Sie Ihr Passwort, um fortzufahren.',
-    },
+const { t } = useI18n();
+
+watchEffect(() => {
+    setLayoutProps({ title: t('auth.confirmPassword.title'), description: t('auth.confirmPassword.description') });
 });
 </script>
 
 <template>
-    <Head title="Passwort bestätigen" />
+    <Head :title="t('auth.confirmPassword.head')" />
 
     <PasskeyVerify
         :routes="{
             options: confirmOptions(),
             submit: confirmStore(),
         }"
-        label="Mit Passkey bestätigen"
-        loading-label="Wird bestätigt …"
-        separator="Oder mit Passwort bestätigen"
+        :label="t('auth.confirmPassword.passkeyLabel')"
+        :loading-label="t('auth.confirmPassword.passkeyLoading')"
+        :separator="t('auth.confirmPassword.passkeySeparator')"
     />
 
     <Form
@@ -41,7 +41,7 @@ defineOptions({
     >
         <div class="space-y-6">
             <div class="grid gap-2">
-                <Label htmlFor="password">Passwort</Label>
+                <Label htmlFor="password">{{ t('auth.confirmPassword.password') }}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
@@ -61,7 +61,7 @@ defineOptions({
                     data-test="confirm-password-button"
                 >
                     <Spinner v-if="processing" />
-                    Passwort bestätigen
+                    {{ t('auth.confirmPassword.submit') }}
                 </Button>
             </div>
         </div>

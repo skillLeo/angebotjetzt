@@ -5,6 +5,9 @@ import StatCard from '@/components/dashboard/StatCard.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, Inbox, Package, Tag, Wallet } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     stats: { openRequests: number; offers: number; wonJobs: number; walletAvailable: number; walletPending: number; responseRate: number | null };
@@ -13,20 +16,20 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>Dashboard</title></Head>
+    <Head><title>{{ t('dashboard.inspectorPages.dashboardTitle') }}</title></Head>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Offene Anfragen" :value="stats.openRequests" :icon="Inbox" accent />
-        <StatCard label="Abgegebene Angebote" :value="stats.offers" :icon="Tag" />
-        <StatCard label="Gewonnene Aufträge" :value="stats.wonJobs" :icon="Package" />
-        <StatCard label="Verfügbares Guthaben" :value="formatEuro(stats.walletAvailable)" :icon="Wallet" :hint="`${formatEuro(stats.walletPending)} ausstehend`" />
+        <StatCard :label="t('dashboard.inspectorPages.openRequests')" :value="stats.openRequests" :icon="Inbox" accent />
+        <StatCard :label="t('dashboard.inspectorPages.submittedOffers')" :value="stats.offers" :icon="Tag" />
+        <StatCard :label="t('dashboard.inspectorPages.wonJobs')" :value="stats.wonJobs" :icon="Package" />
+        <StatCard :label="t('dashboard.inspectorPages.availableBalance')" :value="formatEuro(stats.walletAvailable)" :icon="Wallet" :hint="`${formatEuro(stats.walletPending)} ${t('dashboard.inspectorPages.pendingSuffix')}`" />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
-            <PageCard title="Neue passende Anfragen">
+            <PageCard :title="t('dashboard.inspectorPages.newMatchingRequests')">
                 <template #actions>
-                    <Link href="/gutachter/anfragen" class="text-sm font-bold text-green-600 hover:text-green-700">Alle ansehen</Link>
+                    <Link href="/gutachter/anfragen" class="text-sm font-bold text-green-600 hover:text-green-700">{{ t('dashboard.inspectorPages.viewAll') }}</Link>
                 </template>
                 <div v-if="newRequests.length" class="divide-y divide-ink-100">
                     <Link v-for="r in newRequests" :key="r.id" :href="`/gutachter/anfragen/${r.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
@@ -37,15 +40,15 @@ defineProps<{
                         <ChevronRight :size="18" class="shrink-0 text-ink-300" aria-hidden="true" />
                     </Link>
                 </div>
-                <EmptyState v-else title="Keine neuen Anfragen" description="Sobald eine Anfrage in Ihrem Servicegebiet eingeht, erscheint sie hier." />
+                <EmptyState v-else :title="t('dashboard.inspectorPages.noNewRequests')" :description="t('dashboard.inspectorPages.noNewRequestsDesc')" />
             </PageCard>
         </div>
 
         <div>
-            <PageCard title="Antwortrate">
+            <PageCard :title="t('dashboard.inspectorPages.responseRate')">
                 <div class="p-6 text-center">
                     <p class="font-display text-5xl font-extrabold text-navy-700">{{ stats.responseRate ?? '–' }}<span v-if="stats.responseRate !== null" class="text-2xl">%</span></p>
-                    <p class="mt-2 text-sm text-ink-500">Ihrer passenden Anfragen haben Sie ein Angebot abgegeben.</p>
+                    <p class="mt-2 text-sm text-ink-500">{{ t('dashboard.inspectorPages.responseRateDesc') }}</p>
                 </div>
             </PageCard>
         </div>

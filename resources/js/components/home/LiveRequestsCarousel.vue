@@ -2,6 +2,9 @@
 import { formatEuroShort } from '@/lib/format';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     requests: Array<{
@@ -27,7 +30,7 @@ function scroll(dir: number) {
             <button
                 type="button"
                 class="flex h-11 w-11 items-center justify-center rounded-pill border border-ink-300 text-navy-700 transition hover:border-navy-700 hover:bg-navy-50"
-                aria-label="Zurück"
+                :aria-label="t('home.liveRequests.back')"
                 @click="scroll(-1)"
             >
                 <ChevronLeft :size="20" aria-hidden="true" />
@@ -35,7 +38,7 @@ function scroll(dir: number) {
             <button
                 type="button"
                 class="flex h-11 w-11 items-center justify-center rounded-pill border border-ink-300 text-navy-700 transition hover:border-navy-700 hover:bg-navy-50"
-                aria-label="Weiter"
+                :aria-label="t('home.liveRequests.forward')"
                 @click="scroll(1)"
             >
                 <ChevronRight :size="20" aria-hidden="true" />
@@ -69,11 +72,11 @@ function scroll(dir: number) {
                         {{ req.plz }} {{ req.ort }}
                     </p>
                     <div class="mt-4 flex items-center justify-between">
-                        <span class="text-sm text-ink-500">Angebote ab</span>
+                        <span class="text-sm text-ink-500">{{ t('home.liveRequests.offersFrom') }}</span>
                         <span
                             class="rounded-pill bg-green-50 px-3.5 py-1.5 font-display text-base font-extrabold text-green-700"
                         >
-                            {{ req.price ? formatEuroShort(req.price) : 'Offen' }}
+                            {{ req.price ? formatEuroShort(req.price) : t('home.liveRequests.open') }}
                         </span>
                     </div>
                 </div>

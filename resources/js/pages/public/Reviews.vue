@@ -2,6 +2,9 @@
 import Pagination from '@/components/dashboard/Pagination.vue';
 import StarRating from '@/components/marketing/StarRating.vue';
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     reviews: {
@@ -13,14 +16,14 @@ defineProps<{
 
 <template>
     <Head>
-        <title>Bewertungen</title>
-        <meta name="description" content="Echte Kundenbewertungen zu den Gutachtern auf AngebotJetzt." />
+        <title>{{ t('public.reviews.metaTitle') }}</title>
+        <meta name="description" :content="t('public.reviews.metaDescription')" />
     </Head>
 
     <section class="bg-sand-100 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div class="mx-auto max-w-7xl">
-            <p class="text-eyebrow mb-4 text-green-600">Kundenstimmen</p>
-            <h1 class="text-hero max-w-2xl text-navy-700">Das sagen unsere Kunden</h1>
+            <p class="text-eyebrow mb-4 text-green-600">{{ t('public.reviews.eyebrow') }}</p>
+            <h1 class="text-hero max-w-2xl text-navy-700">{{ t('public.reviews.title') }}</h1>
             <div class="mt-6 flex items-center gap-3">
                 <span class="font-display text-4xl font-extrabold text-navy-700">4,9</span>
                 <StarRating :rating="5" :size="20" />

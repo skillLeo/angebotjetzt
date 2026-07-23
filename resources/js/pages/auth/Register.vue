@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -10,20 +12,19 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
+const { t } = useI18n();
+
 defineProps<{
     passwordRules: string;
 }>();
 
-defineOptions({
-    layout: {
-        title: 'Konto erstellen',
-        description: 'Geben Sie unten Ihre Daten ein, um Ihr Konto zu erstellen',
-    },
+watchEffect(() => {
+    setLayoutProps({ title: t('auth.register.title'), description: t('auth.register.description') });
 });
 </script>
 
 <template>
-    <Head title="Registrieren" />
+    <Head :title="t('auth.register.head')" />
 
     <Form
         v-bind="store.form()"
@@ -33,7 +34,7 @@ defineOptions({
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="name">Name</Label>
+                <Label for="name">{{ t('auth.register.name') }}</Label>
                 <Input
                     id="name"
                     type="text"
@@ -42,13 +43,13 @@ defineOptions({
                     :tabindex="1"
                     autocomplete="name"
                     name="name"
-                    placeholder="Vor- und Nachname"
+                    :placeholder="t('auth.register.namePlaceholder')"
                 />
                 <InputError :message="errors.name" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">E-Mail-Adresse</Label>
+                <Label for="email">{{ t('auth.register.email') }}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -56,34 +57,34 @@ defineOptions({
                     :tabindex="2"
                     autocomplete="email"
                     name="email"
-                    placeholder="ihre@email.de"
+                    :placeholder="t('auth.register.emailPlaceholder')"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">Passwort</Label>
+                <Label for="password">{{ t('auth.register.password') }}</Label>
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Passwort"
+                    :placeholder="t('auth.register.passwordPlaceholder')"
                     :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Passwort bestätigen</Label>
+                <Label for="password_confirmation">{{ t('auth.register.confirmPassword') }}</Label>
                 <PasswordInput
                     id="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="Passwort bestätigen"
+                    :placeholder="t('auth.register.confirmPasswordPlaceholder')"
                     :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password_confirmation" />
@@ -97,17 +98,17 @@ defineOptions({
                 data-test="register-user-button"
             >
                 <Spinner v-if="processing" />
-                Konto erstellen
+                {{ t('auth.register.submit') }}
             </Button>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
-            Bereits registriert?
+            {{ t('auth.register.alreadyRegistered') }}
             <TextLink
                 :href="login()"
                 class="underline underline-offset-4"
                 :tabindex="6"
-                >Anmelden</TextLink
+                >{{ t('auth.register.login') }}</TextLink
             >
         </div>
     </Form>

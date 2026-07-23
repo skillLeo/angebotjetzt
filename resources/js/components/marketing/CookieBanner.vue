@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 // GDPR consent banner with granular category toggles.
 const visible = ref(false);
@@ -32,26 +35,25 @@ function save(all: boolean) {
             v-if="visible"
             class="fixed inset-x-4 bottom-4 z-[60] mx-auto max-w-xl rounded-panel bg-white p-6 shadow-lift sm:inset-x-6"
             role="dialog"
-            aria-label="Cookie-Einstellungen"
+            :aria-label="t('cookieBanner.title')"
         >
-            <h2 class="font-display text-lg font-bold text-navy-700">Ihre Privatsphäre</h2>
+            <h2 class="font-display text-lg font-bold text-navy-700">{{ t('cookieBanner.title') }}</h2>
             <p class="mt-2 text-sm leading-relaxed text-ink-500">
-                Wir verwenden Cookies, um unsere Website zuverlässig zu betreiben und – mit Ihrer Zustimmung –
-                die Nutzung zu analysieren. Details finden Sie in unserer
-                <a href="/cookie-richtlinie" class="font-medium text-navy-700 underline">Cookie-Richtlinie</a>.
+                {{ t('cookieBanner.description') }}
+                <a href="/cookie-richtlinie" class="font-medium text-navy-700 underline">{{ t('cookieBanner.policyLink') }}</a>.
             </p>
 
             <div v-if="showDetails" class="mt-4 space-y-3">
                 <label class="flex items-center justify-between gap-4 rounded-card bg-sand-50 px-4 py-3">
-                    <span class="text-sm font-medium text-ink-700">Notwendig</span>
+                    <span class="text-sm font-medium text-ink-700">{{ t('cookieBanner.necessary') }}</span>
                     <input type="checkbox" checked disabled class="h-5 w-5 accent-green-500" />
                 </label>
                 <label class="flex items-center justify-between gap-4 rounded-card bg-sand-50 px-4 py-3">
-                    <span class="text-sm font-medium text-ink-700">Statistik</span>
+                    <span class="text-sm font-medium text-ink-700">{{ t('cookieBanner.statistics') }}</span>
                     <input v-model="consent.statistics" type="checkbox" class="h-5 w-5 accent-green-500" />
                 </label>
                 <label class="flex items-center justify-between gap-4 rounded-card bg-sand-50 px-4 py-3">
-                    <span class="text-sm font-medium text-ink-700">Marketing</span>
+                    <span class="text-sm font-medium text-ink-700">{{ t('cookieBanner.marketing') }}</span>
                     <input v-model="consent.marketing" type="checkbox" class="h-5 w-5 accent-green-500" />
                 </label>
             </div>
@@ -62,7 +64,7 @@ function save(all: boolean) {
                     class="flex-1 rounded-pill bg-green-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-green-600"
                     @click="save(true)"
                 >
-                    Alle akzeptieren
+                    {{ t('cookieBanner.acceptAll') }}
                 </button>
                 <button
                     v-if="showDetails"
@@ -70,7 +72,7 @@ function save(all: boolean) {
                     class="flex-1 rounded-pill border border-ink-300 px-5 py-3 text-sm font-bold text-ink-700 transition hover:border-navy-700"
                     @click="save(false)"
                 >
-                    Auswahl speichern
+                    {{ t('cookieBanner.saveSelection') }}
                 </button>
                 <button
                     v-else
@@ -78,7 +80,7 @@ function save(all: boolean) {
                     class="flex-1 rounded-pill border border-ink-300 px-5 py-3 text-sm font-bold text-ink-700 transition hover:border-navy-700"
                     @click="showDetails = true"
                 >
-                    Einstellungen
+                    {{ t('cookieBanner.settings') }}
                 </button>
             </div>
         </div>

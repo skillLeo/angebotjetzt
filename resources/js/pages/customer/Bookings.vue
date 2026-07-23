@@ -6,6 +6,9 @@ import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, Package } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     bookings: {
@@ -16,9 +19,9 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>Meine Aufträge</title></Head>
+    <Head><title>{{ t('dashboard.customerPages.myBookings') }}</title></Head>
 
-    <PageCard title="Meine Aufträge">
+    <PageCard :title="t('dashboard.customerPages.myBookings')">
         <div v-if="bookings.data.length" class="divide-y divide-ink-100">
             <Link
                 v-for="b in bookings.data"
@@ -37,7 +40,7 @@ defineProps<{
                 </div>
             </Link>
         </div>
-        <EmptyState v-else :icon="Package" title="Noch keine Aufträge" description="Sobald Sie ein Angebot annehmen, erscheint Ihr Auftrag hier." />
+        <EmptyState v-else :icon="Package" :title="t('dashboard.customerPages.noBookingsYet')" :description="t('dashboard.customerPages.bookingsAppearHere')" />
         <Pagination :links="bookings.links" />
     </PageCard>
 </template>

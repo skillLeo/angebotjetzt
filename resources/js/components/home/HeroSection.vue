@@ -5,11 +5,14 @@ import { router } from '@inertiajs/vue3';
 import { CheckCircle2, MapPin, MousePointer2, Search } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     serviceTypes: Array<{ id: number; name: string; slug: string }>;
     heroImage: string;
 }>();
+
+const { t } = useI18n();
 
 const service = ref<string>('');
 const location = ref('');
@@ -42,17 +45,15 @@ function submit() {
                         :transition="{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }"
                     >
                         <p class="text-eyebrow mb-5 text-green-600">
-                            Anfragen. Vergleichen. Beauftragen.
+                            {{ t('home.hero.eyebrow') }}
                         </p>
                         <h1 class="text-hero text-navy-700">
-                            Kfz-Gutachten<br />
-                            <span class="text-navy-700">jetzt </span>
-                            <HandDrawnEllipse><span class="text-navy-700">vergleichen</span></HandDrawnEllipse>
+                            {{ t('home.hero.titleLine1') }}<br />
+                            <span class="text-navy-700">{{ t('home.hero.titleJetzt') }}</span>
+                            <HandDrawnEllipse><span class="text-navy-700">{{ t('home.hero.titleCompare') }}</span></HandDrawnEllipse>
                         </h1>
                         <p class="text-lead mt-6 max-w-xl text-ink-700">
-                            Beschreiben Sie, was Sie brauchen. Geprüfte Gutachter aus Ihrer Region
-                            senden Ihnen individuelle Angebote – Sie vergleichen und beauftragen
-                            online. Kostenlos und unverbindlich.
+                            {{ t('home.hero.description') }}
                         </p>
                     </Motion>
 
@@ -67,21 +68,21 @@ function submit() {
                             @submit.prevent="submit"
                         >
                             <div class="relative flex-1">
-                                <label for="hero-service" class="sr-only">Gutachten-Art</label>
+                                <label for="hero-service" class="sr-only">{{ t('home.hero.serviceLabel') }}</label>
                                 <select
                                     id="hero-service"
                                     v-model="service"
                                     class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
-                                    <option value="">Welches Gutachten?</option>
-                                    <option v-for="t in serviceTypes" :key="t.id" :value="t.slug">
-                                        {{ t.name }}
+                                    <option value="">{{ t('home.hero.servicePlaceholder') }}</option>
+                                    <option v-for="serviceType in serviceTypes" :key="serviceType.id" :value="serviceType.slug">
+                                        {{ serviceType.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="hidden h-7 w-px bg-ink-100 sm:block" />
                             <div class="relative flex-1">
-                                <label for="hero-plz" class="sr-only">PLZ oder Ort</label>
+                                <label for="hero-plz" class="sr-only">{{ t('home.hero.locationLabel') }}</label>
                                 <MapPin
                                     class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-ink-300"
                                     :size="18"
@@ -92,7 +93,7 @@ function submit() {
                                     v-model="location"
                                     type="text"
                                     inputmode="numeric"
-                                    placeholder="PLZ oder Ort"
+                                    :placeholder="t('home.hero.locationPlaceholder')"
                                     class="h-12 w-full rounded-pill bg-transparent pr-4 pl-11 text-[15px] font-medium text-ink-700 placeholder:text-ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 />
                             </div>
@@ -101,11 +102,11 @@ function submit() {
                                 class="flex h-12 items-center justify-center gap-2 rounded-pill bg-green-500 px-7 text-[15px] font-bold text-white transition hover:bg-green-600"
                             >
                                 <Search :size="18" aria-hidden="true" />
-                                Angebote erhalten
+                                {{ t('home.hero.submit') }}
                             </button>
                         </form>
                         <p class="mt-3 pl-2 text-sm text-ink-500">
-                            Bereits über 8.000 Gutachten in ganz Deutschland vermittelt.
+                            {{ t('home.hero.trustLine') }}
                         </p>
                     </Motion>
                 </div>
@@ -122,24 +123,24 @@ function submit() {
                             width="720"
                             height="600"
                             fetchpriority="high"
-                            alt="Kfz-Sachverständiger begutachtet ein Fahrzeug"
+                            :alt="t('home.hero.heroImageAlt')"
                             class="aspect-[6/5] w-full rounded-panel object-cover shadow-lift"
                         />
                     </Motion>
 
                     <FloatChip :delay="0.5" class="top-6 -left-2 sm:-left-5">
                         <MapPin :size="16" class="text-green-500" aria-hidden="true" />
-                        Ort: Köln, 50667
+                        {{ t('home.hero.chipLocation') }}
                     </FloatChip>
                     <FloatChip :delay="0.7" alt class="top-24 -right-2 sm:-right-4">
-                        Gutachten: Unfallschaden
+                        {{ t('home.hero.chipService') }}
                     </FloatChip>
                     <FloatChip :delay="0.9" class="bottom-20 -left-2 sm:-left-6">
                         <CheckCircle2 :size="16" class="text-green-500" aria-hidden="true" />
-                        <span class="font-semibold text-green-700">3 Angebote erhalten</span>
+                        <span class="font-semibold text-green-700">{{ t('home.hero.chipOffers') }}</span>
                     </FloatChip>
                     <FloatChip :delay="1.1" alt class="right-2 bottom-6 sm:-right-3">
-                        <span class="text-ink-500">ab</span>
+                        <span class="text-ink-500">{{ t('home.hero.chipFrom') }}</span>
                         <span class="font-display text-lg font-extrabold text-navy-700">249&nbsp;€</span>
                     </FloatChip>
 

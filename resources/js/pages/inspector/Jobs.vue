@@ -6,6 +6,9 @@ import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, Package } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
     jobs: {
@@ -16,9 +19,9 @@ defineProps<{
 </script>
 
 <template>
-    <Head><title>Aufträge</title></Head>
+    <Head><title>{{ t('dashboard.inspectorPages.jobsTitle') }}</title></Head>
 
-    <PageCard title="Meine Aufträge">
+    <PageCard :title="t('dashboard.inspectorPages.myJobs')">
         <div v-if="jobs.data.length" class="divide-y divide-ink-100">
             <Link v-for="j in jobs.data" :key="j.id" :href="`/gutachter/auftraege/${j.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
                 <div class="min-w-0">
@@ -32,7 +35,7 @@ defineProps<{
                 </div>
             </Link>
         </div>
-        <EmptyState v-else :icon="Package" title="Noch keine Aufträge" description="Gewonnene Aufträge erscheinen hier, sobald ein Kunde Ihr Angebot annimmt." />
+        <EmptyState v-else :icon="Package" :title="t('dashboard.inspectorPages.noJobsYet')" :description="t('dashboard.inspectorPages.jobsAppearHere')" />
         <Pagination :links="jobs.links" />
     </PageCard>
 </template>

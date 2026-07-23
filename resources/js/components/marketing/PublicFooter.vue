@@ -2,47 +2,51 @@
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import StarRating from '@/components/marketing/StarRating.vue';
 import { Link } from '@inertiajs/vue3';
-import { Facebook, Globe, Instagram, Linkedin } from 'lucide-vue-next';
+import { Facebook, Instagram, Linkedin } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const columns = [
+const { t } = useI18n();
+
+const columns = computed(() => [
     {
-        title: 'Über AngebotJetzt',
+        title: t('footer.about'),
         links: [
-            { label: 'Über uns', href: '/ueber-uns' },
-            { label: "So funktioniert's", href: '/so-funktionierts' },
-            { label: 'Bewertungen', href: '/bewertungen' },
-            { label: 'Preise', href: '/preise' },
-            { label: 'Kontakt', href: '/kontakt' },
+            { label: t('footer.aboutUs'), href: '/ueber-uns' },
+            { label: t('footer.howItWorks'), href: '/so-funktionierts' },
+            { label: t('footer.reviews'), href: '/bewertungen' },
+            { label: t('footer.prices'), href: '/preise' },
+            { label: t('footer.contact'), href: '/kontakt' },
         ],
     },
     {
-        title: 'Dienstleistungen',
+        title: t('footer.services'),
         links: [
-            { label: 'Unfallschadengutachten', href: '/kfz-gutachten/unfallschadengutachten' },
-            { label: 'Fahrzeugbewertung', href: '/kfz-gutachten/fahrzeugbewertung' },
-            { label: 'Gebrauchtwagencheck', href: '/kfz-gutachten/gebrauchtwagencheck' },
-            { label: 'Wertminderungsgutachten', href: '/kfz-gutachten/wertminderung-restwert' },
-            { label: 'Alle Kfz-Gutachten', href: '/kfz-gutachten' },
+            { label: t('footer.accidentReport'), href: '/kfz-gutachten/unfallschadengutachten' },
+            { label: t('footer.vehicleValuation'), href: '/kfz-gutachten/fahrzeugbewertung' },
+            { label: t('footer.usedCarCheck'), href: '/kfz-gutachten/gebrauchtwagencheck' },
+            { label: t('footer.depreciationReport'), href: '/kfz-gutachten/wertminderung-restwert' },
+            { label: t('footer.allServices'), href: '/kfz-gutachten' },
         ],
     },
     {
-        title: 'Für Gutachter',
+        title: t('footer.forInspectors'),
         links: [
-            { label: 'Gutachter werden', href: '/fuer-gutachter' },
-            { label: 'Gutachter-Login', href: '/gutachter/login' },
-            { label: 'Häufige Fragen', href: '/faq' },
+            { label: t('footer.becomeInspector'), href: '/fuer-gutachter' },
+            { label: t('footer.inspectorLogin'), href: '/gutachter/login' },
+            { label: t('footer.faq'), href: '/faq' },
         ],
     },
     {
-        title: 'Rechtliches',
+        title: t('footer.legal'),
         links: [
-            { label: 'Impressum', href: '/impressum' },
-            { label: 'Datenschutz', href: '/datenschutz' },
-            { label: 'AGB', href: '/agb' },
-            { label: 'Cookie-Richtlinie', href: '/cookie-richtlinie' },
+            { label: t('footer.imprint'), href: '/impressum' },
+            { label: t('footer.privacy'), href: '/datenschutz' },
+            { label: t('footer.terms'), href: '/agb' },
+            { label: t('footer.cookiePolicy'), href: '/cookie-richtlinie' },
         ],
     },
-];
+]);
 </script>
 
 <template>
@@ -75,13 +79,13 @@ const columns = [
                     <span class="font-display text-3xl font-extrabold text-white">4,9</span>
                     <div>
                         <StarRating :rating="5" :size="15" />
-                        <p class="mt-0.5 text-sm text-navy-100">basierend auf Kundenbewertungen</p>
+                        <p class="mt-0.5 text-sm text-navy-100">{{ t('footer.basedOnReviews') }}</p>
                     </div>
                 </div>
 
                 <div class="text-sm leading-relaxed text-navy-100 md:text-right">
-                    AngebotJetzt · Musterstraße 1, 10115 Berlin<br />
-                    © {{ new Date().getFullYear() }} AngebotJetzt. Alle Rechte vorbehalten.
+                    {{ t('footer.addressLine') }}<br />
+                    © {{ new Date().getFullYear() }} AngebotJetzt. {{ t('footer.copyright') }}
                 </div>
             </div>
 
@@ -90,30 +94,25 @@ const columns = [
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        aria-label="AngebotJetzt auf Facebook"
+                        :aria-label="t('footer.facebookLabel')"
                     >
                         <Facebook :size="18" aria-hidden="true" />
                     </a>
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        aria-label="AngebotJetzt auf Instagram"
+                        :aria-label="t('footer.instagramLabel')"
                     >
                         <Instagram :size="18" aria-hidden="true" />
                     </a>
                     <a
                         href="#"
                         class="flex h-10 w-10 items-center justify-center rounded-pill bg-navy-800 text-white transition hover:bg-green-500"
-                        aria-label="AngebotJetzt auf LinkedIn"
+                        :aria-label="t('footer.linkedinLabel')"
                     >
                         <Linkedin :size="18" aria-hidden="true" />
                     </a>
                 </div>
-                <span
-                    class="inline-flex items-center gap-2 rounded-pill border border-navy-800 px-4 py-2 text-sm font-bold text-white"
-                >
-                    <Globe :size="16" aria-hidden="true" /> DE
-                </span>
             </div>
         </div>
     </footer>

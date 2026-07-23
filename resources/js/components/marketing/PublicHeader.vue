@@ -4,6 +4,9 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { Menu, X } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const scrolled = ref(false);
 const mobileOpen = ref(false);
@@ -11,12 +14,12 @@ const mobileOpen = ref(false);
 const page = usePage();
 const isLoggedIn = computed(() => Boolean((page.props.auth as { user?: unknown } | undefined)?.user));
 
-const navItems = [
-    { label: 'Kfz-Gutachten', href: '/kfz-gutachten' },
-    { label: "So funktioniert's", href: '/so-funktionierts' },
-    { label: 'Für Gutachter', href: '/fuer-gutachter' },
-    { label: 'Preise', href: '/preise' },
-];
+const navItems = computed(() => [
+    { label: t('nav.kfzGutachten'), href: '/kfz-gutachten' },
+    { label: t('nav.howItWorks'), href: '/so-funktionierts' },
+    { label: t('nav.forInspectors'), href: '/fuer-gutachter' },
+    { label: t('nav.prices'), href: '/preise' },
+]);
 
 function onScroll() {
     scrolled.value = window.scrollY > 40;
@@ -56,26 +59,28 @@ watch(mobileOpen, (open) => {
                     :href="isLoggedIn ? '/konto' : '/login'"
                     class="text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
                 >
-                    {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
+                    {{ isLoggedIn ? t('nav.myAccount') : t('nav.login') }}
                 </Link>
                 <Link
                     href="/anfrage"
                     class="rounded-pill bg-green-500 px-6 py-2.5 text-[15px] font-bold text-white shadow-card transition hover:bg-green-600"
                 >
-                    Anfrage stellen
+                    {{ t('nav.requestNow') }}
                 </Link>
             </div>
 
-            <button
-                type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-pill text-navy-700 lg:hidden"
-                :aria-expanded="mobileOpen"
-                aria-label="Menü öffnen"
-                @click="mobileOpen = !mobileOpen"
-            >
-                <Menu v-if="!mobileOpen" :size="26" aria-hidden="true" />
-                <X v-else :size="26" aria-hidden="true" />
-            </button>
+            <div class="flex items-center gap-2 lg:hidden">
+                <button
+                    type="button"
+                    class="flex h-11 w-11 items-center justify-center rounded-pill text-navy-700"
+                    :aria-expanded="mobileOpen"
+                    :aria-label="t('nav.menuOpen')"
+                    @click="mobileOpen = !mobileOpen"
+                >
+                    <Menu v-if="!mobileOpen" :size="26" aria-hidden="true" />
+                    <X v-else :size="26" aria-hidden="true" />
+                </button>
+            </div>
         </div>
 
         <!-- Full-screen mobile overlay -->
@@ -112,7 +117,7 @@ watch(mobileOpen, (open) => {
                             class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
                             @click="mobileOpen = false"
                         >
-                            {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
+                            {{ isLoggedIn ? t('nav.myAccount') : t('nav.login') }}
                         </Link>
                     </Motion>
                 </nav>
@@ -122,7 +127,7 @@ watch(mobileOpen, (open) => {
                         class="block w-full rounded-pill bg-green-500 py-4 text-center text-base font-bold text-white"
                         @click="mobileOpen = false"
                     >
-                        Jetzt kostenlos Angebote erhalten
+                        {{ t('nav.mobileCtaLine') }}
                     </Link>
                 </div>
             </div>
