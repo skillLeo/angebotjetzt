@@ -11,7 +11,7 @@ const processing = ref<number | null>(null);
 
 function toggle(id: number) {
     processing.value = id;
-    router.post(`/admin/kategorien/${id}/status`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
+    router.post(`/admin/categories/${id}/status`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
 }
 </script>
 

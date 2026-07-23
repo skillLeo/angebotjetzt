@@ -27,7 +27,7 @@ const columns = [
     <PageCard title="Alle Aufträge">
         <AdminTable :columns="columns" :rows="bookings.data" row-key="id">
             <template #number="{ row }">
-                <Link :href="`/admin/auftraege/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.number }}</Link>
+                <Link :href="`/admin/bookings/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.number }}</Link>
             </template>
             <template #total="{ value }">{{ formatEuro(value as number) }}</template>
             <template #commission="{ value }">{{ formatEuro(value as number) }}</template>

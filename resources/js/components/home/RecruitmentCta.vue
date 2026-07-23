@@ -27,13 +27,13 @@ const { t } = useI18n();
                         </p>
                         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                             <Link
-                                href="/fuer-gutachter"
+                                href="/for-inspectors"
                                 class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
                             >
                                 {{ t('home.recruitment.ctaRegister') }}
                             </Link>
                             <Link
-                                href="/fuer-gutachter"
+                                href="/for-inspectors"
                                 class="rounded-pill border border-navy-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-navy-800"
                             >
                                 {{ t('home.recruitment.ctaLearnMore') }}

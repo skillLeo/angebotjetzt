@@ -11,7 +11,7 @@ const props = defineProps<{
 const form = useForm({ commission_percent: props.settings.commission_percent });
 
 function submit() {
-    form.post('/admin/einstellungen', {
+    form.post('/admin/settings', {
         preserveScroll: true,
         onSuccess: () => toast.success('Einstellungen gespeichert.'),
     });

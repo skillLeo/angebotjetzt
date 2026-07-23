@@ -16,13 +16,13 @@ const form = useForm({ type: 'city', city_name: '', postal_from: '', postal_to: 
 
 function submit() {
     form.type = type.value;
-    form.post('/gutachter/servicegebiet', {
+    form.post('/inspector/service-areas', {
         preserveScroll: true,
         onSuccess: () => form.reset('city_name', 'postal_from', 'postal_to'),
     });
 }
 function remove(id: number) {
-    router.delete(`/gutachter/servicegebiet/${id}`, { preserveScroll: true });
+    router.delete(`/inspector/service-areas/${id}`, { preserveScroll: true });
 }
 </script>
 

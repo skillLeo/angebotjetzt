@@ -11,15 +11,15 @@ class SeoController extends Controller
     {
         $base = rtrim(config('app.url'), '/');
         $static = [
-            '/', '/kfz-gutachten', '/so-funktionierts', '/fuer-gutachter', '/ueber-uns',
-            '/kontakt', '/preise', '/faq', '/bewertungen', '/impressum', '/datenschutz',
-            '/agb', '/cookie-richtlinie', '/anfrage',
+            '/', '/vehicle-reports', '/how-it-works', '/for-inspectors', '/about',
+            '/contact', '/pricing', '/faq', '/reviews', '/imprint', '/privacy',
+            '/terms', '/cookie-policy', '/request',
         ];
 
         $urls = collect($static)->map(fn ($path) => ['loc' => $base.$path, 'priority' => $path === '/' ? '1.0' : '0.7']);
 
         foreach (ServiceType::where('is_active', true)->pluck('slug') as $slug) {
-            $urls->push(['loc' => $base.'/kfz-gutachten/'.$slug, 'priority' => '0.8']);
+            $urls->push(['loc' => $base.'/vehicle-reports/'.$slug, 'priority' => '0.8']);
         }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
@@ -36,8 +36,8 @@ class SeoController extends Controller
     {
         $base = rtrim(config('app.url'), '/');
         $body = "User-agent: *\n";
-        $body .= "Disallow: /konto\n";
-        $body .= "Disallow: /gutachter\n";
+        $body .= "Disallow: /account\n";
+        $body .= "Disallow: /inspector\n";
         $body .= "Disallow: /admin\n";
         $body .= "Allow: /\n\n";
         $body .= "Sitemap: {$base}/sitemap.xml\n";

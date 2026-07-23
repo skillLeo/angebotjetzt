@@ -30,7 +30,7 @@ class CheckoutController extends Controller
      * Accepting an offer immediately creates a Stripe Checkout session —
      * payment happens in the same step, never afterwards.
      */
-    public function accept(Request $request, Offer $offer): RedirectResponse
+    public function accept(Request $request, Offer $offer): RedirectResponse|HttpResponse
     {
         $serviceRequest = $offer->request;
 
@@ -169,12 +169,12 @@ class CheckoutController extends Controller
         AppNotification::notify($offer->inspector, 'offer_accepted',
             'Ihr Angebot wurde angenommen',
             "Auftrag {$booking->booking_number} · {$offer->request->vehicle_make} {$offer->request->vehicle_model} in {$offer->request->ort}",
-            "/gutachter/auftraege/{$booking->id}");
+            "/inspector/jobs/{$booking->id}");
 
         AppNotification::notify($booking->user, 'booking_paid',
             'Zahlung erfolgreich — Auftrag bestätigt',
             "Auftrag {$booking->booking_number} bei {$offer->inspector->name}",
-            "/konto/auftraege/{$booking->id}");
+            "/account/bookings/{$booking->id}");
 
         Mail::to($booking->user->email)->queue(new BookingConfirmedCustomerMail($booking));
         Mail::to($offer->inspector->email)->queue(new BookingConfirmedInspectorMail($booking));

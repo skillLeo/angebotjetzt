@@ -22,7 +22,7 @@ const form = useForm({
 });
 
 function submit() {
-    form.post('/gutachter/profil', {
+    form.post('/inspector/profile', {
         preserveScroll: true,
         onSuccess: () => toast.success(t('dashboard.inspectorPages.profileUpdated')),
     });

@@ -22,7 +22,7 @@ defineProps<{
 
     <PageCard :title="t('dashboard.customerPages.myRequests')">
         <template #actions>
-            <Link href="/anfrage" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
+            <Link href="/request" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
                 {{ t('dashboard.customerPages.newRequest') }}
             </Link>
         </template>
@@ -31,7 +31,7 @@ defineProps<{
             <Link
                 v-for="r in requests.data"
                 :key="r.id"
-                :href="`/konto/anfragen/${r.id}`"
+                :href="`/account/requests/${r.id}`"
                 class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6"
             >
                 <div class="min-w-0">
@@ -48,7 +48,7 @@ defineProps<{
             </Link>
         </div>
         <EmptyState v-else :title="t('dashboard.customerPages.noRequestsYet')" :description="t('dashboard.customerPages.requestsAppearHere')">
-            <Link href="/anfrage" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ t('dashboard.customerPages.submitRequest') }}</Link>
+            <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ t('dashboard.customerPages.submitRequest') }}</Link>
         </EmptyState>
 
         <Pagination :links="requests.links" />

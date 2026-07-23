@@ -16,7 +16,7 @@ const search = ref(props.filters.suche ?? '');
 const status = ref(props.filters.status ?? '');
 
 function apply() {
-    router.get('/admin/anfragen', { suche: search.value || undefined, status: status.value || undefined }, { preserveState: true });
+    router.get('/admin/requests', { suche: search.value || undefined, status: status.value || undefined }, { preserveState: true });
 }
 
 const columns = [
@@ -53,7 +53,7 @@ const columns = [
 
         <AdminTable :columns="columns" :rows="requests.data" row-key="id">
             <template #number="{ row }">
-                <Link :href="`/admin/anfragen/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.number }}</Link>
+                <Link :href="`/admin/requests/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.number }}</Link>
             </template>
             <template #status="{ value }"><StatusBadge :status="value as string" /></template>
         </AdminTable>

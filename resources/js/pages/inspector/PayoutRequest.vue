@@ -19,14 +19,14 @@ const maxPayout = computed(() => (props.available - props.pendingPayout) / 100);
 const form = useForm({ amount: '', iban: '', bic: '', account_holder: '' });
 
 function submit() {
-    form.transform((d) => ({ ...d, amount: String(d.amount).replace(',', '.') })).post('/gutachter/wallet/auszahlung');
+    form.transform((d) => ({ ...d, amount: String(d.amount).replace(',', '.') })).post('/inspector/wallet/payout');
 }
 </script>
 
 <template>
     <Head><title>{{ t('dashboard.inspectorPages.requestPayoutTitle') }}</title></Head>
 
-    <Link href="/gutachter/wallet" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/inspector/wallet" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.inspectorPages.backToWallet') }}
     </Link>
 

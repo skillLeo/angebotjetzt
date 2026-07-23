@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.login');
             }
-            if ($request->is('gutachter') || $request->is('gutachter/*')) {
+            if ($request->is('inspector') || $request->is('inspector/*')) {
                 return route('gutachter.login');
             }
 

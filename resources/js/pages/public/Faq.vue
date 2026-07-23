@@ -48,7 +48,7 @@ const sections = computed(() => [
             </div>
             <div class="rounded-panel bg-navy-900 p-8 text-center">
                 <p class="font-display text-xl font-bold text-white">{{ t('public.faq.noAnswer') }}</p>
-                <Link href="/kontakt" class="mt-5 inline-block rounded-pill bg-green-500 px-7 py-3 font-bold text-white transition hover:bg-green-600">
+                <Link href="/contact" class="mt-5 inline-block rounded-pill bg-green-500 px-7 py-3 font-bold text-white transition hover:bg-green-600">
                     {{ t('public.faq.contactCta') }}
                 </Link>
             </div>

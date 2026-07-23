@@ -26,7 +26,7 @@ defineProps<{
                 {{ t('public.category.description', { count: inspectorCount }) }}
             </p>
             <Link
-                href="/anfrage"
+                href="/request"
                 class="mt-8 inline-block rounded-pill bg-green-500 px-8 py-4 text-base font-bold text-white transition hover:bg-green-600"
             >
                 {{ t('public.category.cta') }}

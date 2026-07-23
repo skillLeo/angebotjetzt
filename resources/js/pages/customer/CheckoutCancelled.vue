@@ -20,7 +20,7 @@ defineProps<{ requestId?: number }>();
             {{ t('dashboard.customerPages.paymentCancelledText') }}
         </p>
         <div class="mt-8">
-            <Link href="/konto/anfragen" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
+            <Link href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
                 {{ t('dashboard.customerPages.backToMyRequests') }}
             </Link>
         </div>

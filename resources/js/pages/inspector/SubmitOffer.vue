@@ -24,14 +24,14 @@ const netCents = computed(() => priceCents.value - commissionCents.value);
 
 function submit() {
     form.transform((d) => ({ ...d, price: String(d.price).replace(',', '.') }))
-        .post(`/gutachter/anfragen/${props.request.id}/angebot`);
+        .post(`/inspector/requests/${props.request.id}/offer`);
 }
 </script>
 
 <template>
     <Head><title>{{ t('dashboard.inspectorPages.submitOffer') }}</title></Head>
 
-    <Link :href="`/gutachter/anfragen/${request.id}`" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link :href="`/inspector/requests/${request.id}`" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.inspectorPages.backToRequest') }}
     </Link>
 

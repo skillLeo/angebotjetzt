@@ -63,6 +63,6 @@ class InspectorRegisterController extends Controller
 
         Auth::guard('inspector')->login($inspector);
 
-        return redirect('/gutachter')->with('success', 'Willkommen! Ihr Gutachter-Konto wurde erstellt.');
+        return redirect('/inspector')->with('success', 'Willkommen! Ihr Gutachter-Konto wurde erstellt.');
     }
 }

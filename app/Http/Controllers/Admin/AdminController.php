@@ -236,7 +236,7 @@ class AdminController extends Controller
         AppNotification::notify($booking->inspector, 'balance_released',
             'Guthaben freigegeben',
             "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-            '/gutachter/wallet');
+            '/inspector/wallet');
 
         ActivityLog::record('booking.confirmed', Auth::guard('admin')->user(), $booking);
 
@@ -516,7 +516,7 @@ class AdminController extends Controller
         AppNotification::notify($payout->inspector, 'payout_paid',
             'Auszahlung überwiesen',
             'Ihre Auszahlung über '.number_format($payout->amount_cents / 100, 2, ',', '.').' € wurde überwiesen.',
-            '/gutachter/wallet');
+            '/inspector/wallet');
 
         Mail::to($payout->inspector->email)->queue(new PayoutPaidMail($payout));
 

@@ -17,14 +17,14 @@ const props = defineProps<{
 }>();
 
 function confirm() {
-    router.post(`/admin/auftraege/${props.booking.id}/bestaetigen`, {}, { preserveScroll: true });
+    router.post(`/admin/bookings/${props.booking.id}/confirm`, {}, { preserveScroll: true });
 }
 </script>
 
 <template>
     <Head><title>Auftrag {{ booking.number }}</title></Head>
 
-    <Link href="/admin/auftraege" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/admin/bookings" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 
@@ -36,12 +36,12 @@ function confirm() {
                     <div><p class="text-sm text-ink-500">Kunde</p><p class="font-semibold text-navy-700">{{ booking.customer.name }}</p><p class="text-sm text-ink-500">{{ booking.customer.email }}</p></div>
                     <div>
                         <p class="text-sm text-ink-500">Gutachter</p>
-                        <Link :href="`/admin/gutachter/${booking.inspector.id}`" class="font-semibold text-green-600 hover:underline">{{ booking.inspector.name }}</Link>
+                        <Link :href="`/admin/inspectors/${booking.inspector.id}`" class="font-semibold text-green-600 hover:underline">{{ booking.inspector.name }}</Link>
                         <p class="text-sm text-ink-500">{{ booking.inspector.city }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-ink-500">Anfrage</p>
-                        <Link :href="`/admin/anfragen/${booking.requestId}`" class="font-semibold text-green-600 hover:underline">{{ booking.requestNumber }}</Link>
+                        <Link :href="`/admin/requests/${booking.requestId}`" class="font-semibold text-green-600 hover:underline">{{ booking.requestNumber }}</Link>
                     </div>
                     <div v-if="booking.review"><p class="text-sm text-ink-500">Bewertung</p><p class="font-semibold text-navy-700">{{ booking.review.rating }}/5</p></div>
                 </div>

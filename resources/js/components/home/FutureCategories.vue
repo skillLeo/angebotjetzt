@@ -51,7 +51,7 @@ const icons: Record<string, Component> = {
                 <template v-for="cat in categories" :key="cat.id">
                     <Reveal v-if="!cat.is_active">
                         <Link
-                            :href="`/demnaechst/${cat.slug}`"
+                            :href="`/coming-soon/${cat.slug}`"
                             class="group flex items-center gap-4 rounded-card border border-dashed border-ink-300 bg-sand-50 p-5 transition hover:border-green-500 hover:bg-green-50"
                         >
                             <span

@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const search = ref(props.filters.suche ?? '');
 function apply() {
-    router.get('/admin/kunden', { suche: search.value || undefined }, { preserveState: true });
+    router.get('/admin/customers', { suche: search.value || undefined }, { preserveState: true });
 }
 
 const columns = [

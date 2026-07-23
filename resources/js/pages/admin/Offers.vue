@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const status = ref(props.filters.status ?? '');
 function apply() {
-    router.get('/admin/angebote', { status: status.value || undefined }, { preserveState: true });
+    router.get('/admin/offers', { status: status.value || undefined }, { preserveState: true });
 }
 
 const columns = [
@@ -42,7 +42,7 @@ const columns = [
         </template>
         <AdminTable :columns="columns" :rows="offers.data" row-key="id">
             <template #requestNumber="{ row }">
-                <Link :href="`/admin/anfragen/${row.requestId}`" class="font-semibold text-green-600 hover:underline">{{ row.requestNumber }}</Link>
+                <Link :href="`/admin/requests/${row.requestId}`" class="font-semibold text-green-600 hover:underline">{{ row.requestNumber }}</Link>
             </template>
             <template #price="{ value }">{{ formatEuro(value as number) }}</template>
             <template #commission="{ value }">{{ formatEuro(value as number) }}</template>

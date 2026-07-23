@@ -21,7 +21,7 @@ defineProps<{
 <template>
     <Head><title>Anfrage {{ request.number }}</title></Head>
 
-    <Link href="/admin/anfragen" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/admin/requests" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 

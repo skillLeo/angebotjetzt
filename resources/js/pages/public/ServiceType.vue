@@ -30,7 +30,7 @@ const benefits = computed(() => [
         <nav class="mx-auto max-w-7xl text-sm text-ink-500" aria-label="Brotkrümel">
             <Link href="/" class="hover:text-navy-700">{{ t('public.breadcrumb.home') }}</Link>
             <span class="mx-2">/</span>
-            <Link href="/kfz-gutachten" class="hover:text-navy-700">{{ t('public.breadcrumb.kfzGutachten') }}</Link>
+            <Link href="/vehicle-reports" class="hover:text-navy-700">{{ t('public.breadcrumb.kfzGutachten') }}</Link>
             <span class="mx-2">/</span>
             <span class="text-navy-700">{{ serviceType.name }}</span>
         </nav>
@@ -50,7 +50,7 @@ const benefits = computed(() => [
                         {{ t('public.serviceType.cta') }}
                     </Link>
                     <Link
-                        href="/so-funktionierts"
+                        href="/how-it-works"
                         class="rounded-pill border border-ink-300 px-7 py-3.5 text-center text-[15px] font-bold text-navy-700 transition hover:border-navy-700"
                     >
                         {{ t('public.serviceType.howItWorks') }}
@@ -92,7 +92,7 @@ const benefits = computed(() => [
                 <Link
                     v-for="other in others"
                     :key="other.id"
-                    :href="`/kfz-gutachten/${other.slug}`"
+                    :href="`/vehicle-reports/${other.slug}`"
                     class="group flex items-center justify-between gap-4 rounded-card border border-ink-100 bg-white p-5 transition hover:border-green-500 hover:shadow-card"
                 >
                     <div>

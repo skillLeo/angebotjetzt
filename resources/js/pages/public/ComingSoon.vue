@@ -13,7 +13,7 @@ const props = defineProps<{
 const form = useForm({ email: '' });
 
 function submit() {
-    form.post(`/demnaechst/${props.category.slug}/interesse`, {
+    form.post(`/coming-soon/${props.category.slug}/interest`, {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();

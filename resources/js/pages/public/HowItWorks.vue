@@ -40,7 +40,7 @@ const faq = computed(() => [
                 <FaqAccordion :items="faq" />
             </div>
             <div class="mt-10 text-center">
-                <Link href="/anfrage" class="inline-block rounded-pill bg-green-500 px-8 py-4 text-base font-bold text-white transition hover:bg-green-600">
+                <Link href="/request" class="inline-block rounded-pill bg-green-500 px-8 py-4 text-base font-bold text-white transition hover:bg-green-600">
                     {{ t('public.howItWorks.cta') }}
                 </Link>
             </div>

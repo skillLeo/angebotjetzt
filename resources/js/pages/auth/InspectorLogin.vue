@@ -8,7 +8,7 @@ const { t } = useI18n();
 const form = useForm({ email: '', password: '', remember: false });
 
 function submit() {
-    form.post('/gutachter/login', { onFinish: () => form.reset('password') });
+    form.post('/inspector/login', { onFinish: () => form.reset('password') });
 }
 </script>
 

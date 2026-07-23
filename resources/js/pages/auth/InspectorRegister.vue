@@ -12,7 +12,7 @@ const form = useForm({
 });
 
 function submit() {
-    form.post('/registrieren/gutachter', { onFinish: () => form.reset('password', 'password_confirmation') });
+    form.post('/inspector/register', { onFinish: () => form.reset('password', 'password_confirmation') });
 }
 </script>
 
@@ -44,7 +44,7 @@ function submit() {
             </div>
             <label class="flex items-start gap-3 text-sm text-ink-700">
                 <input v-model="form.agb" type="checkbox" class="mt-0.5 h-5 w-5 accent-green-500" />
-                <span>{{ t('auth.inspectorRegister.acceptPrefix') }} <Link href="/agb" class="font-semibold text-green-600 underline" target="_blank">{{ t('auth.inspectorRegister.terms') }}</Link> {{ t('auth.inspectorRegister.and') }} <Link href="/datenschutz" class="font-semibold text-green-600 underline" target="_blank">{{ t('auth.inspectorRegister.privacy') }}</Link>.</span>
+                <span>{{ t('auth.inspectorRegister.acceptPrefix') }} <Link href="/terms" class="font-semibold text-green-600 underline" target="_blank">{{ t('auth.inspectorRegister.terms') }}</Link> {{ t('auth.inspectorRegister.and') }} <Link href="/privacy" class="font-semibold text-green-600 underline" target="_blank">{{ t('auth.inspectorRegister.privacy') }}</Link>.</span>
             </label>
             <p v-if="form.errors.agb" class="text-sm text-red-600">{{ form.errors.agb }}</p>
 
@@ -52,7 +52,7 @@ function submit() {
                 {{ t('auth.inspectorRegister.submit') }}
             </button>
             <p class="text-center text-sm text-ink-500">
-                {{ t('auth.inspectorRegister.alreadyRegistered') }} <Link href="/gutachter/login" class="font-semibold text-green-600">{{ t('auth.inspectorRegister.toLogin') }}</Link>
+                {{ t('auth.inspectorRegister.alreadyRegistered') }} <Link href="/inspector/login" class="font-semibold text-green-600">{{ t('auth.inspectorRegister.toLogin') }}</Link>
             </p>
         </form>
     </SplitAuthShell>

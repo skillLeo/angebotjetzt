@@ -81,7 +81,7 @@ function submit() {
     form.transform((data) => ({
         ...data,
         mileage: data.mileage === '' ? null : data.mileage,
-    })).post('/anfrage', {
+    })).post('/request', {
         forceFormData: true,
         onSuccess: () => localStorage.removeItem(DRAFT_KEY),
     });

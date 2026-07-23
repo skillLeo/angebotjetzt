@@ -12,13 +12,13 @@ const url = computed(() => page.url);
 const inspector = computed(() => (page.props.auth as { inspector?: { name?: string; company?: string } }).inspector);
 
 const nav = computed(() => [
-    { label: t('dashboard.inspector.navDashboard'), href: '/gutachter', icon: LayoutDashboard, active: url.value === '/gutachter' },
-    { label: t('dashboard.inspector.navRequests'), href: '/gutachter/anfragen', icon: Inbox, active: url.value.startsWith('/gutachter/anfragen') },
-    { label: t('dashboard.inspector.navOffers'), href: '/gutachter/angebote', icon: Tag, active: url.value.startsWith('/gutachter/angebote') },
-    { label: t('dashboard.inspector.navBookings'), href: '/gutachter/auftraege', icon: Package, active: url.value.startsWith('/gutachter/auftraege') },
-    { label: t('dashboard.inspector.navServiceArea'), href: '/gutachter/servicegebiet', icon: MapPin, active: url.value.startsWith('/gutachter/servicegebiet') },
-    { label: t('dashboard.inspector.navWallet'), href: '/gutachter/wallet', icon: Wallet, active: url.value.startsWith('/gutachter/wallet') },
-    { label: t('dashboard.inspector.navProfile'), href: '/gutachter/profil', icon: User, active: url.value.startsWith('/gutachter/profil') },
+    { label: t('dashboard.inspector.navDashboard'), href: '/inspector', icon: LayoutDashboard, active: url.value === '/inspector' },
+    { label: t('dashboard.inspector.navRequests'), href: '/inspector/requests', icon: Inbox, active: url.value.startsWith('/inspector/requests') },
+    { label: t('dashboard.inspector.navOffers'), href: '/inspector/offers', icon: Tag, active: url.value.startsWith('/inspector/offers') },
+    { label: t('dashboard.inspector.navBookings'), href: '/inspector/jobs', icon: Package, active: url.value.startsWith('/inspector/jobs') },
+    { label: t('dashboard.inspector.navServiceArea'), href: '/inspector/service-areas', icon: MapPin, active: url.value.startsWith('/inspector/service-areas') },
+    { label: t('dashboard.inspector.navWallet'), href: '/inspector/wallet', icon: Wallet, active: url.value.startsWith('/inspector/wallet') },
+    { label: t('dashboard.inspector.navProfile'), href: '/inspector/profile', icon: User, active: url.value.startsWith('/inspector/profile') },
 ]);
 </script>
 
@@ -26,7 +26,7 @@ const nav = computed(() => [
     <DashboardShell
         :title="t('dashboard.inspector.title')"
         :nav="nav"
-        logout-route="/gutachter/logout"
+        logout-route="/inspector/logout"
         :user-name="inspector?.name ?? t('dashboard.inspector.role')"
         :user-role="t('dashboard.inspector.role')"
     >

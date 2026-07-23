@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 function filterBy(slug: string | null) {
-    router.get('/gutachter/anfragen', slug ? { service: slug } : {}, { preserveState: true });
+    router.get('/inspector/requests', slug ? { service: slug } : {}, { preserveState: true });
 }
 </script>
 
@@ -48,7 +48,7 @@ function filterBy(slug: string | null) {
 
     <PageCard :title="t('dashboard.inspectorPages.matchingRequests')">
         <div v-if="requests.data.length" class="divide-y divide-ink-100">
-            <Link v-for="r in requests.data" :key="r.id" :href="`/gutachter/anfragen/${r.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
+            <Link v-for="r in requests.data" :key="r.id" :href="`/inspector/requests/${r.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
                 <div class="min-w-0">
                     <p class="truncate font-semibold text-navy-700">{{ r.vehicle }} · {{ r.service }}</p>
                     <p class="text-sm text-ink-500">{{ r.ort }} · {{ r.number }} · {{ r.date }}</p>

@@ -18,7 +18,7 @@ const service = ref<string>('');
 const location = ref('');
 
 function submit() {
-    router.get('/anfrage', {
+    router.get('/request', {
         service: service.value || undefined,
         plz: location.value || undefined,
     });

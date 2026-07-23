@@ -56,7 +56,7 @@ defineProps<{
             </div>
 
             <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/konto/anfragen" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
+                <Link href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
                     Meine Anfragen ansehen
                 </Link>
                 <Link href="/" class="rounded-pill border border-ink-300 px-7 py-3.5 font-bold text-navy-700 transition hover:border-navy-700">

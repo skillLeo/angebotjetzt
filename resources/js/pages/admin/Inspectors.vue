@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const search = ref(props.filters.suche ?? '');
 function apply() {
-    router.get('/admin/gutachter', { suche: search.value || undefined }, { preserveState: true });
+    router.get('/admin/inspectors', { suche: search.value || undefined }, { preserveState: true });
 }
 
 const columns = [
@@ -37,7 +37,7 @@ const columns = [
                     <Search :size="16" class="absolute top-1/2 left-3 -translate-y-1/2 text-ink-300" aria-hidden="true" />
                     <input v-model="search" type="search" placeholder="Suche…" class="rounded-pill border border-ink-300 py-2 pr-3 pl-9 text-sm" @keyup.enter="apply" />
                 </div>
-                <Link href="/admin/gutachter/import" class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
+                <Link href="/admin/inspectors/import" class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
                     <Upload :size="16" aria-hidden="true" /> CSV-Import
                 </Link>
             </div>
@@ -45,7 +45,7 @@ const columns = [
 
         <AdminTable :columns="columns" :rows="inspectors.data" row-key="id">
             <template #name="{ row }">
-                <Link :href="`/admin/gutachter/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>
+                <Link :href="`/admin/inspectors/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>
                 <p class="text-xs text-ink-500">{{ row.company }}</p>
             </template>
             <template #balance="{ value }">{{ formatEuro(value as number) }}</template>

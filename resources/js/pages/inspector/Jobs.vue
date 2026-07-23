@@ -23,7 +23,7 @@ defineProps<{
 
     <PageCard :title="t('dashboard.inspectorPages.myJobs')">
         <div v-if="jobs.data.length" class="divide-y divide-ink-100">
-            <Link v-for="j in jobs.data" :key="j.id" :href="`/gutachter/auftraege/${j.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
+            <Link v-for="j in jobs.data" :key="j.id" :href="`/inspector/jobs/${j.id}`" class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6">
                 <div class="min-w-0">
                     <p class="truncate font-semibold text-navy-700">{{ j.vehicle }} · {{ j.service }}</p>
                     <p class="text-sm text-ink-500">{{ j.ort }} · {{ j.number }} · {{ j.date }}</p>

@@ -33,7 +33,7 @@ const { t } = useI18n();
         <h2>{{ t('public.legalContent.privacy.h8') }}</h2>
         <p>
             {{ t('public.legalContent.privacy.p8') }}
-            <a href="/cookie-richtlinie">{{ t('public.legalContent.privacy.p8Link') }}</a>{{ t('public.legalContent.privacy.p8End') }}
+            <a href="/cookie-policy">{{ t('public.legalContent.privacy.p8Link') }}</a>{{ t('public.legalContent.privacy.p8End') }}
         </p>
     </LegalPage>
 </template>

@@ -15,10 +15,10 @@ const page = usePage();
 const isLoggedIn = computed(() => Boolean((page.props.auth as { user?: unknown } | undefined)?.user));
 
 const navItems = computed(() => [
-    { label: t('nav.kfzGutachten'), href: '/kfz-gutachten' },
-    { label: t('nav.howItWorks'), href: '/so-funktionierts' },
-    { label: t('nav.forInspectors'), href: '/fuer-gutachter' },
-    { label: t('nav.prices'), href: '/preise' },
+    { label: t('nav.kfzGutachten'), href: '/vehicle-reports' },
+    { label: t('nav.howItWorks'), href: '/how-it-works' },
+    { label: t('nav.forInspectors'), href: '/for-inspectors' },
+    { label: t('nav.prices'), href: '/pricing' },
 ]);
 
 function onScroll() {
@@ -56,13 +56,13 @@ watch(mobileOpen, (open) => {
 
             <div class="hidden items-center gap-4 lg:flex">
                 <Link
-                    :href="isLoggedIn ? '/konto' : '/login'"
+                    :href="isLoggedIn ? '/account' : '/login'"
                     class="text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
                 >
                     {{ isLoggedIn ? t('nav.myAccount') : t('nav.login') }}
                 </Link>
                 <Link
-                    href="/anfrage"
+                    href="/request"
                     class="rounded-pill bg-green-500 px-6 py-2.5 text-[15px] font-bold text-white shadow-card transition hover:bg-green-600"
                 >
                     {{ t('nav.requestNow') }}
@@ -113,7 +113,7 @@ watch(mobileOpen, (open) => {
                         :transition="{ delay: 0.28, duration: 0.4 }"
                     >
                         <Link
-                            :href="isLoggedIn ? '/konto' : '/login'"
+                            :href="isLoggedIn ? '/account' : '/login'"
                             class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
                             @click="mobileOpen = false"
                         >
@@ -123,7 +123,7 @@ watch(mobileOpen, (open) => {
                 </nav>
                 <div class="border-t border-ink-100 p-6">
                     <Link
-                        href="/anfrage"
+                        href="/request"
                         class="block w-full rounded-pill bg-green-500 py-4 text-center text-base font-bold text-white"
                         @click="mobileOpen = false"
                     >

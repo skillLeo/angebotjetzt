@@ -22,14 +22,14 @@ const completing = ref(false);
 
 function complete() {
     completing.value = true;
-    router.post(`/gutachter/auftraege/${props.job.id}/abschliessen`, {}, { onFinish: () => (completing.value = false) });
+    router.post(`/inspector/jobs/${props.job.id}/complete`, {}, { onFinish: () => (completing.value = false) });
 }
 </script>
 
 <template>
     <Head><title>{{ t('dashboard.inspectorPages.bookingTitle') }} {{ job.number }}</title></Head>
 
-    <Link href="/gutachter/auftraege" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/inspector/jobs" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.inspectorPages.backToBookings') }}
     </Link>
 

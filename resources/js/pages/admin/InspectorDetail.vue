@@ -16,14 +16,14 @@ const props = defineProps<{
 }>();
 
 function toggle() {
-    router.post(`/admin/gutachter/${props.inspector.id}/status`, {}, { preserveScroll: true });
+    router.post(`/admin/inspectors/${props.inspector.id}/status`, {}, { preserveScroll: true });
 }
 </script>
 
 <template>
     <Head><title>{{ inspector.name }}</title></Head>
 
-    <Link href="/admin/gutachter" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/admin/inspectors" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 

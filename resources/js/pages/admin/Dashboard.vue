@@ -30,7 +30,7 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
     <Head><title>Dashboard</title></Head>
 
     <div v-if="stats.pendingPayouts > 0 || stats.unmatchedRequests > 0" class="mb-6 grid gap-3 sm:grid-cols-2">
-        <Link v-if="stats.pendingPayouts > 0" href="/admin/auszahlungen" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
+        <Link v-if="stats.pendingPayouts > 0" href="/admin/payouts" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />
             <p class="text-sm font-semibold text-amber-800">{{ stats.pendingPayouts }} offene Auszahlungen ({{ formatEuro(stats.pendingPayoutAmount) }})</p>
         </Link>
@@ -75,7 +75,7 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
     <div class="mt-6">
         <PageCard title="Top-Gutachter">
             <div class="divide-y divide-ink-100">
-                <Link v-for="i in topInspectors" :key="i.id" :href="`/admin/gutachter/${i.id}`" class="flex items-center justify-between px-5 py-3.5 transition hover:bg-sand-50 sm:px-6">
+                <Link v-for="i in topInspectors" :key="i.id" :href="`/admin/inspectors/${i.id}`" class="flex items-center justify-between px-5 py-3.5 transition hover:bg-sand-50 sm:px-6">
                     <div>
                         <p class="font-semibold text-navy-700">{{ i.name }}</p>
                         <p class="text-sm text-ink-500">{{ i.company }} · {{ i.city }}</p>

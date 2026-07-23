@@ -53,7 +53,7 @@ class RequestService
                     'new_request',
                     "Neue Anfrage in {$request->ort}",
                     "{$request->serviceType->name} · {$request->vehicle_make} {$request->vehicle_model}",
-                    "/gutachter/anfragen/{$request->id}"
+                    "/inspector/requests/{$request->id}"
                 );
             }
 

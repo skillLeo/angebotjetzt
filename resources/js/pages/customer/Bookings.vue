@@ -26,7 +26,7 @@ defineProps<{
             <Link
                 v-for="b in bookings.data"
                 :key="b.id"
-                :href="`/konto/auftraege/${b.id}`"
+                :href="`/account/bookings/${b.id}`"
                 class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-sand-50 sm:px-6"
             >
                 <div class="min-w-0">

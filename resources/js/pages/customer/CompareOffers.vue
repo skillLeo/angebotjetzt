@@ -21,7 +21,7 @@ const lowest = props.offers.length ? Math.min(...props.offers.map((o) => o.price
 
 function accept(offerId: number) {
     accepting.value = offerId;
-    router.post(`/konto/angebote/${offerId}/annehmen`, {}, {
+    router.post(`/account/offers/${offerId}/accept`, {}, {
         onFinish: () => (accepting.value = null),
     });
 }
@@ -30,7 +30,7 @@ function accept(offerId: number) {
 <template>
     <Head><title>{{ t('dashboard.customerPages.compareOffers') }}</title></Head>
 
-    <Link :href="`/konto/anfragen/${request.id}`" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link :href="`/account/requests/${request.id}`" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.customerPages.back') }}
     </Link>
 

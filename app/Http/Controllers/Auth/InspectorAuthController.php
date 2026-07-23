@@ -58,7 +58,7 @@ class InspectorAuthController extends Controller
         $request->session()->regenerate();
         ActivityLog::record('inspector.login', $inspector);
 
-        return redirect()->intended('/gutachter');
+        return redirect()->intended('/inspector');
     }
 
     public function logout(Request $request): RedirectResponse

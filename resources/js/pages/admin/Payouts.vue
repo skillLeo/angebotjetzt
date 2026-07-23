@@ -18,7 +18,7 @@ const processing = ref<number | null>(null);
 
 function markPaid(id: number) {
     processing.value = id;
-    router.post(`/admin/auszahlungen/${id}/bezahlt`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
+    router.post(`/admin/payouts/${id}/paid`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
 }
 </script>
 
@@ -30,7 +30,7 @@ function markPaid(id: number) {
             <div v-for="p in payouts.data" :key="p.id" class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <Link :href="`/admin/gutachter/${p.inspectorId}`" class="font-semibold text-navy-700 hover:text-green-600">{{ p.inspector }}</Link>
+                        <Link :href="`/admin/inspectors/${p.inspectorId}`" class="font-semibold text-navy-700 hover:text-green-600">{{ p.inspector }}</Link>
                         <StatusBadge :status="p.status" />
                     </div>
                     <p class="mt-1 text-sm text-ink-500">

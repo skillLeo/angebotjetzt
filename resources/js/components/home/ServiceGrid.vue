@@ -20,7 +20,7 @@ const { t } = useI18n();
             :class="i === 0 ? 'md:col-span-2 lg:col-span-2' : ''"
         >
             <Link
-                :href="`/kfz-gutachten/${type.slug}`"
+                :href="`/vehicle-reports/${type.slug}`"
                 class="group relative flex h-full flex-col overflow-hidden rounded-card border border-ink-100 bg-white transition-shadow hover:shadow-lift"
             >
                 <div class="relative overflow-hidden" :class="i === 0 ? 'aspect-[16/8]' : 'aspect-[16/10]'">

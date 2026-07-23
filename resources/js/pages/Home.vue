@@ -171,7 +171,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
             <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <Reveal v-for="(city, i) in cities" :key="city" :delay="(i % 6) * 0.03">
                     <Link
-                        href="/kfz-gutachten"
+                        href="/vehicle-reports"
                         class="block rounded-pill border border-ink-100 bg-white px-5 py-3 text-center text-sm font-semibold text-navy-700 transition hover:border-green-500 hover:text-green-600"
                     >
                         {{ t('home.citySeo.inspectorPrefix') }} {{ city }}

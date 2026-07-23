@@ -28,7 +28,7 @@ defineProps<{
     </div>
 
     <div class="mt-4 flex justify-end">
-        <Link href="/gutachter/wallet/auszahlung" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
+        <Link href="/inspector/wallet/payout" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
             {{ t('dashboard.inspectorPages.requestPayout') }}
         </Link>
     </div>

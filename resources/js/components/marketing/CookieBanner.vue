@@ -40,7 +40,7 @@ function save(all: boolean) {
             <h2 class="font-display text-lg font-bold text-navy-700">{{ t('cookieBanner.title') }}</h2>
             <p class="mt-2 text-sm leading-relaxed text-ink-500">
                 {{ t('cookieBanner.description') }}
-                <a href="/cookie-richtlinie" class="font-medium text-navy-700 underline">{{ t('cookieBanner.policyLink') }}</a>.
+                <a href="/cookie-policy" class="font-medium text-navy-700 underline">{{ t('cookieBanner.policyLink') }}</a>.
             </p>
 
             <div v-if="showDetails" class="mt-4 space-y-3">

@@ -62,14 +62,14 @@ const serviceName = computed(() => props.serviceTypes.find((t) => t.id === props
             <label class="flex items-start gap-3">
                 <input v-model="form.agb" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-green-500" />
                 <span class="text-sm text-ink-700">
-                    Ich akzeptiere die <Link href="/agb" class="font-semibold text-green-600 underline" target="_blank">AGB</Link>.
+                    Ich akzeptiere die <Link href="/terms" class="font-semibold text-green-600 underline" target="_blank">AGB</Link>.
                 </span>
             </label>
             <p v-if="form.errors.agb" class="text-sm text-red-600">{{ form.errors.agb }}</p>
             <label class="flex items-start gap-3">
                 <input v-model="form.privacy" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-green-500" />
                 <span class="text-sm text-ink-700">
-                    Ich habe die <Link href="/datenschutz" class="font-semibold text-green-600 underline" target="_blank">Datenschutzerklärung</Link> gelesen.
+                    Ich habe die <Link href="/privacy" class="font-semibold text-green-600 underline" target="_blank">Datenschutzerklärung</Link> gelesen.
                 </span>
             </label>
             <p v-if="form.errors.privacy" class="text-sm text-red-600">{{ form.errors.privacy }}</p>

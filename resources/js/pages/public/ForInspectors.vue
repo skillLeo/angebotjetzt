@@ -41,10 +41,10 @@ const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee2262
                     {{ t('public.forInspectors.description', { count: stats.inspectors }) }}
                 </p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <Link href="/registrieren/gutachter" class="rounded-pill bg-green-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
+                    <Link href="/inspector/register" class="rounded-pill bg-green-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
                         {{ t('public.forInspectors.register') }}
                     </Link>
-                    <Link href="/gutachter/login" class="rounded-pill border border-navy-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-navy-800">
+                    <Link href="/inspector/login" class="rounded-pill border border-navy-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-navy-800">
                         {{ t('public.forInspectors.toLogin') }}
                     </Link>
                 </div>

@@ -22,7 +22,7 @@ defineProps<{
 <template>
     <Head><title>{{ t('dashboard.customerPages.requestTitle') }} {{ request.number }}</title></Head>
 
-    <Link href="/konto/anfragen" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/account/requests" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.customerPages.backToRequests') }}
     </Link>
 
@@ -54,7 +54,7 @@ defineProps<{
                         </div>
                         <p class="text-sm text-ink-500">{{ o.inspector.city }}</p>
                     </div>
-                    <Link :href="`/konto/anfragen/${request.id}/angebote`" class="mt-2 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
+                    <Link :href="`/account/requests/${request.id}/offers`" class="mt-2 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
                         {{ t('dashboard.customerPages.compareOffers') }}
                     </Link>
                 </div>

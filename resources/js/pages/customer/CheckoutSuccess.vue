@@ -23,10 +23,10 @@ defineProps<{ sessionId: string | null }>();
             {{ t('dashboard.customerPages.paymentSuccessText') }}
         </p>
         <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/konto/auftraege" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
+            <Link href="/account/bookings" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
                 {{ t('dashboard.customerPages.toMyBookings') }}
             </Link>
-            <Link href="/konto" class="rounded-pill border border-ink-300 px-7 py-3.5 font-bold text-navy-700 transition hover:border-navy-700">
+            <Link href="/account" class="rounded-pill border border-ink-300 px-7 py-3.5 font-bold text-navy-700 transition hover:border-navy-700">
                 {{ t('dashboard.customerPages.toOverview') }}
             </Link>
         </div>

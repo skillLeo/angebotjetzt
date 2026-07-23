@@ -51,7 +51,7 @@ const inspectorPoints = computed(() => [
                         <span class="text-[15px] text-ink-700">{{ p }}</span>
                     </li>
                 </ul>
-                <Link href="/anfrage" class="mt-8 block rounded-pill bg-green-500 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
+                <Link href="/request" class="mt-8 block rounded-pill bg-green-500 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
                     {{ t('public.pricing.customerCta') }}
                 </Link>
             </div>
@@ -66,7 +66,7 @@ const inspectorPoints = computed(() => [
                         <span class="text-[15px] text-navy-100">{{ p }}</span>
                     </li>
                 </ul>
-                <Link href="/fuer-gutachter" class="mt-8 block rounded-pill bg-green-500 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
+                <Link href="/for-inspectors" class="mt-8 block rounded-pill bg-green-500 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
                     {{ t('public.pricing.inspectorCta') }}
                 </Link>
             </div>

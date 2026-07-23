@@ -22,7 +22,7 @@ defineProps<{
 <template>
     <Head><title>{{ t('dashboard.inspectorPages.requestTitle') }} {{ request.number }}</title></Head>
 
-    <Link href="/gutachter/anfragen" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/inspector/requests" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> {{ t('dashboard.inspectorPages.backToRequests') }}
     </Link>
 
@@ -62,7 +62,7 @@ defineProps<{
                     </div>
                     <div v-else>
                         <p class="text-sm text-ink-500">{{ t('dashboard.inspectorPages.noOfferYet') }}</p>
-                        <Link :href="`/gutachter/anfragen/${request.id}/angebot`" class="mt-4 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
+                        <Link :href="`/inspector/requests/${request.id}/offer`" class="mt-4 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
                             {{ t('dashboard.inspectorPages.submitOffer') }}
                         </Link>
                     </div>

@@ -12,19 +12,19 @@ const form = useForm({ file: null as File | null });
 function upload(e: Event) {
     form.file = (e.target as HTMLInputElement).files?.[0] ?? null;
     if (form.file) {
-        form.post('/admin/gutachter/import/vorschau', { forceFormData: true, preserveScroll: true });
+        form.post('/admin/inspectors/import/preview', { forceFormData: true, preserveScroll: true });
     }
 }
 
 function confirmImport() {
-    router.post('/admin/gutachter/import');
+    router.post('/admin/inspectors/import');
 }
 </script>
 
 <template>
     <Head><title>Gutachter importieren</title></Head>
 
-    <Link href="/admin/gutachter" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
+    <Link href="/admin/inspectors" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 

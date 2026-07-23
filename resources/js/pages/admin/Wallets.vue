@@ -32,7 +32,7 @@ const columns = [
     <PageCard title="Alle Wallets">
         <AdminTable :columns="columns" :rows="wallets.data" row-key="inspectorId">
             <template #name="{ row }">
-                <Link :href="`/admin/gutachter/${row.inspectorId}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>
+                <Link :href="`/admin/inspectors/${row.inspectorId}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>
             </template>
             <template #available="{ value }">{{ formatEuro(value as number) }}</template>
             <template #pending="{ value }">{{ formatEuro(value as number) }}</template>

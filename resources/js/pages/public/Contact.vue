@@ -9,7 +9,7 @@ const { t } = useI18n();
 const form = useForm({ name: '', email: '', subject: '', message: '' });
 
 function submit() {
-    form.post('/kontakt', {
+    form.post('/contact', {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();

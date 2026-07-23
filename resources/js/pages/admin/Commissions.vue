@@ -17,7 +17,7 @@ const von = ref(props.filters.von);
 const bis = ref(props.filters.bis);
 
 function apply() {
-    router.get('/admin/provisionen', { von: von.value, bis: bis.value }, { preserveState: true });
+    router.get('/admin/commissions', { von: von.value, bis: bis.value }, { preserveState: true });
 }
 </script>
 
