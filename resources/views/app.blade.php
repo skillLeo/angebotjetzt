@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="de" translate="no" @class(['dark' => ($appearance ?? 'light') == 'dark'])>
+<html lang="de" @class(['dark' => ($appearance ?? 'light') == 'dark'])>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="google" content="notranslate">
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
