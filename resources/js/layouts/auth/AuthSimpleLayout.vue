@@ -93,34 +93,39 @@ const offers = [
             </Motion>
         </div>
 
-        <!-- Right: form panel -->
-        <div class="flex flex-1 flex-col items-center justify-center gap-6 bg-sand-50 p-6 md:p-10">
-            <Motion
-                class="w-full max-w-sm"
-                :initial="{ opacity: 0, y: 12 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :transition="{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }"
-            >
-                <div class="flex flex-col gap-7">
-                    <div class="flex flex-col items-center gap-5 lg:items-start">
-                        <Link href="/" class="inline-flex flex-col items-center gap-2 lg:hidden">
-                            <BrandLogo />
-                        </Link>
-                        <div class="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
-                            <span class="flex h-11 w-11 items-center justify-center rounded-card bg-green-50 text-green-600">
-                                <component :is="icon" :size="21" aria-hidden="true" />
-                            </span>
-                            <div class="space-y-1.5">
+        <!-- Right: form panel — top/middle/bottom rhythm mirrors the brand panel -->
+        <div class="flex flex-1 flex-col bg-sand-50 px-6 py-8 md:px-10 md:py-10">
+            <Link href="/" class="inline-flex w-fit lg:hidden">
+                <BrandLogo />
+            </Link>
+
+            <div class="flex flex-1 flex-col items-center justify-center">
+                <Motion
+                    class="w-full max-w-sm"
+                    :initial="{ opacity: 0, y: 12 }"
+                    :animate="{ opacity: 1, y: 0 }"
+                    :transition="{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }"
+                >
+                    <div class="flex flex-col gap-6">
+                        <div class="text-center lg:text-left">
+                            <div class="flex items-center justify-center gap-3 lg:justify-start">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-green-50 text-green-600">
+                                    <component :is="icon" :size="18" aria-hidden="true" />
+                                </span>
                                 <h1 class="font-display text-2xl font-bold text-navy-700">{{ title }}</h1>
-                                <p class="text-[15px] text-ink-500">{{ description }}</p>
                             </div>
+                            <p class="mt-2 text-[15px] text-ink-500 lg:pl-12">{{ description }}</p>
+                        </div>
+                        <div class="rounded-panel border border-ink-100 bg-white p-7 shadow-lift">
+                            <slot />
                         </div>
                     </div>
-                    <div class="rounded-panel border border-ink-100 bg-white p-7 shadow-lift">
-                        <slot />
-                    </div>
-                </div>
-            </Motion>
+                </Motion>
+            </div>
+
+            <p class="text-center text-xs text-ink-500 lg:text-left">
+                © {{ new Date().getFullYear() }} AngebotJetzt · Alle Rechte vorbehalten
+            </p>
         </div>
     </div>
     <Toaster position="top-center" rich-colors />

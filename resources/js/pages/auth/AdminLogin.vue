@@ -14,14 +14,14 @@ function submit() {
 <template>
     <Head><title>{{ 'Admin-Login' }}</title></Head>
 
-    <SplitAuthShell :quote="'Volle Kontrolle über jede Anfrage, jedes Angebot und jeden Euro – an einem Ort.'">
-        <span class="mb-5 flex h-11 w-11 items-center justify-center rounded-card bg-navy-50 text-navy-700">
-            <LayoutDashboard :size="21" aria-hidden="true" />
-        </span>
-        <h1 class="font-display text-2xl font-bold text-navy-700">{{ 'Admin-Panel' }}</h1>
-        <p class="mt-1.5 text-[15px] text-ink-500">{{ 'Melden Sie sich mit Ihren Administrator-Zugangsdaten an.' }}</p>
-
-        <form class="mt-8 space-y-5" @submit.prevent="submit">
+    <SplitAuthShell
+        :quote="'Volle Kontrolle über jede Anfrage, jedes Angebot und jeden Euro – an einem Ort.'"
+        :title="'Admin-Panel'"
+        :description="'Melden Sie sich mit Ihren Administrator-Zugangsdaten an.'"
+        :icon="LayoutDashboard"
+        icon-class="bg-navy-50 text-navy-700"
+    >
+        <form class="space-y-5" @submit.prevent="submit">
             <FormField v-model="form.email" :label="'E-Mail'" type="email" required :error="form.errors.email" />
             <FormField v-model="form.password" :label="'Passwort'" type="password" required />
             <label class="flex items-center gap-2 text-sm text-ink-700">

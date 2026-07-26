@@ -9,6 +9,28 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
+// Browser translation tools (Google Translate etc.) re-parent text nodes into
+// <font> wrappers Vue doesn't know about. Vue's patch then throws on
+// removeChild/insertBefore and the page silently stops updating — e.g. a form
+// submit succeeds server-side but the UI never leaves the page. Tolerating the
+// two calls that throw keeps the app functional while translated.
+if (typeof Node === 'function' && Node.prototype) {
+    const originalRemoveChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function <T extends Node>(this: Node, child: T): T {
+        if (child.parentNode !== this) {
+            return child;
+        }
+        return originalRemoveChild.call(this, child) as T;
+    };
+    const originalInsertBefore = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function <T extends Node>(this: Node, newNode: T, referenceNode: Node | null): T {
+        if (referenceNode && referenceNode.parentNode !== this) {
+            return originalInsertBefore.call(this, newNode, null) as T;
+        }
+        return originalInsertBefore.call(this, newNode, referenceNode) as T;
+    };
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'AngebotJetzt';
 
 createInertiaApp({

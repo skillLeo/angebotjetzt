@@ -21,14 +21,11 @@ function submit() {
     <SplitAuthShell
         :quote="'Endlich passende Aufträge ohne Kaltakquise – ich bestimme meine Preise selbst.'"
         quote-author="Sabine Krüger, Kfz-Sachverständige"
+        :title="'Als Gutachter registrieren'"
+        :description="'Erhalten Sie passende Anfragen aus Ihrer Region automatisch.'"
+        :icon="UserPlus"
     >
-        <span class="mb-5 flex h-11 w-11 items-center justify-center rounded-card bg-green-50 text-green-600">
-            <UserPlus :size="21" aria-hidden="true" />
-        </span>
-        <h1 class="font-display text-2xl font-bold text-navy-700">{{ 'Als Gutachter registrieren' }}</h1>
-        <p class="mt-1.5 text-[15px] text-ink-500">{{ 'Erhalten Sie passende Anfragen aus Ihrer Region automatisch.' }}</p>
-
-        <form class="mt-8 space-y-4" @submit.prevent="submit">
+        <form class="space-y-4" @submit.prevent="submit">
             <FormField v-model="form.company_name" :label="'Firma (optional)'" :error="form.errors.company_name" />
             <div class="grid gap-4 sm:grid-cols-2">
                 <FormField v-model="form.name" :label="'Name'" required :error="form.errors.name" />
