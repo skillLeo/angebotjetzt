@@ -16,6 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{ next: []; back: [] }>();
 
 const errors = ref<Record<string, string>>({});
+const today = new Date().toISOString().slice(0, 10);
 
 function proceed() {
     errors.value = {};
@@ -36,8 +37,8 @@ function proceed() {
             <div class="sm:col-span-2">
                 <FormField v-model="form.strasse" label="Straße & Hausnummer" placeholder="optional" />
             </div>
-            <FormField v-model="form.preferred_date" label="Wunschtermin" type="date" />
-            <FormField v-model="form.alternative_date" label="Alternativtermin" type="date" />
+            <FormField v-model="form.preferred_date" label="Wunschtermin" type="date" :min="today" />
+            <FormField v-model="form.alternative_date" label="Alternativtermin" type="date" :min="today" />
         </div>
 
         <div class="mt-5">

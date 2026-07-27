@@ -40,12 +40,14 @@ Route::post('/coming-soon/{category:slug}/interest', [PublicController::class, '
 
 /*
 |--------------------------------------------------------------------------
-| Request wizard (guests allowed)
+| Request wizard (customer must be authenticated)
 |--------------------------------------------------------------------------
 */
-Route::get('/request', [RequestWizardController::class, 'show'])->name('wizard');
-Route::post('/request', [RequestWizardController::class, 'store'])->middleware('throttle:10,10')->name('wizard.store');
-Route::get('/request/confirmation/{serviceRequest:request_number}', [RequestWizardController::class, 'confirmation'])->name('wizard.confirmation');
+Route::middleware('auth')->group(function () {
+    Route::get('/request', [RequestWizardController::class, 'show'])->name('wizard');
+    Route::post('/request', [RequestWizardController::class, 'store'])->middleware('throttle:10,10')->name('wizard.store');
+    Route::get('/request/confirmation/{serviceRequest:request_number}', [RequestWizardController::class, 'confirmation'])->name('wizard.confirmation');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -83,8 +85,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('inspector')->name('gutachter.')->group(function () {
-    Route::get('/login', [InspectorAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [InspectorAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.store');
+    // The standalone inspector login page is retired — /login now authenticates
+    // both customers and inspectors. The route name stays alive as a redirect
+    // so existing route('gutachter.login') references (e.g. invitation emails)
+    // keep working and land on the correct unified page.
+    Route::get('/login', fn () => redirect()->route('login'))->name('login');
     Route::post('/logout', [InspectorAuthController::class, 'logout'])->name('logout');
 });
 
@@ -145,6 +150,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/payouts', [AdminController::class, 'payouts'])->name('payouts');
     Route::post('/payouts/{payout}/paid', [AdminController::class, 'markPayoutPaid'])->name('payouts.paid');
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
+    Route::get('/customers/{customer}', [AdminController::class, 'customerDetail'])->name('customers.show');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
     Route::post('/categories/{category}/status', [AdminController::class, 'toggleCategory'])->name('categories.toggle');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');

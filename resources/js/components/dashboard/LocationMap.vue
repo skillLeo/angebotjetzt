@@ -22,8 +22,32 @@ onMounted(async () => {
     await import('leaflet/dist/leaflet.css');
     if (!mapEl.value) return;
 
-    const coords = zones[props.plz.charAt(0)] ?? [51.16, 10.45];
-    map = L.map(mapEl.value, { center: coords, zoom: 10, scrollWheelZoom: false });
+    // Fall back to the coarse zone estimate if geocoding is unavailable or
+    // finds nothing — real postal-code + city geocoding via Nominatim gives
+    // the actual location instead of one of only ten fixed regional points.
+    let coords = zones[props.plz.charAt(0)] ?? [51.16, 10.45];
+    let zoom = 10;
+
+    try {
+        const query = encodeURIComponent(`${props.plz} ${props.ort}, Deutschland`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&q=${query}`, {
+            headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+            const results = await res.json();
+            const lat = parseFloat(results?.[0]?.lat);
+            const lon = parseFloat(results?.[0]?.lon);
+            if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+                coords = [lat, lon];
+                zoom = 13;
+            }
+        }
+    } catch {
+        // Network/geocoding failure — keep the coarse zone fallback above.
+    }
+
+    if (!mapEl.value) return;
+    map = L.map(mapEl.value, { center: coords, zoom, scrollWheelZoom: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
     const icon = L.divIcon({

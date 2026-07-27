@@ -5,7 +5,7 @@ import Pagination from '@/components/dashboard/Pagination.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { Banknote, Percent } from 'lucide-vue-next';
 
 defineProps<{
@@ -28,12 +28,15 @@ const columns = [
     <Head><title>Zahlungen</title></Head>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-2">
-        <StatCard label="Umsatz gesamt" :value="formatEuro(totals.revenue)" :icon="Banknote" accent />
-        <StatCard label="Provision gesamt" :value="formatEuro(totals.commission)" :icon="Percent" accent />
+        <StatCard label="Umsatz gesamt" :value="formatEuro(totals.revenue)" :icon="Banknote" accent hint="Summe aller erfolgreich bezahlten Zahlungen" />
+        <StatCard label="Provision gesamt" :value="formatEuro(totals.commission)" :icon="Percent" accent hint="Ihr Anteil davon" />
     </div>
 
-    <PageCard title="Alle Zahlungen">
+    <PageCard title="Alle Zahlungen" subtitle="Jede über Stripe abgewickelte Kundenzahlung für einen Auftrag">
         <AdminTable :columns="columns" :rows="payments.data" row-key="id">
+            <template #booking="{ row }">
+                <Link :href="`/admin/bookings/${row.bookingId}`" class="font-semibold text-green-600 hover:underline">{{ row.booking }}</Link>
+            </template>
             <template #total="{ value }">{{ formatEuro(value as number) }}</template>
             <template #commission="{ value }">{{ formatEuro(value as number) }}</template>
             <template #status="{ value }"><StatusBadge :status="value as string" /></template>

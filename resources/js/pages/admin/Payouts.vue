@@ -25,7 +25,7 @@ function markPaid(id: number) {
 <template>
     <Head><title>Auszahlungen</title></Head>
 
-    <PageCard title="Auszahlungs-Warteschlange">
+    <PageCard title="Auszahlungs-Warteschlange" subtitle="Überweisen Sie den Betrag manuell per Banküberweisung an die angegebene IBAN, dann bestätigen Sie es hier — 'Als ausgezahlt markieren' löst selbst keine Zahlung aus, sondern bucht nur das Guthaben aus.">
         <div v-if="payouts.data.length" class="divide-y divide-ink-100">
             <div v-for="p in payouts.data" :key="p.id" class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div class="min-w-0">

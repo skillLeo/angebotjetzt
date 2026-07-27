@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form, Head, setLayoutProps } from '@inertiajs/vue3';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/vue3';
 import { LogIn } from 'lucide-vue-next';
 import { watchEffect } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -105,6 +105,13 @@ defineProps<{
         <div class="text-center text-sm text-muted-foreground">
             {{ 'Noch kein Konto?' }}
             <TextLink :href="register()" :tabindex="5">{{ 'Jetzt registrieren' }}</TextLink>
+        </div>
+
+        <div class="border-t border-ink-100 pt-6 text-center text-sm text-muted-foreground">
+            <p class="mb-3">{{ 'Sind Sie Gutachter und noch nicht registriert?' }}</p>
+            <Button variant="outline" as-child class="w-full sm:w-auto">
+                <Link href="/inspector/register">{{ 'Als Gutachter registrieren' }}</Link>
+            </Button>
         </div>
     </Form>
 </template>

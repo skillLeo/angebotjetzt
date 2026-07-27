@@ -39,7 +39,7 @@ createInertiaApp({
         switch (true) {
             case name === 'Home' || name.startsWith('public/') || name.startsWith('wizard/'):
                 return PublicLayout;
-            case name === 'auth/InspectorLogin' || name === 'auth/AdminLogin' || name === 'auth/InspectorRegister':
+            case name === 'auth/AdminLogin' || name === 'auth/InspectorRegister':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

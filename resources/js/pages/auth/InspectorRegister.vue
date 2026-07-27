@@ -51,7 +51,7 @@ function submit() {
                 {{ 'Konto erstellen' }}
             </button>
             <p class="text-center text-sm text-ink-500">
-                {{ 'Bereits registriert?' }} <Link href="/inspector/login" class="font-semibold text-green-600">{{ 'Zum Login' }}</Link>
+                {{ 'Bereits registriert?' }} <Link href="/login" class="font-semibold text-green-600">{{ 'Zum Login' }}</Link>
             </p>
         </form>
     </SplitAuthShell>

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import PageCard from '@/components/dashboard/PageCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
-import StarRating from '@/components/marketing/StarRating.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Mail, Phone } from 'lucide-vue-next';
+import { ArrowLeft, Mail, Phone, Star } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -72,7 +71,7 @@ function submitReview() {
                     <div v-else>
                         <div class="flex items-center gap-2">
                             <button v-for="i in 5" :key="i" type="button" @click="rating = i" :aria-label="`${i} Sterne`">
-                                <StarRating :rating="i <= rating ? 5 : 0" :size="26" class="pointer-events-none" />
+                                <Star :size="26" class="pointer-events-none" :class="i <= rating ? 'fill-amber-400 text-amber-400' : 'fill-ink-100 text-ink-100'" />
                             </button>
                         </div>
                         <textarea v-model="reviewForm.comment" rows="4" :placeholder="'Wie war Ihre Erfahrung? (optional)'" class="mt-4 w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />

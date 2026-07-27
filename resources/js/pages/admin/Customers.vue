@@ -2,7 +2,7 @@
 import AdminTable from '@/components/dashboard/AdminTable.vue';
 import PageCard from '@/components/dashboard/PageCard.vue';
 import Pagination from '@/components/dashboard/Pagination.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { Search } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -28,7 +28,7 @@ const columns = [
 <template>
     <Head><title>Kunden</title></Head>
 
-    <PageCard title="Kundenverwaltung">
+    <PageCard title="Kundenverwaltung" subtitle="Alle registrierten Kunden — auf einen Namen klicken, um dessen Anfragen und Aufträge zu sehen">
         <template #actions>
             <div class="relative">
                 <Search :size="16" class="absolute top-1/2 left-3 -translate-y-1/2 text-ink-300" aria-hidden="true" />
@@ -42,7 +42,7 @@ const columns = [
                         {{ String(row.name).charAt(0) }}
                     </span>
                     <div class="min-w-0">
-                        <p class="font-semibold text-navy-700">{{ row.name }}</p>
+                        <Link :href="`/admin/customers/${row.id}`" class="font-semibold text-navy-700 hover:text-green-600 hover:underline">{{ row.name }}</Link>
                         <p class="truncate text-xs text-ink-500">{{ row.email }}</p>
                     </div>
                 </div>

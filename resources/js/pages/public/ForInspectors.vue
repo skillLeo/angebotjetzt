@@ -42,7 +42,7 @@ const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee2262
                     <Link href="/inspector/register" class="rounded-pill bg-green-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
                         {{ 'Als Gutachter registrieren' }}
                     </Link>
-                    <Link href="/inspector/login" class="rounded-pill border border-navy-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-navy-800">
+                    <Link href="/login" class="rounded-pill border border-navy-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-navy-800">
                         {{ 'Zum Login' }}
                     </Link>
                 </div>

@@ -29,10 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.login');
             }
-            if ($request->is('inspector') || $request->is('inspector/*')) {
-                return route('gutachter.login');
-            }
 
+            // Inspector routes also redirect to the single unified /login —
+            // it authenticates both customer and inspector credentials.
             return route('login');
         });
     })

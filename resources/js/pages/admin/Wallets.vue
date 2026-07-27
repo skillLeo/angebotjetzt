@@ -25,11 +25,11 @@ const columns = [
     <Head><title>Wallets</title></Head>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-2">
-        <StatCard label="Verfügbares Guthaben (gesamt)" :value="formatEuro(totals.available)" :icon="Wallet" accent />
-        <StatCard label="Ausstehendes Guthaben (gesamt)" :value="formatEuro(totals.pending)" :icon="Wallet" />
+        <StatCard label="Verfügbares Guthaben (gesamt)" :value="formatEuro(totals.available)" :icon="Wallet" accent hint="Bereit zur Auszahlung an Gutachter" />
+        <StatCard label="Ausstehendes Guthaben (gesamt)" :value="formatEuro(totals.pending)" :icon="Wallet" hint="Wird erst nach Auftragsbestätigung freigegeben" />
     </div>
 
-    <PageCard title="Alle Wallets">
+    <PageCard title="Alle Wallets" subtitle="Guthabenstand jedes Gutachters: Verfügbar kann ausgezahlt werden, Ausstehend wartet noch auf Ihre Bestätigung des Auftrags">
         <AdminTable :columns="columns" :rows="wallets.data" row-key="inspectorId">
             <template #name="{ row }">
                 <Link :href="`/admin/inspectors/${row.inspectorId}`" class="font-semibold text-green-600 hover:underline">{{ row.name }}</Link>

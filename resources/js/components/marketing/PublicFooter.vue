@@ -31,7 +31,7 @@ const columns = computed(() => [
         title: 'Für Gutachter',
         links: [
             { label: 'Gutachter werden', href: '/for-inspectors' },
-            { label: 'Gutachter-Login', href: '/inspector/login' },
+            { label: 'Gutachter-Login', href: '/login' },
             { label: 'Häufige Fragen', href: '/faq' },
         ],
     },

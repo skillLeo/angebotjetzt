@@ -11,6 +11,7 @@ const props = defineProps<{
     stats: { requests: number; requestsNew: number; offers: number; bookings: number; revenue: number; commission: number; pendingPayouts: number; pendingPayoutAmount: number; unmatchedRequests: number; inspectors: number };
     funnel: { requests: number; withOffers: number; booked: number; completed: number };
     revenueByWeek: Record<string, { total: number; commission: number }>;
+    commissionPercent: number;
     topInspectors: Array<{ id: number; name: string; company: string | null; city: string | null; jobs: number }>;
 }>();
 
@@ -34,29 +35,29 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />
             <p class="text-sm font-semibold text-amber-800">{{ stats.pendingPayouts }} offene Auszahlungen ({{ formatEuro(stats.pendingPayoutAmount) }})</p>
         </Link>
-        <Link v-if="stats.unmatchedRequests > 0" href="/admin/anfragen?status=unmatched" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
+        <Link v-if="stats.unmatchedRequests > 0" href="/admin/requests?status=unmatched" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />
             <p class="text-sm font-semibold text-amber-800">{{ stats.unmatchedRequests }} Anfragen ohne passenden Gutachter</p>
         </Link>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Umsatz gesamt" :value="formatEuro(stats.revenue)" :icon="Banknote" accent />
-        <StatCard label="Provision gesamt" :value="formatEuro(stats.commission)" :icon="Percent" accent />
+        <StatCard label="Umsatz gesamt" :value="formatEuro(stats.revenue)" :icon="Banknote" accent hint="Bruttosumme aller bezahlten Aufträge" />
+        <StatCard label="Provision gesamt" :value="formatEuro(stats.commission)" :icon="Percent" accent :hint="`Plattform-Anteil (${commissionPercent}%) vom Umsatz`" />
         <StatCard label="Anfragen" :value="stats.requests" :icon="FileText" :hint="`${stats.requestsNew} in 30 Tagen`" />
-        <StatCard label="Aufträge" :value="stats.bookings" :icon="Package" />
+        <StatCard label="Aufträge" :value="stats.bookings" :icon="Package" hint="Bezahlte, bestätigte Buchungen" />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
-            <PageCard title="Provision je Woche (letzte 12 Wochen)">
+            <PageCard title="Provision je Woche (letzte 12 Wochen)" subtitle="Ihre Einnahmen aus der Vermittlungsprovision, gruppiert nach Kalenderwoche">
                 <div class="p-6 sm:p-8">
                     <BarChart :data="chartData" />
                 </div>
             </PageCard>
         </div>
         <div>
-            <PageCard title="Conversion-Funnel">
+            <PageCard title="Conversion-Funnel" subtitle="Wie viele Anfragen am Ende zu einem bezahlten Auftrag führen">
                 <div class="space-y-4 p-6 sm:p-8">
                     <div v-for="step in funnelSteps" :key="step.label">
                         <div class="mb-1 flex justify-between text-sm">
@@ -73,7 +74,7 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
     </div>
 
     <div class="mt-6">
-        <PageCard title="Top-Gutachter">
+        <PageCard title="Top-Gutachter" subtitle="Die 5 Gutachter mit den meisten abgeschlossenen Aufträgen">
             <div class="divide-y divide-ink-100">
                 <Link v-for="i in topInspectors" :key="i.id" :href="`/admin/inspectors/${i.id}`" class="flex items-center justify-between px-5 py-3.5 transition hover:bg-sand-50 sm:px-6">
                     <div>

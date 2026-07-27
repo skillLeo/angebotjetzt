@@ -60,6 +60,7 @@ class AdminController extends Controller
                 'completed' => Booking::whereIn('status', ['confirmed'])->count(),
             ],
             'revenueByWeek' => $revenueByWeek,
+            'commissionPercent' => Setting::commissionPercent(),
             'topInspectors' => Inspector::withCount('bookings')
                 ->orderByDesc('bookings_count')
                 ->take(5)
@@ -250,6 +251,7 @@ class AdminController extends Controller
                 ->latest()->paginate(20)
                 ->through(fn ($p) => [
                     'id' => $p->id,
+                    'bookingId' => $p->booking->id,
                     'booking' => $p->booking->booking_number,
                     'customer' => $p->booking->user->name,
                     'inspector' => $p->booking->inspector->name,
@@ -545,6 +547,40 @@ class AdminController extends Controller
                     'since' => $u->created_at->format('d.m.Y'),
                 ]),
             'filters' => $request->only(['suche']),
+        ]);
+    }
+
+    public function customerDetail(\App\Models\User $customer): Response
+    {
+        $customer->loadCount(['requests', 'bookings']);
+
+        return Inertia::render('admin/CustomerDetail', [
+            'customer' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
+                'since' => $customer->created_at->format('d.m.Y'),
+                'requestsCount' => $customer->requests_count,
+                'bookingsCount' => $customer->bookings_count,
+                'requests' => $customer->requests()->with('serviceType:id,name')->latest()->take(20)->get()
+                    ->map(fn ($r) => [
+                        'id' => $r->id,
+                        'number' => $r->request_number,
+                        'service' => $r->serviceType->name,
+                        'vehicle' => $r->vehicle_make.' '.$r->vehicle_model,
+                        'status' => $r->status,
+                        'date' => $r->created_at->format('d.m.Y'),
+                    ]),
+                'bookings' => $customer->bookings()->with('inspector:id,name')->latest()->take(20)->get()
+                    ->map(fn ($b) => [
+                        'id' => $b->id,
+                        'number' => $b->booking_number,
+                        'inspector' => $b->inspector->name,
+                        'status' => $b->status,
+                        'date' => $b->created_at->format('d.m.Y'),
+                    ]),
+            ],
         ]);
     }
 
