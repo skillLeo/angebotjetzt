@@ -8,22 +8,22 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        <meta name="description" content="AngebotJetzt: Geprüfte Kfz-Gutachter aus Ihrer Region senden Ihnen individuelle Angebote. Vergleichen und online beauftragen – kostenlos und unverbindlich.">
+        <meta name="description" content="AngebotJetzt: Geprüfte Anbieter aus Ihrer Region senden Ihnen individuelle Angebote. Vergleichen und online beauftragen – kostenlos und unverbindlich.">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="AngebotJetzt">
-        <meta property="og:title" content="AngebotJetzt – Kfz-Gutachten vergleichen und beauftragen">
-        <meta property="og:description" content="Geprüfte Kfz-Gutachter aus Ihrer Region. Angebote vergleichen und online beauftragen.">
+        <meta property="og:title" content="AngebotJetzt – Angebote vergleichen und Anbieter beauftragen">
+        <meta property="og:description" content="Geprüfte Anbieter aus Ihrer Region. Angebote vergleichen und online beauftragen.">
         <meta property="og:locale" content="de_DE">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="AngebotJetzt – Kfz-Gutachten vergleichen">
-        <meta name="twitter:description" content="Geprüfte Kfz-Gutachter aus Ihrer Region. Angebote vergleichen und online beauftragen.">
+        <meta name="twitter:title" content="AngebotJetzt – Angebote vergleichen">
+        <meta name="twitter:description" content="Geprüfte Anbieter aus Ihrer Region. Angebote vergleichen und online beauftragen.">
 
         @php
             $jsonLd = [
                 '@context' => 'https://schema.org',
                 '@type' => 'LocalBusiness',
                 'name' => 'AngebotJetzt',
-                'description' => 'Marktplatz für Kfz-Gutachten: geprüfte Sachverständige aus ganz Deutschland.',
+                'description' => 'Marktplatz für Dienstleistungen: geprüfte Anbieter aus ganz Deutschland.',
                 'url' => rtrim(config('app.url'), '/'),
                 'areaServed' => 'DE',
                 'priceRange' => '€€',
