@@ -22,7 +22,7 @@ const activity = computed(() => [
 <template>
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Bundesweit'" :line1="'Geprüfte Gutachter'" :line2="'in ganz Deutschland'" />
+            <SectionHeading :eyebrow="'Bundesweit'" :line1="'Geprüfte Anbieter'" :line2="'in ganz Deutschland'" />
 
             <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
                 <GermanyMap :city-counts="cityCounts" />

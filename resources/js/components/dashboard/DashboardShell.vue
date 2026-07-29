@@ -26,6 +26,10 @@ const notifications = computed(() => (page.props.notifications as { count: numbe
 function logout() {
     router.post(props.logoutRoute);
 }
+
+function markAllRead() {
+    router.post('/notifications/read-all', {}, { preserveScroll: true, preserveState: true });
+}
 </script>
 
 <template>
@@ -148,8 +152,16 @@ function logout() {
                                 v-if="notifOpen"
                                 class="absolute right-0 mt-2 w-80 origin-top-right overflow-hidden rounded-card border border-ink-100 bg-white shadow-lift"
                             >
-                                <div class="border-b border-ink-100 px-4 py-3">
+                                <div class="flex items-center justify-between border-b border-ink-100 px-4 py-3">
                                     <p class="font-display text-sm font-bold text-navy-700">{{ 'Benachrichtigungen' }}</p>
+                                    <button
+                                        v-if="notifications.count > 0"
+                                        type="button"
+                                        class="text-xs font-semibold text-green-600 transition hover:text-green-700"
+                                        @click="markAllRead"
+                                    >
+                                        {{ 'Alle als gelesen markieren' }}
+                                    </button>
                                 </div>
                                 <div v-if="notifications.items.length" class="max-h-96 overflow-y-auto">
                                     <Link

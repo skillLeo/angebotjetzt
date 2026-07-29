@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\InspectorAuthController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Customer\CustomerAreaController;
 use App\Http\Controllers\Inspector\InspectorAreaController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\RequestWizardController;
 use App\Http\Controllers\SeoController;
@@ -73,6 +74,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/stripe/webhook', [CheckoutController::class, 'webhook'])->name('stripe.webhook');
+
+Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])
+    ->middleware('auth:web,inspector')
+    ->name('notifications.read-all');
 
 // Starter-kit dashboard route kept as a redirect
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -146,6 +151,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/inspectors/import', [AdminController::class, 'importStore'])->name('inspectors.import.store');
     Route::get('/inspectors/{inspector}', [AdminController::class, 'inspectorDetail'])->name('inspectors.show');
     Route::post('/inspectors/{inspector}/status', [AdminController::class, 'toggleInspector'])->name('inspectors.toggle');
+    Route::post('/inspectors/{inspector}/approve', [AdminController::class, 'approveInspector'])->name('inspectors.approve');
+    Route::post('/inspectors/{inspector}/verified', [AdminController::class, 'toggleVerified'])->name('inspectors.verified.toggle');
     Route::get('/wallets', [AdminController::class, 'wallets'])->name('wallets');
     Route::get('/payouts', [AdminController::class, 'payouts'])->name('payouts');
     Route::post('/payouts/{payout}/paid', [AdminController::class, 'markPayoutPaid'])->name('payouts.paid');

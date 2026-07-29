@@ -4,11 +4,15 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronRight, Inbox, Package, Tag, Wallet } from 'lucide-vue-next';
+import { ChevronRight, Clock, Inbox, Package, Star, Tag, Wallet } from 'lucide-vue-next';
 
 
 defineProps<{
-    stats: { openRequests: number; offers: number; wonJobs: number; walletAvailable: number; walletPending: number; responseRate: number | null };
+    pendingApproval?: boolean;
+    stats: {
+        openRequests: number; offers: number; wonJobs: number; walletAvailable: number; walletPending: number; responseRate: number | null;
+        rating: number | null; reviewsCount: number;
+    } | null;
     newRequests: Array<{ id: number; number: string; service: string; vehicle: string; ort: string; date: string }>;
 }>();
 </script>
@@ -16,14 +20,34 @@ defineProps<{
 <template>
     <Head><title>{{ 'Dashboard' }}</title></Head>
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <PageCard v-if="pendingApproval">
+        <div class="flex flex-col items-center gap-4 px-6 py-16 text-center sm:px-8">
+            <span class="flex h-14 w-14 items-center justify-center rounded-pill bg-amber-100 text-amber-700">
+                <Clock :size="26" aria-hidden="true" />
+            </span>
+            <div>
+                <h2 class="font-display text-xl font-bold text-navy-700">{{ 'Ihr Konto wird geprüft' }}</h2>
+                <p class="mt-2 max-w-md text-ink-500">
+                    {{ 'Vielen Dank für Ihre Registrierung. Unser Team prüft Ihr Gutachter-Konto derzeit. Sobald es freigeschaltet ist, erhalten Sie passende Anfragen aus Ihrem Servicegebiet und können Angebote abgeben.' }}
+                </p>
+            </div>
+        </div>
+    </PageCard>
+
+    <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard :label="'Offene Anfragen'" :value="stats.openRequests" :icon="Inbox" accent />
         <StatCard :label="'Abgegebene Angebote'" :value="stats.offers" :icon="Tag" />
         <StatCard :label="'Gewonnene Aufträge'" :value="stats.wonJobs" :icon="Package" />
         <StatCard :label="'Verfügbares Guthaben'" :value="formatEuro(stats.walletAvailable)" :icon="Wallet" :hint="`${formatEuro(stats.walletPending)} ${'ausstehend'}`" />
+        <StatCard
+            :label="'Bewertung'"
+            :value="stats.rating ? stats.rating.toFixed(1).replace('.', ',') : '–'"
+            :icon="Star"
+            :hint="stats.reviewsCount ? `${stats.reviewsCount} ${'Bewertungen'}` : 'Noch keine Bewertungen'"
+        />
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-3">
+    <div v-if="!pendingApproval" class="mt-6 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <PageCard :title="'Neue passende Anfragen'">
                 <template #actions>

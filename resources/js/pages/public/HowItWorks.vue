@@ -8,7 +8,7 @@ import { computed } from 'vue';
 
 const faq = computed(() => [
     { q: 'Ist die Anfrage wirklich kostenlos?', a: 'Ja. Anfrage und Angebotsvergleich sind für Kunden vollständig kostenlos und unverbindlich.' },
-    { q: 'Wie viele Angebote erhalte ich?', a: 'Das hängt von den verfügbaren Gutachtern in Ihrer Region ab – in der Regel erhalten Sie mehrere Angebote zum Vergleich.' },
+    { q: 'Wie viele Angebote erhalte ich?', a: 'Das hängt von den verfügbaren Anbietern in Ihrer Region ab – in der Regel erhalten Sie mehrere Angebote zum Vergleich.' },
     { q: 'Wann bezahle ich?', a: 'Erst wenn Sie ein Angebot annehmen. Die Zahlung erfolgt sicher online im selben Schritt.' },
 ]);
 </script>
@@ -16,13 +16,13 @@ const faq = computed(() => [
 <template>
     <Head>
         <title>{{ 'So funktioniert\'s' }}</title>
-        <meta name="description" :content="'In drei einfachen Schritten zum passenden Kfz-Gutachten: Anfrage stellen, Angebote vergleichen, Gutachter beauftragen.'" />
+        <meta name="description" :content="'In drei einfachen Schritten zum passenden Angebot: Anfrage stellen, Angebote vergleichen, Anbieter beauftragen.'" />
     </Head>
 
     <section class="bg-sand-100 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div class="mx-auto max-w-7xl">
             <p class="text-eyebrow mb-4 text-green-600">{{ 'In drei Schritten' }}</p>
-            <h1 class="text-hero max-w-3xl text-navy-700">{{ 'So einfach kommen Sie zu Ihrem Gutachten' }}</h1>
+            <h1 class="text-hero max-w-3xl text-navy-700">{{ 'So einfach finden Sie den passenden Anbieter' }}</h1>
             <p class="text-lead mt-6 max-w-2xl text-ink-700">
                 {{ 'Kein Suchen, kein Telefonieren, kein Papierkram. Beschreiben Sie Ihr Anliegen einmal – den Rest übernimmt AngebotJetzt.' }}
             </p>

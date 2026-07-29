@@ -10,10 +10,9 @@ import ServiceGrid from '@/components/home/ServiceGrid.vue';
 import StatsBand from '@/components/home/StatsBand.vue';
 import TestimonialBand from '@/components/home/TestimonialBand.vue';
 import FaqAccordion from '@/components/marketing/FaqAccordion.vue';
-import Reveal from '@/components/marketing/Reveal.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import StarRating from '@/components/marketing/StarRating.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { BadgeCheck, CircleDollarSign } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -34,22 +33,20 @@ const testimonialPerson = 'https://images.unsplash.com/photo-1554151228-14d9def6
 const recruitmentImage = 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=900&auto=format&fit=crop';
 
 const faqItems = computed(() => [
-    { q: 'Was kostet mich eine Anfrage?', a: 'Ihre Anfrage und der Angebotsvergleich sind für Sie als Kunde vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des Gutachters, den Sie beauftragen.' },
-    { q: 'Wie schnell erhalte ich Angebote?', a: 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein. Da wir alle passenden Gutachter aus Ihrer Region automatisch benachrichtigen, erhalten Sie meist mehrere Angebote zum Vergleich.' },
-    { q: 'Sind die Gutachter geprüft?', a: 'Ja. Alle Gutachter auf AngebotJetzt sind geprüfte, oft öffentlich bestellte und vereidigte Kfz-Sachverständige. Viele stammen aus unserem etablierten Netzwerk und sind seit Jahren aktiv.' },
+    { q: 'Was kostet mich eine Anfrage?', a: 'Ihre Anfrage und der Angebotsvergleich sind für Sie als Kunde vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des Anbieters, den Sie beauftragen.' },
+    { q: 'Wie schnell erhalte ich Angebote?', a: 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein. Da wir alle passenden Anbieter aus Ihrer Region automatisch benachrichtigen, erhalten Sie meist mehrere Angebote zum Vergleich.' },
+    { q: 'Sind die Anbieter geprüft?', a: 'Ja. Alle Anbieter auf AngebotJetzt durchlaufen eine Prüfung, bevor sie Anfragen erhalten. Viele stammen aus unserem etablierten Netzwerk und sind seit Jahren aktiv.' },
     { q: 'Wie funktioniert die Bezahlung?', a: 'Sie bezahlen sicher online im Moment der Beauftragung – direkt über unsere verschlüsselte Zahlungsabwicklung. Kein Papierkram, keine Vorkasse per Überweisung.' },
-    { q: 'Kann ich zwischen mehreren Angeboten wählen?', a: 'Selbstverständlich. Sie sehen alle eingegangenen Angebote übersichtlich nebeneinander – mit Preis, Gutachterprofil und Bewertung – und entscheiden in Ruhe, wen Sie beauftragen.' },
-    { q: 'Für welche Fahrzeuge gibt es Gutachten?', a: 'Von PKW über Motorräder und Nutzfahrzeuge bis hin zu Oldtimern und Elektrofahrzeugen. Wählen Sie einfach die passende Gutachten-Art und beschreiben Sie Ihr Fahrzeug.' },
+    { q: 'Kann ich zwischen mehreren Angeboten wählen?', a: 'Selbstverständlich. Sie sehen alle eingegangenen Angebote übersichtlich nebeneinander – mit Preis, Anbieterprofil und Bewertung – und entscheiden in Ruhe, wen Sie beauftragen.' },
 ]);
 
-const cities = ['Berlin', 'Hamburg', 'München', 'Köln', 'Frankfurt am Main', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden', 'Hannover', 'Nürnberg', 'Duisburg', 'Bochum', 'Wuppertal', 'Bonn', 'Münster', 'Mannheim', 'Karlsruhe', 'Augsburg'];
-const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'WirtschaftsWoche', 'kfz-betrieb'];
+const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoche', 'Capital'];
 </script>
 
 <template>
     <Head>
-        <title>{{ 'Kfz-Gutachten vergleichen und Gutachter beauftragen' }}</title>
-        <meta name="description" :content="'AngebotJetzt: Geprüfte Kfz-Gutachter aus Ihrer Region senden Ihnen individuelle Angebote. Vergleichen Sie und beauftragen Sie online – kostenlos und unverbindlich.'" />
+        <title>{{ 'Angebote vergleichen und Anbieter beauftragen' }}</title>
+        <meta name="description" :content="'AngebotJetzt: Geprüfte Anbieter aus Ihrer Region senden Ihnen individuelle Angebote. Vergleichen Sie und beauftragen Sie online – kostenlos und unverbindlich.'" />
     </Head>
 
     <!-- 02 HERO -->
@@ -79,7 +76,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
                     <BadgeCheck :size="22" aria-hidden="true" />
                 </span>
                 <div>
-                    <p class="font-display text-lg font-bold text-navy-700">{{ 'Geprüfte Gutachter' }}</p>
+                    <p class="font-display text-lg font-bold text-navy-700">{{ 'Geprüfte Anbieter' }}</p>
                     <p class="text-sm text-ink-500">{{ 'In ganz Deutschland' }}</p>
                 </div>
             </div>
@@ -89,7 +86,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <!-- 04 SERVICE CATEGORY GRID -->
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Kfz-Gutachten'" :line1="'Für jeden Anlass'" :line2="'das richtige Gutachten'" />
+            <SectionHeading :eyebrow="'Unsere Services'" :line1="'Für jeden Bedarf'" :line2="'der passende Anbieter'" />
             <div class="mt-10">
                 <ServiceGrid :service-types="serviceTypes" />
             </div>
@@ -102,7 +99,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <!-- 06 LIVE REQUESTS CAROUSEL -->
     <section v-if="recentRequests.length" class="bg-sand-50 py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Aktuelle Anfragen'" :line1="'Diese Fahrzeuge suchen'" :line2="'gerade einen Gutachter'" />
+            <SectionHeading :eyebrow="'Aktuelle Anfragen'" :line1="'Diese Anfragen suchen'" :line2="'gerade den passenden Anbieter'" />
             <div class="mt-8">
                 <LiveRequestsCarousel :requests="recentRequests" />
             </div>
@@ -121,7 +118,7 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
     <!-- 10 PROVIDER CARDS CAROUSEL -->
     <section v-if="providers.length" class="bg-white py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Unser Netzwerk'" :line1="'Unsere geprüften'" :line2="'Gutachter'" />
+            <SectionHeading :eyebrow="'Unser Netzwerk'" :line1="'Unsere geprüften'" :line2="'Anbieter'" />
             <div class="mt-8">
                 <ProviderCarousel :providers="providers" />
             </div>
@@ -158,23 +155,6 @@ const press = ['Handelsblatt', 'auto motor sport', 'ADAC', 'FOCUS', 'Wirtschafts
             <SectionHeading centered :eyebrow="'Häufige Fragen'" :line1="'Alles, was Sie'" :line2="'wissen müssen'" />
             <div class="mt-10">
                 <FaqAccordion :items="faqItems" />
-            </div>
-        </div>
-    </section>
-
-    <!-- 15 CITY SEO GRID -->
-    <section class="bg-sand-50 py-14 lg:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :line1="'Kfz-Gutachter'" :line2="'in Ihrer Stadt finden'" />
-            <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <Reveal v-for="(city, i) in cities" :key="city" :delay="(i % 6) * 0.03">
-                    <Link
-                        href="/vehicle-reports"
-                        class="block rounded-pill border border-ink-100 bg-white px-5 py-3 text-center text-sm font-semibold text-navy-700 transition hover:border-green-500 hover:text-green-600"
-                    >
-                        {{ 'Gutachter' }} {{ city }}
-                    </Link>
-                </Reveal>
             </div>
         </div>
     </section>

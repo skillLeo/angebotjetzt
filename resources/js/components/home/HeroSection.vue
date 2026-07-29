@@ -46,12 +46,12 @@ function submit() {
                             {{ 'Anfragen. Vergleichen. Beauftragen.' }}
                         </p>
                         <h1 class="text-hero text-navy-700">
-                            {{ 'Kfz-Gutachten' }}<br />
+                            {{ 'Der richtige Anbieter' }}<br />
                             <span class="text-navy-700">{{ 'jetzt ' }}</span>
                             <HandDrawnEllipse><span class="text-navy-700">{{ 'vergleichen' }}</span></HandDrawnEllipse>
                         </h1>
                         <p class="text-lead mt-6 max-w-xl text-ink-700">
-                            {{ 'Beschreiben Sie, was Sie brauchen. Geprüfte Gutachter aus Ihrer Region senden Ihnen individuelle Angebote – Sie vergleichen und beauftragen online. Kostenlos und unverbindlich.' }}
+                            {{ 'Beschreiben Sie, was Sie brauchen. Geprüfte Anbieter aus Ihrer Region senden Ihnen individuelle Angebote – Sie vergleichen und beauftragen online. Kostenlos und unverbindlich.' }}
                         </p>
                     </Motion>
 
@@ -66,13 +66,13 @@ function submit() {
                             @submit.prevent="submit"
                         >
                             <div class="relative flex-1">
-                                <label for="hero-service" class="sr-only">{{ 'Gutachten-Art' }}</label>
+                                <label for="hero-service" class="sr-only">{{ 'Leistung' }}</label>
                                 <select
                                     id="hero-service"
                                     v-model="service"
                                     class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
-                                    <option value="">{{ 'Welches Gutachten?' }}</option>
+                                    <option value="">{{ 'Welche Leistung?' }}</option>
                                     <option v-for="serviceType in serviceTypes" :key="serviceType.id" :value="serviceType.slug">
                                         {{ serviceType.name }}
                                     </option>
@@ -104,7 +104,7 @@ function submit() {
                             </button>
                         </form>
                         <p class="mt-3 pl-2 text-sm text-ink-500">
-                            {{ 'Bereits über 8.000 Gutachten in ganz Deutschland vermittelt.' }}
+                            {{ 'Bereits über 8.000 Aufträge in ganz Deutschland vermittelt.' }}
                         </p>
                     </Motion>
                 </div>
@@ -121,7 +121,7 @@ function submit() {
                             width="720"
                             height="600"
                             fetchpriority="high"
-                            :alt="'Kfz-Sachverständiger begutachtet ein Fahrzeug'"
+                            :alt="'Dienstleister bei der Ausführung eines Auftrags'"
                             class="aspect-[6/5] w-full rounded-panel object-cover shadow-lift"
                         />
                     </Motion>
@@ -131,7 +131,7 @@ function submit() {
                         {{ 'Ort: Köln, 50667' }}
                     </FloatChip>
                     <FloatChip :delay="0.7" alt class="top-24 -right-2 sm:-right-4">
-                        {{ 'Gutachten: Unfallschaden' }}
+                        {{ 'Leistung: Unfallschaden' }}
                     </FloatChip>
                     <FloatChip :delay="0.9" class="bottom-20 -left-2 sm:-left-6">
                         <CheckCircle2 :size="16" class="text-green-500" aria-hidden="true" />

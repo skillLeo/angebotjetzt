@@ -21,6 +21,7 @@ class MatchingService
 
         return Inspector::query()
             ->where('is_active', true)
+            ->where('is_approved', true)
             ->whereHas('serviceAreas', function ($query) use ($plz, $ort) {
                 $query->where(function ($q) use ($plz, $ort) {
                     $q->where(function ($city) use ($ort) {

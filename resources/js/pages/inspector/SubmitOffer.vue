@@ -13,6 +13,9 @@ const props = defineProps<{
 
 const form = useForm({ price: '', estimated_date: '', message: '' });
 
+const today = new Date();
+const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
 const priceCents = computed(() => {
     const val = parseFloat(String(form.price).replace(',', '.'));
     return isNaN(val) ? 0 : Math.round(val * 100);
@@ -49,7 +52,7 @@ function submit() {
 
                     <div>
                         <label for="est" class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Voraussichtlich fertig bis' }}</label>
-                        <input id="est" v-model="form.estimated_date" type="date" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
+                        <input id="est" v-model="form.estimated_date" type="date" :min="minDate" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
                         <p v-if="form.errors.estimated_date" class="mt-1 text-sm text-red-600">{{ form.errors.estimated_date }}</p>
                     </div>
 

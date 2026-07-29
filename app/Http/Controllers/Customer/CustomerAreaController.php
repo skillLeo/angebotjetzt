@@ -112,7 +112,7 @@ class CustomerAreaController extends Controller
         ]);
     }
 
-    public function storeReview(Request $request, Booking $booking): RedirectResponse
+    public function storeReview(Request $request, Booking $booking, \App\Services\WalletService $walletService): RedirectResponse
     {
         abort_unless($booking->user_id === Auth::id(), 403);
         abort_unless(in_array($booking->status, ['completed_by_inspector', 'confirmed'], true), 403);
@@ -131,6 +131,22 @@ class CustomerAreaController extends Controller
                 'comment' => $data['comment'] ?? null,
             ]
         );
+
+        // A customer rating is their confirmation the job was done — this is
+        // what finalizes the booking and releases the inspector's pending
+        // balance, the same as an admin's manual confirmation would.
+        if ($booking->status === 'completed_by_inspector') {
+            $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
+            $booking->request->update(['status' => 'completed']);
+            $walletService->releasePending($booking);
+
+            \App\Models\AppNotification::notify($booking->inspector, 'balance_released',
+                'Guthaben freigegeben',
+                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                '/inspector/wallet');
+
+            \App\Models\ActivityLog::record('booking.confirmed', Auth::user(), $booking);
+        }
 
         return back()->with('success', 'Vielen Dank für Ihre Bewertung!');
     }

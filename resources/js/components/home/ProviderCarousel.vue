@@ -59,11 +59,11 @@ function scroll(dir: number) {
                         width="64"
                         height="64"
                         loading="lazy"
-                        :alt="`${'Gutachter'} ${p.name}`"
+                        :alt="`${'Anbieter'} ${p.name}`"
                         class="h-16 w-16 rounded-pill object-cover"
                     />
                     <div>
-                        <p class="text-sm text-ink-500">{{ 'Gutachter' }} {{ p.city }}</p>
+                        <p class="text-sm text-ink-500">{{ 'Anbieter' }} {{ p.city }}</p>
                         <h3 class="font-display text-lg font-bold text-navy-700">{{ p.name }}</h3>
                     </div>
                 </div>

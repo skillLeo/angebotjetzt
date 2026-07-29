@@ -172,11 +172,16 @@ class AdminController extends Controller
         ]);
     }
 
-    public function bookings(): Response
+    public function bookings(Request $request): Response
     {
+        $query = Booking::with(['request.serviceType:id,name', 'user:id,name', 'inspector:id,name', 'offer', 'payment']);
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        }
+
         return Inertia::render('admin/Bookings', [
-            'bookings' => Booking::with(['request.serviceType:id,name', 'user:id,name', 'inspector:id,name', 'offer', 'payment'])
-                ->latest()->paginate(20)
+            'bookings' => $query->latest()->paginate(20)->withQueryString()
                 ->through(fn ($b) => [
                     'id' => $b->id,
                     'number' => $b->booking_number,
@@ -189,6 +194,7 @@ class AdminController extends Controller
                     'status' => $b->status,
                     'date' => $b->created_at->format('d.m.Y'),
                 ]),
+            'filters' => $request->only(['status']),
         ]);
     }
 
@@ -244,11 +250,16 @@ class AdminController extends Controller
         return back()->with('success', 'Auftrag bestätigt — Guthaben wurde freigegeben.');
     }
 
-    public function payments(): Response
+    public function payments(Request $request): Response
     {
+        $query = Payment::with('booking:id,booking_number,user_id,inspector_id', 'booking.user:id,name', 'booking.inspector:id,name');
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        }
+
         return Inertia::render('admin/Payments', [
-            'payments' => Payment::with('booking:id,booking_number,user_id,inspector_id', 'booking.user:id,name', 'booking.inspector:id,name')
-                ->latest()->paginate(20)
+            'payments' => $query->latest()->paginate(20)->withQueryString()
                 ->through(fn ($p) => [
                     'id' => $p->id,
                     'bookingId' => $p->booking->id,
@@ -266,6 +277,7 @@ class AdminController extends Controller
                 'revenue' => Payment::where('status', 'paid')->sum('total_cents'),
                 'commission' => Payment::where('status', 'paid')->sum('commission_cents'),
             ],
+            'filters' => $request->only(['status']),
         ]);
     }
 
@@ -304,8 +316,12 @@ class AdminController extends Controller
                 ->orWhere('city', 'like', "%{$search}%"));
         }
 
+        if ($request->query('status') === 'pending') {
+            $query->where('is_approved', false);
+        }
+
         return Inertia::render('admin/Inspectors', [
-            'inspectors' => $query->orderBy('name')->paginate(20)->withQueryString()
+            'inspectors' => $query->latest()->paginate(20)->withQueryString()
                 ->through(fn ($i) => [
                     'id' => $i->id,
                     'name' => $i->name,
@@ -313,13 +329,15 @@ class AdminController extends Controller
                     'city' => $i->city,
                     'email' => $i->email,
                     'active' => $i->is_active,
+                    'approved' => $i->is_approved,
                     'verified' => $i->is_verified,
                     'jobs' => $i->bookings_count,
                     'offers' => $i->offers_count,
                     'balance' => $i->wallet?->available_cents ?? 0,
                     'imported' => $i->imported_from,
                 ]),
-            'filters' => $request->only(['suche']),
+            'pendingCount' => Inspector::where('is_approved', false)->count(),
+            'filters' => $request->only(['suche', 'status']),
         ]);
     }
 
@@ -338,6 +356,7 @@ class AdminController extends Controller
                 'city' => $inspector->city,
                 'bio' => $inspector->bio,
                 'active' => $inspector->is_active,
+                'approved' => $inspector->is_approved,
                 'verified' => $inspector->is_verified,
                 'since' => $inspector->member_since?->format('d.m.Y'),
                 'imported' => $inspector->imported_from,
@@ -361,14 +380,53 @@ class AdminController extends Controller
         ]);
     }
 
-    public function toggleInspector(Inspector $inspector): RedirectResponse
+    public function toggleInspector(Inspector $inspector, \App\Services\RequestService $requestService): RedirectResponse
     {
         $inspector->update(['is_active' => ! $inspector->is_active]);
 
         ActivityLog::record($inspector->is_active ? 'inspector.activated' : 'inspector.deactivated',
             Auth::guard('admin')->user(), $inspector);
 
-        return back()->with('success', $inspector->is_active ? 'Gutachter aktiviert.' : 'Gutachter deaktiviert.');
+        $message = $inspector->is_active ? 'Gutachter aktiviert.' : 'Gutachter deaktiviert.';
+
+        if ($inspector->is_active) {
+            $rematched = $requestService->rematchUnmatchedRequestsFor($inspector);
+            if ($rematched > 0) {
+                $message .= " {$rematched} zuvor unbeantwortete Anfrage(n) wurden ihm zugeordnet.";
+            }
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function approveInspector(Inspector $inspector, \App\Services\RequestService $requestService): RedirectResponse
+    {
+        if ($inspector->is_approved) {
+            return back()->withErrors(['status' => 'Dieser Gutachter ist bereits freigeschaltet.']);
+        }
+
+        $inspector->update(['is_approved' => true]);
+
+        ActivityLog::record('inspector.approved', Auth::guard('admin')->user(), $inspector);
+
+        $rematched = $requestService->rematchUnmatchedRequestsFor($inspector);
+
+        $message = 'Gutachter freigeschaltet.';
+        if ($rematched > 0) {
+            $message .= " {$rematched} zuvor unbeantwortete Anfrage(n) wurden ihm zugeordnet.";
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function toggleVerified(Inspector $inspector): RedirectResponse
+    {
+        $inspector->update(['is_verified' => ! $inspector->is_verified]);
+
+        ActivityLog::record($inspector->is_verified ? 'inspector.verified' : 'inspector.unverified',
+            Auth::guard('admin')->user(), $inspector);
+
+        return back()->with('success', $inspector->is_verified ? 'Gutachter als geprüft markiert.' : 'Prüf-Status entfernt.');
     }
 
     public function importForm(): Response
@@ -454,12 +512,21 @@ class AdminController extends Controller
         return redirect()->route('admin.inspectors')->with('success', "{$created} Gutachter importiert und eingeladen.");
     }
 
-    public function wallets(): Response
+    public function wallets(Request $request): Response
     {
+        $query = Wallet::with('inspector:id,name,company_name,city');
+
+        if ($request->query('status') === 'pending') {
+            $query->where('pending_cents', '>', 0);
+        } elseif ($request->query('status') === 'available') {
+            $query->where('available_cents', '>', 0);
+        }
+
         return Inertia::render('admin/Wallets', [
-            'wallets' => Wallet::with('inspector:id,name,company_name,city')
+            'wallets' => $query
                 ->orderByDesc('available_cents')
                 ->paginate(25)
+                ->withQueryString()
                 ->through(fn ($w) => [
                     'inspectorId' => $w->inspector_id,
                     'name' => $w->inspector->name,
@@ -473,16 +540,25 @@ class AdminController extends Controller
                 'available' => Wallet::sum('available_cents'),
                 'pending' => Wallet::sum('pending_cents'),
             ],
+            'filters' => $request->only(['status']),
         ]);
     }
 
-    public function payouts(): Response
+    public function payouts(Request $request): Response
     {
+        $query = PayoutRequest::with(['inspector.wallet', 'paidByAdmin:id,name']);
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        } else {
+            $query->orderByRaw("FIELD(status, 'pending') DESC");
+        }
+
         return Inertia::render('admin/Payouts', [
-            'payouts' => PayoutRequest::with(['inspector.wallet', 'paidByAdmin:id,name'])
-                ->orderByRaw("FIELD(status, 'pending') DESC")
+            'payouts' => $query
                 ->latest('requested_at')
                 ->paginate(20)
+                ->withQueryString()
                 ->through(fn ($p) => [
                     'id' => $p->id,
                     'inspector' => $p->inspector->name,
@@ -498,6 +574,7 @@ class AdminController extends Controller
                     'paid' => $p->paid_at?->format('d.m.Y H:i'),
                     'paidBy' => $p->paidByAdmin?->name,
                 ]),
+            'filters' => $request->only(['status']),
         ]);
     }
 

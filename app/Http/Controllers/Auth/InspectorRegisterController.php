@@ -44,6 +44,7 @@ class InspectorRegisterController extends Controller
             'city' => $data['city'],
             'password' => $data['password'],
             'is_active' => true,
+            'is_approved' => false,
             'is_verified' => false,
             'member_since' => now(),
             'email_verified_at' => now(),
@@ -63,6 +64,6 @@ class InspectorRegisterController extends Controller
 
         Auth::guard('inspector')->login($inspector);
 
-        return redirect('/inspector')->with('success', 'Willkommen! Ihr Gutachter-Konto wurde erstellt.');
+        return redirect('/inspector')->with('success', 'Ihr Gutachter-Konto wurde erstellt und wird nun von unserem Team geprüft.');
     }
 }

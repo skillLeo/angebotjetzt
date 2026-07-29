@@ -4,11 +4,18 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import Pagination from '@/components/dashboard/Pagination.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     bookings: { data: Array<Record<string, unknown>>; links: Array<{ url: string | null; label: string; active: boolean }> };
+    filters: { status?: string };
 }>();
+
+const status = ref(props.filters.status ?? '');
+function apply() {
+    router.get('/admin/bookings', { status: status.value || undefined }, { preserveState: true });
+}
 
 const columns = [
     { key: 'number', label: 'Auftrag' },
@@ -18,6 +25,7 @@ const columns = [
     { key: 'commission', label: 'Provision', align: 'right' as const },
     { key: 'inspectorShare', label: 'Gutachter-Anteil', align: 'right' as const },
     { key: 'status', label: 'Status' },
+    { key: 'date', label: 'Datum' },
 ];
 </script>
 
@@ -25,6 +33,18 @@ const columns = [
     <Head><title>Aufträge</title></Head>
 
     <PageCard title="Alle Aufträge">
+        <template #actions>
+            <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
+                <option value="">Alle Status</option>
+                <option value="awaiting_payment">Zahlung ausstehend</option>
+                <option value="paid">Bezahlt</option>
+                <option value="in_progress">In Bearbeitung</option>
+                <option value="completed_by_inspector">Abgeschlossen (Gutachter)</option>
+                <option value="confirmed">Bestätigt</option>
+                <option value="cancelled">Storniert</option>
+                <option value="refunded">Erstattet</option>
+            </select>
+        </template>
         <AdminTable :columns="columns" :rows="bookings.data" row-key="id">
             <template #number="{ row }">
                 <Link :href="`/admin/bookings/${row.id}`" class="font-semibold text-green-600 hover:underline">{{ row.number }}</Link>

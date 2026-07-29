@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\BookingConfirmedCustomerMail;
 use App\Mail\BookingConfirmedInspectorMail;
+use App\Mail\OfferNotSelectedMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
@@ -131,13 +132,16 @@ class CheckoutController extends Controller
             return;
         }
 
-        $booking = DB::transaction(function () use ($offer, $session) {
+        $losingOffers = Offer::where('request_id', $offer->request_id)
+            ->where('id', '!=', $offer->id)
+            ->where('status', 'open')
+            ->with(['inspector', 'request.serviceType'])
+            ->get();
+
+        $booking = DB::transaction(function () use ($offer, $session, $losingOffers) {
             $offer->update(['status' => 'accepted']);
 
-            Offer::where('request_id', $offer->request_id)
-                ->where('id', '!=', $offer->id)
-                ->where('status', 'open')
-                ->update(['status' => 'rejected']);
+            Offer::whereIn('id', $losingOffers->pluck('id'))->update(['status' => 'rejected']);
 
             $offer->request->update(['status' => 'accepted']);
 
@@ -178,6 +182,15 @@ class CheckoutController extends Controller
 
         Mail::to($booking->user->email)->queue(new BookingConfirmedCustomerMail($booking));
         Mail::to($offer->inspector->email)->queue(new BookingConfirmedInspectorMail($booking));
+
+        foreach ($losingOffers as $losingOffer) {
+            AppNotification::notify($losingOffer->inspector, 'offer_not_selected',
+                'Anfrage vergeben',
+                "Auftrag {$offer->request->request_number} · {$offer->request->vehicle_make} {$offer->request->vehicle_model} wurde an einen anderen Gutachter vergeben.",
+                '/inspector/offers');
+
+            Mail::to($losingOffer->inspector->email)->queue(new OfferNotSelectedMail($losingOffer));
+        }
 
         ActivityLog::record('booking.paid', null, $booking, [
             'total_cents' => $offer->price_cents,

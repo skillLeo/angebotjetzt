@@ -4,17 +4,19 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import Pagination from '@/components/dashboard/Pagination.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Search, Upload } from 'lucide-vue-next';
+import { Check, Search, Upload } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps<{
     inspectors: { data: Array<Record<string, unknown>>; links: Array<{ url: string | null; label: string; active: boolean }> };
-    filters: { suche?: string };
+    pendingCount: number;
+    filters: { suche?: string; status?: string };
 }>();
 
 const search = ref(props.filters.suche ?? '');
+const status = ref(props.filters.status ?? '');
 function apply() {
-    router.get('/admin/inspectors', { suche: search.value || undefined }, { preserveState: true });
+    router.get('/admin/inspectors', { suche: search.value || undefined, status: status.value || undefined }, { preserveState: true });
 }
 
 const columns = [
@@ -24,15 +26,24 @@ const columns = [
     { key: 'offers', label: 'Angebote', align: 'center' as const },
     { key: 'balance', label: 'Guthaben', align: 'right' as const },
     { key: 'active', label: 'Status' },
+    { key: 'approveAction', label: '' },
 ];
+
+function approve(id: number) {
+    router.post(`/admin/inspectors/${id}/approve`, {}, { preserveScroll: true });
+}
 </script>
 
 <template>
     <Head><title>Gutachter</title></Head>
 
-    <PageCard title="Gutachterverwaltung">
+    <PageCard title="Gutachterverwaltung" :subtitle="pendingCount > 0 ? `${pendingCount} Gutachter warten auf Freischaltung` : undefined">
         <template #actions>
             <div class="flex items-center gap-2">
+                <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
+                    <option value="">Alle Status</option>
+                    <option value="pending">Ausstehende Freischaltung</option>
+                </select>
                 <div class="relative">
                     <Search :size="16" class="absolute top-1/2 left-3 -translate-y-1/2 text-ink-300" aria-hidden="true" />
                     <input v-model="search" type="search" placeholder="Suche…" class="rounded-pill border border-ink-300 py-2 pr-3 pl-9 text-sm" @keyup.enter="apply" />
@@ -56,10 +67,23 @@ const columns = [
                 </div>
             </template>
             <template #balance="{ value }">{{ formatEuro(value as number) }}</template>
-            <template #active="{ value }">
-                <span class="inline-flex rounded-pill px-2.5 py-1 text-xs font-bold" :class="value ? 'bg-green-50 text-green-700' : 'bg-ink-100 text-ink-500'">
+            <template #active="{ value, row }">
+                <span v-if="!row.approved" class="inline-flex rounded-pill bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
+                    Ausstehend
+                </span>
+                <span v-else class="inline-flex rounded-pill px-2.5 py-1 text-xs font-bold" :class="value ? 'bg-green-50 text-green-700' : 'bg-ink-100 text-ink-500'">
                     {{ value ? 'Aktiv' : 'Inaktiv' }}
                 </span>
+            </template>
+            <template #approveAction="{ row }">
+                <button
+                    v-if="!row.approved"
+                    type="button"
+                    class="inline-flex items-center gap-1.5 rounded-pill bg-green-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-green-600"
+                    @click="approve(row.id as number)"
+                >
+                    <Check :size="14" aria-hidden="true" /> Freischalten
+                </button>
             </template>
         </AdminTable>
         <Pagination :links="inspectors.links" />

@@ -5,13 +5,20 @@ import Pagination from '@/components/dashboard/Pagination.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { Banknote, Percent } from 'lucide-vue-next';
+import { ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     payments: { data: Array<Record<string, unknown>>; links: Array<{ url: string | null; label: string; active: boolean }> };
     totals: { revenue: number; commission: number };
+    filters: { status?: string };
 }>();
+
+const status = ref(props.filters.status ?? '');
+function apply() {
+    router.get('/admin/payments', { status: status.value || undefined }, { preserveState: true });
+}
 
 const columns = [
     { key: 'booking', label: 'Auftrag' },
@@ -33,6 +40,15 @@ const columns = [
     </div>
 
     <PageCard title="Alle Zahlungen" subtitle="Jede über Stripe abgewickelte Kundenzahlung für einen Auftrag">
+        <template #actions>
+            <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
+                <option value="">Alle Status</option>
+                <option value="pending">Ausstehend</option>
+                <option value="paid">Bezahlt</option>
+                <option value="failed">Fehlgeschlagen</option>
+                <option value="refunded">Erstattet</option>
+            </select>
+        </template>
         <AdminTable :columns="columns" :rows="payments.data" row-key="id">
             <template #booking="{ row }">
                 <Link :href="`/admin/bookings/${row.bookingId}`" class="font-semibold text-green-600 hover:underline">{{ row.booking }}</Link>

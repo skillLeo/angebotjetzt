@@ -65,7 +65,7 @@ onMounted(async () => {
         L.marker(coords, { icon, title: name })
             .addTo(map)
             .bindPopup(
-                `<strong style="color:#14375E;font-size:15px;">${name}</strong><br><span style="color:#6E747E;font-size:13px;">${count} ${count === 1 ? 'geprüfter Gutachter' : 'geprüfte Gutachter'}</span>`,
+                `<strong style="color:#14375E;font-size:15px;">${name}</strong><br><span style="color:#6E747E;font-size:13px;">${count} ${count === 1 ? 'geprüfter Anbieter' : 'geprüfte Anbieter'}</span>`,
             );
     }
 });
@@ -81,6 +81,6 @@ onBeforeUnmount(() => {
         ref="mapEl"
         class="isolate relative z-0 h-[420px] w-full rounded-panel border border-ink-100 shadow-card lg:h-[520px]"
         role="img"
-        aria-label="Karte von Deutschland mit den Servicegebieten unserer Gutachter"
+        aria-label="Karte von Deutschland mit den Servicegebieten unserer Anbieter"
     />
 </template>

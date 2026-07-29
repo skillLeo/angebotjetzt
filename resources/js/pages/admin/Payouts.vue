@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AdminTable from '@/components/dashboard/AdminTable.vue';
 import PageCard from '@/components/dashboard/PageCard.vue';
 import Pagination from '@/components/dashboard/Pagination.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
@@ -7,52 +8,77 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { Check } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     payouts: {
         data: Array<{ id: number; inspector: string; inspectorId: number; company: string | null; amount: number; iban: string; bic: string | null; accountHolder: string; balance: number; status: string; requested: string; paid: string | null; paidBy: string | null }>;
         links: Array<{ url: string | null; label: string; active: boolean }>;
     };
+    filters: { status?: string };
 }>();
 
-const processing = ref<number | null>(null);
+const status = ref(props.filters.status ?? '');
+function apply() {
+    router.get('/admin/payouts', { status: status.value || undefined }, { preserveState: true });
+}
 
+const processing = ref<number | null>(null);
 function markPaid(id: number) {
     processing.value = id;
     router.post(`/admin/payouts/${id}/paid`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
 }
+
+const columns = [
+    { key: 'inspector', label: 'Gutachter' },
+    { key: 'amount', label: 'Betrag', align: 'right' as const },
+    { key: 'iban', label: 'IBAN' },
+    { key: 'balance', label: 'Guthaben', align: 'right' as const },
+    { key: 'status', label: 'Status' },
+    { key: 'requested', label: 'Angefordert' },
+    { key: 'paid', label: 'Bezahlt' },
+    { key: 'actions', label: '' },
+];
 </script>
 
 <template>
     <Head><title>Auszahlungen</title></Head>
 
     <PageCard title="Auszahlungs-Warteschlange" subtitle="Überweisen Sie den Betrag manuell per Banküberweisung an die angegebene IBAN, dann bestätigen Sie es hier — 'Als ausgezahlt markieren' löst selbst keine Zahlung aus, sondern bucht nur das Guthaben aus.">
-        <div v-if="payouts.data.length" class="divide-y divide-ink-100">
-            <div v-for="p in payouts.data" :key="p.id" class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                <div class="min-w-0">
-                    <div class="flex items-center gap-2">
-                        <Link :href="`/admin/inspectors/${p.inspectorId}`" class="font-semibold text-navy-700 hover:text-green-600">{{ p.inspector }}</Link>
-                        <StatusBadge :status="p.status" />
-                    </div>
-                    <p class="mt-1 text-sm text-ink-500">
-                        {{ p.accountHolder }} · {{ p.iban }}<span v-if="p.bic"> · {{ p.bic }}</span>
-                    </p>
-                    <p class="text-xs text-ink-500">Angefordert {{ p.requested }} · Verfügbares Guthaben {{ formatEuro(p.balance) }}<span v-if="p.paidBy"> · Bezahlt von {{ p.paidBy }}</span></p>
-                </div>
-                <div class="flex shrink-0 items-center gap-4">
-                    <span class="font-display text-xl font-extrabold text-navy-700">{{ formatEuro(p.amount) }}</span>
-                    <button
-                        v-if="p.status === 'pending'"
-                        type="button"
-                        :disabled="processing === p.id"
-                        class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
-                        @click="markPaid(p.id)"
-                    >
-                        <Check :size="16" aria-hidden="true" /> Als ausgezahlt markieren
-                    </button>
-                </div>
-            </div>
-        </div>
-        <p v-else class="px-5 py-10 text-center text-sm text-ink-500">Keine Auszahlungsanfragen.</p>
+        <template #actions>
+            <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
+                <option value="">Alle Status</option>
+                <option value="pending">Ausstehend</option>
+                <option value="paid">Bezahlt</option>
+                <option value="rejected">Abgelehnt</option>
+            </select>
+        </template>
+        <AdminTable :columns="columns" :rows="payouts.data" row-key="id">
+            <template #inspector="{ row }">
+                <Link :href="`/admin/inspectors/${row.inspectorId}`" class="font-semibold text-green-600 hover:underline">{{ row.inspector }}</Link>
+                <p v-if="row.company" class="text-xs text-ink-500">{{ row.company }}</p>
+            </template>
+            <template #amount="{ value }">{{ formatEuro(value as number) }}</template>
+            <template #iban="{ row }">
+                <p>{{ row.iban }}</p>
+                <p class="text-xs text-ink-500">{{ row.accountHolder }}</p>
+            </template>
+            <template #balance="{ value }">{{ formatEuro(value as number) }}</template>
+            <template #status="{ value }"><StatusBadge :status="value as string" /></template>
+            <template #paid="{ row }">
+                <span>{{ row.paid ?? '–' }}</span>
+                <p v-if="row.paidBy" class="text-xs text-ink-500">{{ 'von' }} {{ row.paidBy }}</p>
+            </template>
+            <template #actions="{ row }">
+                <button
+                    v-if="row.status === 'pending'"
+                    type="button"
+                    :disabled="processing === row.id"
+                    class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
+                    @click="markPaid(row.id as number)"
+                >
+                    <Check :size="14" aria-hidden="true" /> {{ 'Als ausgezahlt markieren' }}
+                </button>
+            </template>
+        </AdminTable>
         <Pagination :links="payouts.links" />
     </PageCard>
 </template>

@@ -33,6 +33,15 @@ class InspectorAreaController extends Controller
     public function dashboard(WalletService $walletService): Response
     {
         $inspector = Auth::guard('inspector')->user();
+
+        if (! $inspector->is_approved) {
+            return Inertia::render('inspector/Dashboard', [
+                'pendingApproval' => true,
+                'stats' => null,
+                'newRequests' => [],
+            ]);
+        }
+
         $wallet = $walletService->walletFor($inspector);
 
         $matchedRequestIds = $inspector->matches()->pluck('request_id');
@@ -57,6 +66,8 @@ class InspectorAreaController extends Controller
                 'responseRate' => $matchedRequestIds->count() > 0
                     ? round($totalOffers / $matchedRequestIds->count() * 100)
                     : null,
+                'rating' => $inspector->averageRating(),
+                'reviewsCount' => $inspector->reviews()->where('is_published', true)->count(),
             ],
             'newRequests' => $openMatches->map(fn ($r) => $this->requestRow($r)),
         ]);
@@ -138,6 +149,7 @@ class InspectorAreaController extends Controller
     public function storeOffer(Request $httpRequest, ServiceRequest $serviceRequest, CommissionService $commission): RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
+        abort_unless($inspector->is_approved, 403);
         $this->assertMatched($serviceRequest, $inspector);
 
         if (! in_array($serviceRequest->status, ['open', 'offers_received'], true)) {
@@ -283,7 +295,7 @@ class InspectorAreaController extends Controller
         ]);
     }
 
-    public function storeServiceArea(Request $httpRequest): RedirectResponse
+    public function storeServiceArea(Request $httpRequest, \App\Services\RequestService $requestService): RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
 
@@ -302,6 +314,10 @@ class InspectorAreaController extends Controller
             'postal_from' => $data['type'] === 'postal_range' ? (int) $data['postal_from'] : null,
             'postal_to' => $data['type'] === 'postal_range' ? (int) $data['postal_to'] : null,
         ]);
+
+        // Widening coverage can mean previously-stuck "no matching inspector"
+        // requests in this area now belong to this inspector too.
+        $requestService->rematchUnmatchedRequestsFor($inspector);
 
         return back()->with('success', 'Servicegebiet hinzugefügt.');
     }

@@ -62,5 +62,9 @@ return [
         'vehicle_make' => 'Marke',
         'vehicle_model' => 'Modell',
         'vin' => 'FIN',
+        'city' => 'Stadt',
+        'company_name' => 'Firma',
+        'plz_from' => 'PLZ von',
+        'plz_to' => 'PLZ bis',
     ],
 ];

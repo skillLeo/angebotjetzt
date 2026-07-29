@@ -15,7 +15,7 @@ class Inspector extends Authenticatable
     protected $fillable = [
         'company_name', 'name', 'email', 'phone', 'password', 'avatar_path',
         'city', 'bio', 'qualifications', 'years_experience', 'is_active',
-        'is_verified', 'member_since', 'imported_from', 'email_verified_at',
+        'is_approved', 'is_verified', 'member_since', 'imported_from', 'email_verified_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
@@ -27,6 +27,7 @@ class Inspector extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
             'member_since' => 'date',
             'is_active' => 'boolean',
+            'is_approved' => 'boolean',
             'is_verified' => 'boolean',
             'password' => 'hashed',
         ];

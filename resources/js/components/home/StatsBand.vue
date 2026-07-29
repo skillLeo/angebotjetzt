@@ -13,8 +13,8 @@ const props = defineProps<{
 
 
 const items = computed(() => [
-    { value: Math.max(props.stats.bookings, 8000), suffix: '+', label: 'Gutachten vermittelt', decimals: 0 },
-    { value: Math.max(props.stats.inspectors, 25), suffix: '', label: 'Geprüfte Gutachter', decimals: 0 },
+    { value: Math.max(props.stats.bookings, 8000), suffix: '+', label: 'Aufträge vermittelt', decimals: 0 },
+    { value: Math.max(props.stats.inspectors, 25), suffix: '', label: 'Geprüfte Anbieter', decimals: 0 },
     { value: props.stats.avgOffers || 3.2, suffix: '', label: 'Ø Angebote pro Anfrage', decimals: 1 },
     { value: props.stats.avgResponseHours || 3, suffix: ' Std.', label: 'Ø Antwortzeit', decimals: 0 },
 ]);

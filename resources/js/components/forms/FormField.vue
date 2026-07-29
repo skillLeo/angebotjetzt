@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useId } from 'vue';
+
 withDefaults(
     defineProps<{
         label: string;
@@ -16,7 +18,7 @@ withDefaults(
     { type: 'text', required: false },
 );
 defineEmits<{ 'update:modelValue': [value: string]; blur: [event: FocusEvent] }>();
-const id = `f-${Math.random().toString(36).slice(2, 9)}`;
+const id = useId();
 </script>
 
 <template>
