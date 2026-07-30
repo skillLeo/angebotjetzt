@@ -6,7 +6,6 @@ import LiveRequestsCarousel from '@/components/home/LiveRequestsCarousel.vue';
 import MapSection from '@/components/home/MapSection.vue';
 import ProviderCarousel from '@/components/home/ProviderCarousel.vue';
 import RecruitmentCta from '@/components/home/RecruitmentCta.vue';
-import ServiceGrid from '@/components/home/ServiceGrid.vue';
 import StatsBand from '@/components/home/StatsBand.vue';
 import TestimonialBand from '@/components/home/TestimonialBand.vue';
 import FaqAccordion from '@/components/marketing/FaqAccordion.vue';
@@ -50,7 +49,7 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     </Head>
 
     <!-- 02 HERO -->
-    <HeroSection :service-types="serviceTypes" :hero-image="heroImage" />
+    <HeroSection :categories="categories" :service-types="serviceTypes" :hero-image="heroImage" />
 
     <!-- 03 TRUST STRIP -->
     <section class="bg-white pb-4">
@@ -88,7 +87,7 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading :eyebrow="'Unsere Services'" :line1="'Für jeden Bedarf'" :line2="'der passende Anbieter'" />
             <div class="mt-10">
-                <ServiceGrid :service-types="serviceTypes" />
+                <FutureCategories :categories="categories" />
             </div>
         </div>
     </section>
@@ -124,9 +123,6 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
             </div>
         </div>
     </section>
-
-    <!-- 11 FUTURE CATEGORIES -->
-    <FutureCategories :categories="categories" />
 
     <!-- 12 RECRUITMENT CTA -->
     <RecruitmentCta :image="recruitmentImage" />

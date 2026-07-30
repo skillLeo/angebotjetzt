@@ -16,10 +16,13 @@ const props = defineProps<{
         contact_phone: string;
         agb: boolean;
         privacy: boolean;
+        password: string;
+        password_confirmation: string;
         processing?: boolean;
         errors: Record<string, string>;
     };
     serviceTypes: Array<{ id: number; name: string }>;
+    isGuest: boolean;
 }>();
 const emit = defineEmits<{ back: []; submit: [] }>();
 
@@ -37,6 +40,19 @@ const serviceName = computed(() => props.serviceTypes.find((t) => t.id === props
                 <FormField v-model="form.contact_email" label="E-Mail" type="email" required :error="form.errors.contact_email" />
                 <FormField v-model="form.contact_phone" label="Telefon" type="tel" required :error="form.errors.contact_phone" placeholder="+49 …" />
             </div>
+
+            <template v-if="isGuest">
+                <div class="rounded-card bg-sand-50 p-4">
+                    <p class="text-sm font-semibold text-navy-700">Konto erstellen</p>
+                    <p class="mt-1 text-sm text-ink-500">
+                        Damit Sie Ihre Anfrage und alle Angebote später wiederfinden, legen wir mit dieser E-Mail-Adresse ein Konto für Sie an. Bitte vergeben Sie ein Passwort dafür.
+                    </p>
+                </div>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <FormField v-model="form.password" label="Passwort" type="password" required :error="form.errors.password" />
+                    <FormField v-model="form.password_confirmation" label="Passwort bestätigen" type="password" required />
+                </div>
+            </template>
         </div>
 
         <!-- Summary -->

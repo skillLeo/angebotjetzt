@@ -41,12 +41,12 @@ Route::post('/coming-soon/{category:slug}/interest', [PublicController::class, '
 
 /*
 |--------------------------------------------------------------------------
-| Request wizard (customer must be authenticated)
+| Request wizard (guests may fill it out; an account is created at submission)
 |--------------------------------------------------------------------------
 */
+Route::get('/request', [RequestWizardController::class, 'show'])->name('wizard');
+Route::post('/request', [RequestWizardController::class, 'store'])->middleware('throttle:10,10')->name('wizard.store');
 Route::middleware('auth')->group(function () {
-    Route::get('/request', [RequestWizardController::class, 'show'])->name('wizard');
-    Route::post('/request', [RequestWizardController::class, 'store'])->middleware('throttle:10,10')->name('wizard.store');
     Route::get('/request/confirmation/{serviceRequest:request_number}', [RequestWizardController::class, 'confirmation'])->name('wizard.confirmation');
 });
 

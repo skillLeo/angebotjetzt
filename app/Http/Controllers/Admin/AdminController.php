@@ -245,6 +245,12 @@ class AdminController extends Controller
             "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
             '/inspector/wallet');
 
+        AppNotification::notify($booking->user, 'booking_completed',
+            'Auftrag abgeschlossen',
+            "Auftrag {$booking->booking_number} wurde als abgeschlossen bestätigt.",
+            "/account/bookings/{$booking->id}");
+        \Illuminate\Support\Facades\Mail::to($booking->user->email)->queue(new \App\Mail\BookingCompletedMail($booking));
+
         ActivityLog::record('booking.confirmed', Auth::guard('admin')->user(), $booking);
 
         return back()->with('success', 'Auftrag bestätigt — Guthaben wurde freigegeben.');

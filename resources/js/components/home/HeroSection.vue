@@ -4,37 +4,46 @@ import HandDrawnEllipse from '@/components/marketing/HandDrawnEllipse.vue';
 import { router } from '@inertiajs/vue3';
 import { CheckCircle2, MapPin, MousePointer2, Search } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
-    serviceTypes: Array<{ id: number; name: string; slug: string }>;
+    categories: Array<{ id: number; name: string; slug: string; icon: string; is_active: boolean }>;
+    serviceTypes: Array<{ id: number; name: string; slug: string; categoryId: number }>;
     heroImage: string;
 }>();
 
 
+const category = ref<number | null>(null);
 const service = ref<string>('');
 const location = ref('');
 
+const servicesForCategory = computed(() =>
+    props.serviceTypes.filter((t) => t.categoryId === category.value),
+);
+
+watch(category, () => (service.value = ''));
+
 function submit() {
+    if (!service.value) return;
     router.get('/request', {
-        service: service.value || undefined,
+        service: service.value,
         plz: location.value || undefined,
     });
 }
 </script>
 
 <template>
-    <section class="bg-white px-4 pt-4 pb-8 sm:px-6 lg:pb-14">
-        <div class="relative mx-auto max-w-[1360px] overflow-hidden rounded-panel bg-sand-100">
-            <div
-                class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-green-100/60 blur-3xl"
-                aria-hidden="true"
-            />
-            <div
-                class="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-navy-100/50 blur-3xl"
-                aria-hidden="true"
-            />
-            <div class="relative grid items-center gap-8 px-6 py-12 sm:px-10 lg:grid-cols-[55fr_45fr] lg:gap-6 lg:px-14 lg:py-16">
+    <section class="relative overflow-hidden bg-sand-100 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div
+            class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-green-100/60 blur-3xl"
+            aria-hidden="true"
+        />
+        <div
+            class="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-navy-100/50 blur-3xl"
+            aria-hidden="true"
+        />
+        <div class="relative mx-auto max-w-7xl">
+            <div class="grid items-center gap-8 lg:grid-cols-[55fr_45fr] lg:gap-6">
                 <!-- Left column -->
                 <div>
                     <Motion
@@ -43,12 +52,11 @@ function submit() {
                         :transition="{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }"
                     >
                         <p class="text-eyebrow mb-5 text-green-600">
-                            {{ 'Anfragen. Vergleichen. Beauftragen.' }}
+                            {{ 'Anfragen. Vergleichen. Buchen.' }}
                         </p>
                         <h1 class="text-hero text-navy-700">
                             {{ 'Der richtige Anbieter' }}<br />
-                            <span class="text-navy-700">{{ 'jetzt ' }}</span>
-                            <HandDrawnEllipse><span class="text-navy-700">{{ 'vergleichen' }}</span></HandDrawnEllipse>
+                            <span class="text-navy-700">{{ 'jetzt' }}&nbsp;</span><HandDrawnEllipse><span class="text-navy-700">{{ 'vergleichen' }}</span></HandDrawnEllipse>
                         </h1>
                         <p class="text-lead mt-6 max-w-xl text-ink-700">
                             {{ 'Beschreiben Sie, was Sie brauchen. Geprüfte Anbieter aus Ihrer Region senden Ihnen individuelle Angebote – Sie vergleichen und beauftragen online. Kostenlos und unverbindlich.' }}
@@ -62,46 +70,65 @@ function submit() {
                         :transition="{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }"
                     >
                         <form
-                            class="mt-9 flex flex-col gap-2 rounded-panel bg-white p-2 shadow-lift sm:flex-row sm:items-center sm:rounded-pill"
+                            class="mt-9 flex flex-col gap-2 rounded-panel bg-white p-2 shadow-lift"
                             @submit.prevent="submit"
                         >
-                            <div class="relative flex-1">
-                                <label for="hero-service" class="sr-only">{{ 'Leistung' }}</label>
-                                <select
-                                    id="hero-service"
-                                    v-model="service"
-                                    class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <div class="relative flex-1">
+                                    <label for="hero-category" class="sr-only">{{ 'Kategorie' }}</label>
+                                    <select
+                                        id="hero-category"
+                                        v-model="category"
+                                        class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                                    >
+                                        <option :value="null">{{ 'Welche Kategorie?' }}</option>
+                                        <option v-for="cat in categories" :key="cat.id" :value="cat.id" :disabled="!cat.is_active">
+                                            {{ cat.name }}{{ !cat.is_active ? ` (${'Demnächst'})` : '' }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="hidden h-7 w-px bg-ink-100 sm:block" />
+                                <div class="relative flex-1">
+                                    <label for="hero-service" class="sr-only">{{ 'Leistung' }}</label>
+                                    <select
+                                        id="hero-service"
+                                        v-model="service"
+                                        :disabled="!category"
+                                        class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:cursor-not-allowed disabled:text-ink-300"
+                                    >
+                                        <option value="">{{ 'Welche Leistung?' }}</option>
+                                        <option v-for="serviceType in servicesForCategory" :key="serviceType.id" :value="serviceType.slug">
+                                            {{ serviceType.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2 border-t border-ink-100 pt-2 sm:flex-row sm:items-center">
+                                <div class="relative flex-1">
+                                    <label for="hero-plz" class="sr-only">{{ 'PLZ oder Ort' }}</label>
+                                    <MapPin
+                                        class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-ink-300"
+                                        :size="18"
+                                        aria-hidden="true"
+                                    />
+                                    <input
+                                        id="hero-plz"
+                                        v-model="location"
+                                        type="text"
+                                        inputmode="numeric"
+                                        :placeholder="'PLZ oder Ort'"
+                                        class="h-12 w-full rounded-pill bg-transparent pr-4 pl-11 text-[15px] font-medium text-ink-700 placeholder:text-ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    :disabled="!service"
+                                    class="flex h-12 items-center justify-center gap-2 rounded-pill bg-green-500 px-7 text-[15px] font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-ink-300"
                                 >
-                                    <option value="">{{ 'Welche Leistung?' }}</option>
-                                    <option v-for="serviceType in serviceTypes" :key="serviceType.id" :value="serviceType.slug">
-                                        {{ serviceType.name }}
-                                    </option>
-                                </select>
+                                    <Search :size="18" aria-hidden="true" />
+                                    {{ 'Angebote erhalten' }}
+                                </button>
                             </div>
-                            <div class="hidden h-7 w-px bg-ink-100 sm:block" />
-                            <div class="relative flex-1">
-                                <label for="hero-plz" class="sr-only">{{ 'PLZ oder Ort' }}</label>
-                                <MapPin
-                                    class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-ink-300"
-                                    :size="18"
-                                    aria-hidden="true"
-                                />
-                                <input
-                                    id="hero-plz"
-                                    v-model="location"
-                                    type="text"
-                                    inputmode="numeric"
-                                    :placeholder="'PLZ oder Ort'"
-                                    class="h-12 w-full rounded-pill bg-transparent pr-4 pl-11 text-[15px] font-medium text-ink-700 placeholder:text-ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                class="flex h-12 items-center justify-center gap-2 rounded-pill bg-green-500 px-7 text-[15px] font-bold text-white transition hover:bg-green-600"
-                            >
-                                <Search :size="18" aria-hidden="true" />
-                                {{ 'Angebote erhalten' }}
-                            </button>
                         </form>
                         <p class="mt-3 pl-2 text-sm text-ink-500">
                             {{ 'Bereits über 8.000 Aufträge in ganz Deutschland vermittelt.' }}

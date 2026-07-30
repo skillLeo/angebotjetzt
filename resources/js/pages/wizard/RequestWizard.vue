@@ -14,6 +14,7 @@ const props = defineProps<{
 
 const page = usePage();
 const authUser = (page.props.auth as { user?: { name?: string; email?: string; phone?: string } }).user;
+const isGuest = !authUser;
 
 const DRAFT_KEY = 'aj_request_draft';
 const step = ref(1);
@@ -39,6 +40,8 @@ const form = useForm({
     contact_phone: authUser?.phone ?? '',
     agb: false as boolean,
     privacy: false as boolean,
+    password: '',
+    password_confirmation: '',
     photos: [] as File[],
 });
 
@@ -46,7 +49,7 @@ onMounted(() => {
     const saved = localStorage.getItem(DRAFT_KEY);
     if (saved) {
         try {
-            Object.assign(form, { ...JSON.parse(saved), photos: [] });
+            Object.assign(form, { ...JSON.parse(saved), photos: [], password: '', password_confirmation: '' });
         } catch {
             /* ignore malformed draft */
         }
@@ -60,7 +63,7 @@ onMounted(() => {
 });
 
 watch(
-    () => ({ ...form.data(), photos: undefined }),
+    () => ({ ...form.data(), photos: undefined, password: undefined, password_confirmation: undefined }),
     (val) => localStorage.setItem(DRAFT_KEY, JSON.stringify(val)),
     { deep: true },
 );
@@ -124,7 +127,7 @@ function submit() {
                 <WizardStep1 v-if="step === 1" :form="form" :service-types="serviceTypes" @next="next" />
                 <WizardStep2 v-else-if="step === 2" :form="form" v-model:photos="photos" @next="next" @back="back" />
                 <WizardStep3 v-else-if="step === 3" :form="form" @next="next" @back="back" />
-                <WizardStep4 v-else :form="form" :service-types="serviceTypes" @back="back" @submit="submit" />
+                <WizardStep4 v-else :form="form" :service-types="serviceTypes" :is-guest="isGuest" @back="back" @submit="submit" />
             </div>
         </div>
     </section>

@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\PasswordValidationRules;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
+use App\Models\User;
 use App\Services\RequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RequestWizardController extends Controller
 {
+    use PasswordValidationRules;
+
     public function show(Request $request): Response
     {
         return Inertia::render('wizard/RequestWizard', [
@@ -25,7 +30,9 @@ class RequestWizardController extends Controller
 
     public function store(Request $request, RequestService $requestService): RedirectResponse
     {
-        $data = $request->validate([
+        $isGuest = ! Auth::check();
+
+        $rules = [
             'service_type_id' => ['required', 'exists:service_types,id'],
             'vehicle_make' => ['required', 'string', 'max:80'],
             'vehicle_model' => ['required', 'string', 'max:120'],
@@ -47,15 +54,37 @@ class RequestWizardController extends Controller
             'privacy' => ['accepted'],
             'photos' => ['nullable', 'array', 'max:8'],
             'photos.*' => ['image', 'max:8192'],
-        ], [
+        ];
+
+        $messages = [
             'vin.regex' => 'Die FIN/VIN muss aus 17 Zeichen bestehen (ohne I, O und Q).',
             'first_registration.regex' => 'Bitte geben Sie die Erstzulassung im Format MM/JJJJ an, z. B. 03/2019.',
             'plz.digits' => 'Bitte geben Sie eine gültige fünfstellige Postleitzahl ein.',
             'agb.accepted' => 'Bitte akzeptieren Sie die AGB.',
             'privacy.accepted' => 'Bitte akzeptieren Sie die Datenschutzerklärung.',
-        ]);
+        ];
 
-        $user = Auth::user();
+        if ($isGuest) {
+            $rules['contact_email'][] = Rule::unique('users', 'email');
+            $rules['password'] = $this->passwordRules();
+            $messages['contact_email.unique'] = 'Für diese E-Mail-Adresse existiert bereits ein Konto. Bitte melden Sie sich an, um eine Anfrage zu stellen.';
+        }
+
+        $data = $request->validate($rules, $messages);
+
+        if ($isGuest) {
+            $user = User::create([
+                'name' => $data['contact_name'],
+                'email' => $data['contact_email'],
+                'phone' => $data['contact_phone'],
+                'password' => $data['password'],
+                'agb_accepted' => true,
+                'privacy_accepted_at' => now(),
+            ]);
+            Auth::login($user);
+        } else {
+            $user = Auth::user();
+        }
 
         $photoPaths = [];
         foreach ($request->file('photos', []) as $photo) {
@@ -67,7 +96,7 @@ class RequestWizardController extends Controller
 
         $serviceRequest = $requestService->submit(
             $user,
-            collect($data)->except(['agb', 'privacy', 'photos'])->all(),
+            collect($data)->except(['agb', 'privacy', 'photos', 'password', 'password_confirmation'])->all(),
             $photoPaths
         );
 

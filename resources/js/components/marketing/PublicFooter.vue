@@ -28,7 +28,7 @@ const columns = computed(() => [
         ],
     },
     {
-        title: 'Für Gutachter',
+        title: 'Für Dienstleister',
         links: [
             { label: 'Gutachter werden', href: '/for-inspectors' },
             { label: 'Gutachter-Login', href: '/login' },

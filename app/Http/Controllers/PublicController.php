@@ -242,13 +242,14 @@ class PublicController extends Controller
     {
         return ServiceType::where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'description'])
+            ->get(['id', 'name', 'slug', 'description', 'service_category_id'])
             ->map(fn ($t) => [
                 'id' => $t->id,
                 'name' => $t->name,
                 'slug' => $t->slug,
                 'description' => $t->description,
                 'image' => config('media.services.'.$t->slug),
+                'categoryId' => $t->service_category_id,
             ]);
     }
 }

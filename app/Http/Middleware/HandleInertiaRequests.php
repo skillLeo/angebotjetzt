@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\AppNotification;
+use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -42,6 +44,10 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'notifications' => fn () => $this->notifications($request, $inspector),
+            'navCategories' => fn () => Cache::remember('nav_categories', now()->addHour(), fn () => ServiceCategory::orderBy('sort_order')
+                ->get(['id', 'name', 'slug', 'icon', 'is_active'])
+                ->toArray()
+            ),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

@@ -1,22 +1,29 @@
 <script setup lang="ts">
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
+import { onClickOutside } from '@vueuse/core';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Menu, X } from 'lucide-vue-next';
+import { ChevronDown, Menu, X } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 
 
 const scrolled = ref(false);
 const mobileOpen = ref(false);
+const servicesOpen = ref(false);
+const servicesRef = useTemplateRef('servicesRef');
+onClickOutside(servicesRef, () => (servicesOpen.value = false));
 
 const page = usePage();
 const isLoggedIn = computed(() => Boolean((page.props.auth as { user?: unknown } | undefined)?.user));
 
+type NavCategory = { id: number; name: string; slug: string; icon: string; is_active: boolean };
+const navCategories = computed(() => (page.props.navCategories as NavCategory[] | undefined) ?? []);
+
 const navItems = computed(() => [
-    { label: 'Kfz-Gutachten', href: '/vehicle-reports' },
     { label: 'So funktioniert\'s', href: '/how-it-works' },
-    { label: 'Für Gutachter', href: '/for-inspectors' },
     { label: 'Preise', href: '/pricing' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'Über uns', href: '/about' },
 ]);
 
 function onScroll() {
@@ -42,6 +49,48 @@ watch(mobileOpen, (open) => {
             </Link>
 
             <nav class="hidden items-center gap-8 lg:flex" aria-label="Hauptnavigation">
+                <div ref="servicesRef" class="relative">
+                    <button
+                        type="button"
+                        class="flex items-center gap-1 text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
+                        :aria-expanded="servicesOpen"
+                        aria-haspopup="true"
+                        @click="servicesOpen = !servicesOpen"
+                    >
+                        {{ 'Dienstleistungen' }}
+                        <ChevronDown :size="16" class="transition-transform" :class="servicesOpen ? 'rotate-180' : ''" aria-hidden="true" />
+                    </button>
+                    <Transition
+                        enter-active-class="transition duration-150 ease-out"
+                        enter-from-class="opacity-0 -translate-y-1 scale-95"
+                        leave-active-class="transition duration-100 ease-in"
+                        leave-to-class="opacity-0 -translate-y-1 scale-95"
+                    >
+                        <div
+                            v-if="servicesOpen"
+                            class="absolute left-0 mt-2 w-72 origin-top-left overflow-hidden rounded-card border border-ink-100 bg-white p-2 shadow-lift"
+                        >
+                            <template v-for="cat in navCategories" :key="cat.id">
+                                <Link
+                                    v-if="cat.is_active"
+                                    href="/vehicle-reports"
+                                    class="block rounded-card px-4 py-2.5 text-[15px] font-medium text-ink-700 transition-colors hover:bg-sand-50 hover:text-navy-700"
+                                    @click="servicesOpen = false"
+                                >
+                                    {{ cat.name }}
+                                </Link>
+                                <span
+                                    v-else
+                                    class="flex cursor-not-allowed items-center justify-between rounded-card px-4 py-2.5 text-[15px] font-medium text-ink-300 select-none"
+                                    aria-disabled="true"
+                                >
+                                    {{ cat.name }}
+                                    <span class="rounded-pill bg-sand-100 px-2 py-0.5 text-xs font-bold text-ink-400">{{ 'Demnächst' }}</span>
+                                </span>
+                            </template>
+                        </div>
+                    </Transition>
+                </div>
                 <Link
                     v-for="item in navItems"
                     :key="item.href"
@@ -90,6 +139,26 @@ watch(mobileOpen, (open) => {
         >
             <div v-if="mobileOpen" class="fixed inset-0 top-16 z-40 flex flex-col bg-white lg:hidden">
                 <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-6 pt-8" aria-label="Mobile Navigation">
+                    <p class="px-3 pt-2 text-eyebrow text-ink-500">{{ 'Dienstleistungen' }}</p>
+                    <template v-for="cat in navCategories" :key="cat.id">
+                        <Link
+                            v-if="cat.is_active"
+                            href="/vehicle-reports"
+                            class="block rounded-card px-3 py-3 font-display text-xl font-bold text-navy-700"
+                            @click="mobileOpen = false"
+                        >
+                            {{ cat.name }}
+                        </Link>
+                        <span
+                            v-else
+                            class="flex cursor-not-allowed items-center justify-between rounded-card px-3 py-3 font-display text-xl font-bold text-ink-300 select-none"
+                            aria-disabled="true"
+                        >
+                            {{ cat.name }}
+                            <span class="rounded-pill bg-sand-100 px-2.5 py-1 text-xs font-bold text-ink-400">{{ 'Demnächst' }}</span>
+                        </span>
+                    </template>
+                    <div class="my-3 border-t border-ink-100" />
                     <Motion
                         v-for="(item, i) in navItems"
                         :key="item.href"

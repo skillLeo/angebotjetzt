@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\NewRequestNotificationMail;
 use App\Mail\RequestConfirmationMail;
+use App\Mail\RequestMatchedMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Inspector;
@@ -49,6 +50,8 @@ class RequestService
                 continue;
             }
 
+            $wasUnmatched = $request->status === 'unmatched';
+
             DB::transaction(function () use ($request, $inspector) {
                 $request->matches()->create([
                     'inspector_id' => $inspector->id,
@@ -62,10 +65,28 @@ class RequestService
             });
 
             $this->notifyInspectorOfMatch($inspector, $request);
+
+            if ($wasUnmatched) {
+                $this->notifyCustomerOfMatch($request);
+            }
+
             $matchedCount++;
         }
 
         return $matchedCount;
+    }
+
+    private function notifyCustomerOfMatch(ServiceRequest $request): void
+    {
+        AppNotification::notify(
+            $request->user,
+            'request_matched',
+            "Anbieter gefunden für Anfrage {$request->request_number}",
+            "{$request->serviceType->name} · {$request->ort}",
+            "/account/requests/{$request->id}"
+        );
+
+        Mail::to($request->contact_email)->queue(new RequestMatchedMail($request));
     }
 
     private function notifyInspectorOfMatch(Inspector $inspector, ServiceRequest $request): void

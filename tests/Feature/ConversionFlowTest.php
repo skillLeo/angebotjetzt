@@ -11,17 +11,21 @@ use App\Models\ServiceType;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
 beforeEach(fn () => $this->seed(DatabaseSeeder::class));
 
-it('blocks a guest from reaching or submitting the request wizard', function () {
-    $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
-    $email = 'guest-blocked-'.uniqid().'@example.de';
+it('lets a guest reach the request wizard without being redirected to login', function () {
+    $this->get('/request')->assertOk();
+});
 
-    $this->get('/request')->assertRedirect(route('login'));
+it('creates a real, usable account for a guest who submits the request wizard with a chosen password', function () {
+    Mail::fake();
+    $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
+    $email = 'guest-signup-'.uniqid().'@example.de';
 
     $response = $this->post('/request', [
         'service_type_id' => $type->id,
@@ -30,13 +34,42 @@ it('blocks a guest from reaching or submitting the request wizard', function () 
         'contact_name' => 'Neuer Kunde', 'contact_email' => $email,
         'contact_phone' => '+49 170 1234567',
         'agb' => true, 'privacy' => true,
+        'password' => 'GuestPass123!', 'password_confirmation' => 'GuestPass123!',
     ]);
 
-    $response->assertRedirect(route('login'));
+    $response->assertRedirect();
+    $this->assertAuthenticated();
 
-    // No account or request was created as a side effect of the blocked attempt.
-    expect(User::where('email', $email)->exists())->toBeFalse()
-        ->and(ServiceRequest::where('contact_email', $email)->exists())->toBeFalse();
+    $user = User::where('email', $email)->first();
+    expect($user)->not->toBeNull()
+        ->and(ServiceRequest::where('contact_email', $email)->exists())->toBeTrue();
+
+    // The real, user-chosen password actually works for a fresh login — this is the
+    // specific behaviour that regressed before (password-less/placeholder accounts).
+    Auth::logout();
+    $this->post('/login', ['email' => $email, 'password' => 'GuestPass123!'])
+        ->assertRedirect();
+    $this->assertAuthenticatedAs($user);
+});
+
+it('rejects a guest request submission for an email that already has an account, without creating duplicates', function () {
+    $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
+    $existing = User::factory()->create();
+
+    $response = $this->post('/request', [
+        'service_type_id' => $type->id,
+        'vehicle_make' => 'Audi', 'vehicle_model' => 'A4',
+        'plz' => '50667', 'ort' => 'Köln',
+        'contact_name' => 'Neuer Kunde', 'contact_email' => $existing->email,
+        'contact_phone' => '+49 170 1234567',
+        'agb' => true, 'privacy' => true,
+        'password' => 'GuestPass123!', 'password_confirmation' => 'GuestPass123!',
+    ]);
+
+    $response->assertSessionHasErrors('contact_email');
+    $this->assertGuest();
+    expect(User::where('email', $existing->email)->count())->toBe(1)
+        ->and(ServiceRequest::where('contact_email', $existing->email)->exists())->toBeFalse();
 });
 
 it('lets an authenticated customer submit a request, matches inspectors and notifies them', function () {
