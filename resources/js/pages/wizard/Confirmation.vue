@@ -39,7 +39,7 @@ function claim() {
             <p class="mt-3 text-ink-500">Anfrage-Nummer <span class="font-bold text-navy-700">{{ request.number }}</span></p>
 
             <div class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">
-                <template v-if="!unmatched">
+                <template v-if="!request.unmatched">
                     <div class="flex items-start gap-4">
                         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-green-50 text-green-600">
                             <Mail :size="20" aria-hidden="true" />
