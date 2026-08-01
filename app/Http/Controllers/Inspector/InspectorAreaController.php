@@ -185,10 +185,12 @@ class InspectorAreaController extends Controller
 
         $serviceRequest->update(['status' => 'offers_received']);
 
-        AppNotification::notify($serviceRequest->user, 'new_offer',
-            'Neues Angebot erhalten',
-            "{$inspector->name} hat ein Angebot für Ihre Anfrage {$serviceRequest->request_number} abgegeben.",
-            "/account/requests/{$serviceRequest->id}/offers");
+        if ($serviceRequest->user) {
+            AppNotification::notify($serviceRequest->user, 'new_offer',
+                'Neues Angebot erhalten',
+                "{$inspector->name} hat ein Angebot für Ihre Anfrage {$serviceRequest->request_number} abgegeben.",
+                "/account/requests/{$serviceRequest->id}/offers");
+        }
 
         \Illuminate\Support\Facades\Mail::to($serviceRequest->contact_email)
             ->queue(new \App\Mail\NewOfferMail($serviceRequest, $inspector));

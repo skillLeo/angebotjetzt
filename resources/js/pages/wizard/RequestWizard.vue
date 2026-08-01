@@ -40,8 +40,6 @@ const form = useForm({
     contact_phone: authUser?.phone ?? '',
     agb: false as boolean,
     privacy: false as boolean,
-    password: '',
-    password_confirmation: '',
     photos: [] as File[],
 });
 
@@ -49,7 +47,7 @@ onMounted(() => {
     const saved = localStorage.getItem(DRAFT_KEY);
     if (saved) {
         try {
-            Object.assign(form, { ...JSON.parse(saved), photos: [], password: '', password_confirmation: '' });
+            Object.assign(form, { ...JSON.parse(saved), photos: [] });
         } catch {
             /* ignore malformed draft */
         }
@@ -63,7 +61,7 @@ onMounted(() => {
 });
 
 watch(
-    () => ({ ...form.data(), photos: undefined, password: undefined, password_confirmation: undefined }),
+    () => ({ ...form.data(), photos: undefined }),
     (val) => localStorage.setItem(DRAFT_KEY, JSON.stringify(val)),
     { deep: true },
 );

@@ -1,11 +1,25 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { CheckCircle2, Clock, Mail } from 'lucide-vue-next';
+import FormField from '@/components/forms/FormField.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { CheckCircle2, Clock, KeyRound, Mail } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 
-defineProps<{
+const props = defineProps<{
     request: { number: string; matched: number; unmatched: boolean; service: string; ort: string };
+    canClaim: boolean;
+    contactEmail: string | null;
 }>();
+
+const claimForm = useForm({
+    password: '',
+    password_confirmation: '',
+});
+
+function claim() {
+    claimForm.post(`/request/confirmation/${props.request.number}/claim`, {
+        preserveScroll: true,
+    });
+}
 </script>
 
 <template>
@@ -55,8 +69,42 @@ defineProps<{
                 </template>
             </div>
 
+            <div v-if="canClaim" class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">
+                <div class="flex items-start gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-navy-50 text-navy-700">
+                        <KeyRound :size="20" aria-hidden="true" />
+                    </span>
+                    <div>
+                        <p class="font-display font-bold text-navy-700">Konto anlegen und Anfrage verfolgen</p>
+                        <p class="mt-1 text-sm text-ink-500">
+                            Optional: Vergeben Sie ein Passwort für <span class="font-semibold text-navy-700">{{ contactEmail }}</span>,
+                            um Ihre Anfrage und alle Angebote jederzeit einzusehen. Ganz ohne Konto geht es aber genauso weiter –
+                            wir informieren Sie per E-Mail.
+                        </p>
+                    </div>
+                </div>
+                <form class="mt-5 grid gap-4 sm:grid-cols-2" @submit.prevent="claim">
+                    <FormField
+                        v-model="claimForm.password"
+                        label="Passwort"
+                        type="password"
+                        :error="claimForm.errors.password"
+                    />
+                    <FormField v-model="claimForm.password_confirmation" label="Passwort bestätigen" type="password" />
+                    <div class="sm:col-span-2">
+                        <button
+                            type="submit"
+                            :disabled="claimForm.processing || !claimForm.password"
+                            class="rounded-pill bg-green-500 px-7 py-3 font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-ink-300"
+                        >
+                            Konto erstellen
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
+                <Link v-if="!canClaim" href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
                     Meine Anfragen ansehen
                 </Link>
                 <Link href="/" class="rounded-pill border border-ink-300 px-7 py-3.5 font-bold text-navy-700 transition hover:border-navy-700">

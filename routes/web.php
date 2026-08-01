@@ -36,6 +36,7 @@ Route::get('/privacy', [PublicController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PublicController::class, 'terms'])->name('terms');
 Route::get('/cookie-policy', [PublicController::class, 'cookies'])->name('cookies');
 Route::get('/coming-soon/{category:slug}', [PublicController::class, 'comingSoon'])->name('coming-soon');
+Route::get('/request/start', [PublicController::class, 'requestStart'])->name('request.start');
 Route::post('/coming-soon/{category:slug}/interest', [PublicController::class, 'registerInterest'])
     ->middleware('throttle:10,1')->name('coming-soon.interest');
 
@@ -46,9 +47,12 @@ Route::post('/coming-soon/{category:slug}/interest', [PublicController::class, '
 */
 Route::get('/request', [RequestWizardController::class, 'show'])->name('wizard');
 Route::post('/request', [RequestWizardController::class, 'store'])->middleware('throttle:10,10')->name('wizard.store');
-Route::middleware('auth')->group(function () {
-    Route::get('/request/confirmation/{serviceRequest:request_number}', [RequestWizardController::class, 'confirmation'])->name('wizard.confirmation');
-});
+// Guests may view their own confirmation page and optionally claim an account
+// afterward without ever having logged in — authorization is handled inside
+// the controller (session-scoped guest access or authenticated ownership).
+Route::get('/request/confirmation/{serviceRequest:request_number}', [RequestWizardController::class, 'confirmation'])->name('wizard.confirmation');
+Route::post('/request/confirmation/{serviceRequest:request_number}/claim', [RequestWizardController::class, 'claimAccount'])
+    ->middleware('throttle:5,10')->name('wizard.confirmation.claim');
 
 /*
 |--------------------------------------------------------------------------

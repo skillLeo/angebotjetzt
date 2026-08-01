@@ -102,6 +102,14 @@ class PublicController extends Controller
         ]);
     }
 
+    public function requestStart(): Response
+    {
+        return Inertia::render('public/RequestStart', [
+            'categories' => $this->categories(),
+            'serviceTypes' => $this->serviceTypes(),
+        ]);
+    }
+
     public function category(): Response
     {
         return Inertia::render('public/Category', [

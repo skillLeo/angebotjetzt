@@ -78,13 +78,15 @@ class RequestService
 
     private function notifyCustomerOfMatch(ServiceRequest $request): void
     {
-        AppNotification::notify(
-            $request->user,
-            'request_matched',
-            "Anbieter gefunden für Anfrage {$request->request_number}",
-            "{$request->serviceType->name} · {$request->ort}",
-            "/account/requests/{$request->id}"
-        );
+        if ($request->user) {
+            AppNotification::notify(
+                $request->user,
+                'request_matched',
+                "Anbieter gefunden für Anfrage {$request->request_number}",
+                "{$request->serviceType->name} · {$request->ort}",
+                "/account/requests/{$request->id}"
+            );
+        }
 
         Mail::to($request->contact_email)->queue(new RequestMatchedMail($request));
     }
@@ -110,12 +112,12 @@ class RequestService
     /**
      * Persist a submitted request, match inspectors, and queue all notifications.
      */
-    public function submit(User $user, array $data, array $photoPaths = []): ServiceRequest
+    public function submit(?User $user, array $data, array $photoPaths = []): ServiceRequest
     {
         $request = DB::transaction(function () use ($user, $data, $photoPaths) {
             $request = ServiceRequest::create([
                 ...$data,
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'request_number' => ServiceRequest::nextRequestNumber(),
                 'status' => 'open',
                 'expires_at' => now()->addDays(14),

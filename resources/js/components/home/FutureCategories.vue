@@ -33,7 +33,7 @@ const icons: Record<string, Component> = {
 </script>
 
 <template>
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <template v-for="cat in categories" :key="cat.id">
             <Reveal>
                 <Link
@@ -47,7 +47,7 @@ const icons: Record<string, Component> = {
                         <component :is="icons[cat.icon] ?? Sparkles" :size="22" aria-hidden="true" />
                     </span>
                     <div class="min-w-0">
-                        <p class="truncate font-display font-bold text-navy-700">{{ cat.name }}</p>
+                        <p class="font-display leading-snug font-bold text-navy-700">{{ cat.name }}</p>
                         <span class="mt-1 inline-block text-sm font-semibold text-green-600">{{ 'Angebote erhalten' }}</span>
                     </div>
                 </Link>
@@ -62,7 +62,7 @@ const icons: Record<string, Component> = {
                         <component :is="icons[cat.icon] ?? Sparkles" :size="22" aria-hidden="true" />
                     </span>
                     <div class="min-w-0">
-                        <p class="truncate font-display font-bold text-navy-700">{{ cat.name }}</p>
+                        <p class="font-display leading-snug font-bold text-navy-700">{{ cat.name }}</p>
                         <span
                             class="mt-1 inline-block rounded-pill bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-500"
                         >

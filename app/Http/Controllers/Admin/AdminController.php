@@ -90,7 +90,7 @@ class AdminController extends Controller
                 ->through(fn ($r) => [
                     'id' => $r->id,
                     'number' => $r->request_number,
-                    'customer' => $r->user->name,
+                    'customer' => $r->user->name ?? $r->contact_name,
                     'service' => $r->serviceType->name,
                     'vehicle' => $r->vehicle_make.' '.$r->vehicle_model,
                     'ort' => $r->ort,
@@ -115,7 +115,11 @@ class AdminController extends Controller
                 'number' => $serviceRequest->request_number,
                 'status' => $serviceRequest->status,
                 'service' => $serviceRequest->serviceType->name,
-                'customer' => $serviceRequest->user->only(['name', 'email', 'phone']),
+                'customer' => $serviceRequest->user?->only(['name', 'email', 'phone']) ?? [
+                    'name' => $serviceRequest->contact_name,
+                    'email' => $serviceRequest->contact_email,
+                    'phone' => $serviceRequest->contact_phone,
+                ],
                 'vehicle' => [
                     'make' => $serviceRequest->vehicle_make,
                     'model' => $serviceRequest->vehicle_model,
@@ -244,6 +248,7 @@ class AdminController extends Controller
             'Guthaben freigegeben',
             "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
             '/inspector/wallet');
+        \Illuminate\Support\Facades\Mail::to($booking->inspector->email)->queue(new \App\Mail\BalanceReleasedMail($booking));
 
         AppNotification::notify($booking->user, 'booking_completed',
             'Auftrag abgeschlossen',

@@ -16,8 +16,6 @@ const props = defineProps<{
         contact_phone: string;
         agb: boolean;
         privacy: boolean;
-        password: string;
-        password_confirmation: string;
         processing?: boolean;
         errors: Record<string, string>;
     };
@@ -43,14 +41,10 @@ const serviceName = computed(() => props.serviceTypes.find((t) => t.id === props
 
             <template v-if="isGuest">
                 <div class="rounded-card bg-sand-50 p-4">
-                    <p class="text-sm font-semibold text-navy-700">Konto erstellen</p>
+                    <p class="text-sm font-semibold text-navy-700">Kein Konto nötig</p>
                     <p class="mt-1 text-sm text-ink-500">
-                        Damit Sie Ihre Anfrage und alle Angebote später wiederfinden, legen wir mit dieser E-Mail-Adresse ein Konto für Sie an. Bitte vergeben Sie ein Passwort dafür.
+                        Sie können Ihre Anfrage ohne Konto und ohne Passwort absenden. Direkt danach können Sie optional ein Konto anlegen, um sie später wiederzufinden.
                     </p>
-                </div>
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <FormField v-model="form.password" label="Passwort" type="password" required :error="form.errors.password" />
-                    <FormField v-model="form.password_confirmation" label="Passwort bestätigen" type="password" required />
                 </div>
             </template>
         </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FloatChip from '@/components/marketing/FloatChip.vue';
 import HandDrawnEllipse from '@/components/marketing/HandDrawnEllipse.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { router } from '@inertiajs/vue3';
 import { CheckCircle2, MapPin, MousePointer2, Search } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
@@ -13,15 +14,15 @@ const props = defineProps<{
 }>();
 
 
-const category = ref<number | null>(null);
-const service = ref<string>('');
+const category = ref<string | undefined>(undefined);
+const service = ref<string | undefined>(undefined);
 const location = ref('');
 
 const servicesForCategory = computed(() =>
-    props.serviceTypes.filter((t) => t.categoryId === category.value),
+    props.serviceTypes.filter((t) => String(t.categoryId) === category.value),
 );
 
-watch(category, () => (service.value = ''));
+watch(category, () => (service.value = undefined));
 
 function submit() {
     if (!service.value) return;
@@ -76,31 +77,30 @@ function submit() {
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <div class="relative flex-1">
                                     <label for="hero-category" class="sr-only">{{ 'Kategorie' }}</label>
-                                    <select
-                                        id="hero-category"
-                                        v-model="category"
-                                        class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-                                    >
-                                        <option :value="null">{{ 'Welche Kategorie?' }}</option>
-                                        <option v-for="cat in categories" :key="cat.id" :value="cat.id" :disabled="!cat.is_active">
-                                            {{ cat.name }}{{ !cat.is_active ? ` (${'Demnächst'})` : '' }}
-                                        </option>
-                                    </select>
+                                    <Select v-model="category">
+                                        <SelectTrigger id="hero-category" class="h-12 w-full rounded-pill border-none bg-transparent px-5 text-[15px] font-medium text-ink-700 shadow-none focus-visible:ring-2 focus-visible:ring-green-500">
+                                            <SelectValue :placeholder="'Welche Kategorie?'" />
+                                        </SelectTrigger>
+                                        <SelectContent class="max-w-[calc(100vw-2rem)]">
+                                            <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)" :disabled="!cat.is_active">
+                                                {{ cat.name }}{{ !cat.is_active ? ` (${'Demnächst'})` : '' }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div class="hidden h-7 w-px bg-ink-100 sm:block" />
                                 <div class="relative flex-1">
                                     <label for="hero-service" class="sr-only">{{ 'Leistung' }}</label>
-                                    <select
-                                        id="hero-service"
-                                        v-model="service"
-                                        :disabled="!category"
-                                        class="h-12 w-full appearance-none rounded-pill bg-transparent px-5 text-[15px] font-medium text-ink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:cursor-not-allowed disabled:text-ink-300"
-                                    >
-                                        <option value="">{{ 'Welche Leistung?' }}</option>
-                                        <option v-for="serviceType in servicesForCategory" :key="serviceType.id" :value="serviceType.slug">
-                                            {{ serviceType.name }}
-                                        </option>
-                                    </select>
+                                    <Select v-model="service" :disabled="!category">
+                                        <SelectTrigger id="hero-service" class="h-12 w-full rounded-pill border-none bg-transparent px-5 text-[15px] font-medium text-ink-700 shadow-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:cursor-not-allowed disabled:text-ink-300">
+                                            <SelectValue :placeholder="'Welche Leistung?'" />
+                                        </SelectTrigger>
+                                        <SelectContent class="max-w-[calc(100vw-2rem)]">
+                                            <SelectItem v-for="serviceType in servicesForCategory" :key="serviceType.id" :value="serviceType.slug">
+                                                {{ serviceType.name }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2 border-t border-ink-100 pt-2 sm:flex-row sm:items-center">

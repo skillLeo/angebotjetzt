@@ -22,7 +22,7 @@ it('lets a guest reach the request wizard without being redirected to login', fu
     $this->get('/request')->assertOk();
 });
 
-it('creates a real, usable account for a guest who submits the request wizard with a chosen password', function () {
+it('lets a guest submit the request wizard with no password at all, and creates no account', function () {
     Mail::fake();
     $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
     $email = 'guest-signup-'.uniqid().'@example.de';
@@ -34,18 +34,47 @@ it('creates a real, usable account for a guest who submits the request wizard wi
         'contact_name' => 'Neuer Kunde', 'contact_email' => $email,
         'contact_phone' => '+49 170 1234567',
         'agb' => true, 'privacy' => true,
-        'password' => 'GuestPass123!', 'password_confirmation' => 'GuestPass123!',
     ]);
 
     $response->assertRedirect();
-    $this->assertAuthenticated();
+    $this->assertGuest();
+
+    $request = ServiceRequest::where('contact_email', $email)->first();
+    expect($request)->not->toBeNull()
+        ->and($request->user_id)->toBeNull()
+        ->and(User::where('email', $email)->exists())->toBeFalse();
+});
+
+it('lets a guest optionally set a password after submission to claim a real account', function () {
+    Mail::fake();
+    $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
+    $email = 'guest-claim-'.uniqid().'@example.de';
+
+    $this->post('/request', [
+        'service_type_id' => $type->id,
+        'vehicle_make' => 'Audi', 'vehicle_model' => 'A4',
+        'plz' => '50667', 'ort' => 'Köln',
+        'contact_name' => 'Neuer Kunde', 'contact_email' => $email,
+        'contact_phone' => '+49 170 1234567',
+        'agb' => true, 'privacy' => true,
+    ])->assertRedirect();
+
+    $this->assertGuest();
+    $request = ServiceRequest::where('contact_email', $email)->first();
+    expect($request->user_id)->toBeNull();
+
+    $claim = $this->post("/request/confirmation/{$request->request_number}/claim", [
+        'password' => 'GuestPass123!', 'password_confirmation' => 'GuestPass123!',
+    ]);
+    $claim->assertRedirect();
 
     $user = User::where('email', $email)->first();
-    expect($user)->not->toBeNull()
-        ->and(ServiceRequest::where('contact_email', $email)->exists())->toBeTrue();
+    expect($user)->not->toBeNull();
+    $this->assertAuthenticatedAs($user);
+    expect($request->fresh()->user_id)->toBe($user->id);
 
-    // The real, user-chosen password actually works for a fresh login — this is the
-    // specific behaviour that regressed before (password-less/placeholder accounts).
+    // The real, user-chosen password actually works for a fresh login — never a
+    // password-less/placeholder account.
     Auth::logout();
     $this->post('/login', ['email' => $email, 'password' => 'GuestPass123!'])
         ->assertRedirect();
@@ -63,7 +92,6 @@ it('rejects a guest request submission for an email that already has an account,
         'contact_name' => 'Neuer Kunde', 'contact_email' => $existing->email,
         'contact_phone' => '+49 170 1234567',
         'agb' => true, 'privacy' => true,
-        'password' => 'GuestPass123!', 'password_confirmation' => 'GuestPass123!',
     ]);
 
     $response->assertSessionHasErrors('contact_email');

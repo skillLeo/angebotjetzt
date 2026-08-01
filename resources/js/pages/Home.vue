@@ -52,7 +52,7 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <HeroSection :categories="categories" :service-types="serviceTypes" :hero-image="heroImage" />
 
     <!-- 03 TRUST STRIP -->
-    <section class="bg-white pb-4">
+    <section class="bg-white pt-10 pb-4 lg:pt-14">
         <div class="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
             <div class="flex items-center gap-4 rounded-card border border-ink-100 bg-white p-5">
                 <span class="font-display text-3xl font-extrabold text-navy-700">4,9</span>

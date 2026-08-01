@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FormField from '@/components/forms/FormField.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import WizardNav from '@/components/wizard/WizardNav.vue';
 import { UploadCloud, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -77,31 +78,39 @@ function proceed() {
                 v-model="erstzulassungMasked"
                 label="Erstzulassung"
                 :error="errors.first_registration"
-                maxlength="7"
+                :maxlength="7"
                 placeholder="MM/JJJJ"
                 hint="Format: MM/JJJJ, z. B. 03/2019"
                 @blur="validateFirstRegistration"
             />
             <FormField v-model="form.mileage" label="Kilometerstand" type="number" inputmode="numeric" :error="errors.mileage" min="0" max="2000000" placeholder="z. B. 85000" />
-            <FormField v-model="form.vin" label="FIN / VIN" :error="errors.vin" maxlength="17" placeholder="17-stellig (optional)" hint="Optional – erhöht die Genauigkeit." />
+            <FormField v-model="form.vin" label="FIN / VIN" :error="errors.vin" :maxlength="17" placeholder="17-stellig (optional)" hint="Optional – erhöht die Genauigkeit." />
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-navy-700">Kraftstoff</label>
-                    <select v-model="form.fuel_type" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none">
-                        <option value="">–</option>
-                        <option>Benzin</option>
-                        <option>Diesel</option>
-                        <option>Elektro</option>
-                        <option>Hybrid</option>
-                    </select>
+                    <Select v-model="form.fuel_type">
+                        <SelectTrigger class="h-12 w-full rounded-card border-ink-300 px-4 py-3 text-[15px] focus-visible:border-green-500">
+                            <SelectValue :placeholder="'–'" />
+                        </SelectTrigger>
+                        <SelectContent class="max-w-[calc(100vw-2rem)]">
+                            <SelectItem value="Benzin">Benzin</SelectItem>
+                            <SelectItem value="Diesel">Diesel</SelectItem>
+                            <SelectItem value="Elektro">Elektro</SelectItem>
+                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-navy-700">Getriebe</label>
-                    <select v-model="form.transmission" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none">
-                        <option value="">–</option>
-                        <option>Schaltgetriebe</option>
-                        <option>Automatik</option>
-                    </select>
+                    <Select v-model="form.transmission">
+                        <SelectTrigger class="h-12 w-full rounded-card border-ink-300 px-4 py-3 text-[15px] focus-visible:border-green-500">
+                            <SelectValue :placeholder="'–'" />
+                        </SelectTrigger>
+                        <SelectContent class="max-w-[calc(100vw-2rem)]">
+                            <SelectItem value="Schaltgetriebe">Schaltgetriebe</SelectItem>
+                            <SelectItem value="Automatik">Automatik</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </div>

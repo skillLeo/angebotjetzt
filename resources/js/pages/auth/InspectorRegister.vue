@@ -34,8 +34,8 @@ function submit() {
             <FormField v-model="form.email" :label="'E-Mail'" type="email" required :error="form.errors.email" />
             <FormField v-model="form.city" :label="'Stadt (Ihr Servicegebiet)'" required :error="form.errors.city" />
             <div class="grid gap-4 sm:grid-cols-2">
-                <FormField v-model="form.plz_from" :label="'PLZ von (optional)'" inputmode="numeric" maxlength="5" :error="form.errors.plz_from" />
-                <FormField v-model="form.plz_to" :label="'PLZ bis (optional)'" inputmode="numeric" maxlength="5" :error="form.errors.plz_to" />
+                <FormField v-model="form.plz_from" :label="'PLZ von (optional)'" inputmode="numeric" :maxlength="5" :error="form.errors.plz_from" />
+                <FormField v-model="form.plz_to" :label="'PLZ bis (optional)'" inputmode="numeric" :maxlength="5" :error="form.errors.plz_to" />
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
                 <FormField v-model="form.password" :label="'Passwort'" type="password" required :error="form.errors.password" />

@@ -66,25 +66,12 @@ class RequestWizardController extends Controller
 
         if ($isGuest) {
             $rules['contact_email'][] = Rule::unique('users', 'email');
-            $rules['password'] = $this->passwordRules();
             $messages['contact_email.unique'] = 'Für diese E-Mail-Adresse existiert bereits ein Konto. Bitte melden Sie sich an, um eine Anfrage zu stellen.';
         }
 
         $data = $request->validate($rules, $messages);
 
-        if ($isGuest) {
-            $user = User::create([
-                'name' => $data['contact_name'],
-                'email' => $data['contact_email'],
-                'phone' => $data['contact_phone'],
-                'password' => $data['password'],
-                'agb_accepted' => true,
-                'privacy_accepted_at' => now(),
-            ]);
-            Auth::login($user);
-        } else {
-            $user = Auth::user();
-        }
+        $user = $isGuest ? null : Auth::user();
 
         $photoPaths = [];
         foreach ($request->file('photos', []) as $photo) {
@@ -96,16 +83,27 @@ class RequestWizardController extends Controller
 
         $serviceRequest = $requestService->submit(
             $user,
-            collect($data)->except(['agb', 'privacy', 'photos', 'password', 'password_confirmation'])->all(),
+            collect($data)->except(['agb', 'privacy', 'photos'])->all(),
             $photoPaths
         );
+
+        if ($isGuest) {
+            // No account exists yet for this submission. Grant this browser
+            // session access to the confirmation page (and the optional
+            // post-submission password screen) without logging anyone in.
+            $request->session()->put("request_access_{$serviceRequest->id}", true);
+        }
 
         return redirect()->route('wizard.confirmation', $serviceRequest->request_number);
     }
 
-    public function confirmation(ServiceRequest $serviceRequest): Response
+    public function confirmation(Request $request, ServiceRequest $serviceRequest): Response
     {
-        abort_unless(Auth::id() === $serviceRequest->user_id, 403);
+        $isOwner = Auth::check() && Auth::id() === $serviceRequest->user_id;
+        $hasGuestAccess = $request->session()->get("request_access_{$serviceRequest->id}") === true;
+        abort_unless($isOwner || $hasGuestAccess, 403);
+
+        $canClaim = $serviceRequest->user_id === null && ! Auth::check();
 
         return Inertia::render('wizard/Confirmation', [
             'request' => [
@@ -115,6 +113,38 @@ class RequestWizardController extends Controller
                 'service' => $serviceRequest->serviceType->name,
                 'ort' => $serviceRequest->ort,
             ],
+            'canClaim' => $canClaim,
+            'contactEmail' => $canClaim ? $serviceRequest->contact_email : null,
         ]);
+    }
+
+    public function claimAccount(Request $request, ServiceRequest $serviceRequest): RedirectResponse
+    {
+        $hasGuestAccess = $request->session()->get("request_access_{$serviceRequest->id}") === true;
+        abort_unless($hasGuestAccess && ! Auth::check(), 403);
+
+        if ($serviceRequest->user_id !== null) {
+            return back()->with('error', 'Für diese Anfrage besteht bereits ein Konto.');
+        }
+
+        if (User::where('email', $serviceRequest->contact_email)->exists()) {
+            return back()->with('error', 'Für diese E-Mail-Adresse existiert bereits ein Konto. Bitte melden Sie sich an.');
+        }
+
+        $data = $request->validate(['password' => $this->passwordRules()]);
+
+        $user = User::create([
+            'name' => $serviceRequest->contact_name,
+            'email' => $serviceRequest->contact_email,
+            'phone' => $serviceRequest->contact_phone,
+            'password' => $data['password'],
+            'agb_accepted' => true,
+            'privacy_accepted_at' => now(),
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('wizard.confirmation', $serviceRequest->request_number)
+            ->with('success', 'Konto erstellt! Sie können Ihre Anfrage jetzt jederzeit verfolgen.');
     }
 }
