@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import StarRating from '@/components/marketing/StarRating.vue';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, BadgeCheck, CalendarClock, Check } from 'lucide-vue-next';
@@ -17,7 +18,18 @@ const props = defineProps<{
 const accepting = ref<number | null>(null);
 const lowest = props.offers.length ? Math.min(...props.offers.map((o) => o.price)) : 0;
 
-function accept(offerId: number) {
+const confirmDialogOpen = ref(false);
+const pendingOffer = ref<(typeof props.offers)[number] | null>(null);
+
+function openConfirm(offer: (typeof props.offers)[number]) {
+    pendingOffer.value = offer;
+    confirmDialogOpen.value = true;
+}
+
+function confirmAccept() {
+    if (!pendingOffer.value) return;
+    const offerId = pendingOffer.value.id;
+    confirmDialogOpen.value = false;
     accepting.value = offerId;
     router.post(`/account/offers/${offerId}/accept`, {}, {
         onFinish: () => (accepting.value = null),
@@ -80,10 +92,10 @@ function accept(offerId: number) {
                 type="button"
                 :disabled="accepting !== null || o.status !== 'open'"
                 class="mt-5 inline-flex items-center justify-center gap-2 rounded-pill bg-green-500 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
-                @click="accept(o.id)"
+                @click="openConfirm(o)"
             >
                 <Check :size="18" aria-hidden="true" />
-                {{ accepting === o.id ? 'Weiterleitung …' : 'Angebot annehmen & bezahlen' }}
+                {{ accepting === o.id ? 'Wird bestätigt …' : 'Angebot annehmen' }}
             </button>
         </article>
     </div>
@@ -91,4 +103,39 @@ function accept(offerId: number) {
     <p v-if="!offers.length" class="rounded-card border border-ink-100 bg-white py-12 text-center text-ink-500">
         {{ 'Für diese Anfrage liegen noch keine Angebote vor.' }}
     </p>
+
+    <Dialog v-model:open="confirmDialogOpen">
+        <DialogContent v-if="pendingOffer">
+            <DialogHeader>
+                <DialogTitle>{{ 'Angebot verbindlich annehmen?' }}</DialogTitle>
+                <DialogDescription class="space-y-3 pt-2 text-left">
+                    <span class="block">
+                        {{ `Mit der Annahme des Angebots von ${pendingOffer.inspector.name} über ${formatEuro(pendingOffer.price)} schließen Sie eine verbindliche Vereinbarung direkt mit diesem Gutachter ab.` }}
+                    </span>
+                    <span class="block">
+                        {{ 'Die Zahlung für den Auftrag erfolgt direkt zwischen Ihnen und dem Gutachter, außerhalb der Plattform. AngebotJetzt ist an dieser Zahlung nicht beteiligt.' }}
+                    </span>
+                    <span class="block">
+                        {{ 'Nach der Bestätigung werden die Kontaktdaten beider Seiten freigeschaltet und alle anderen Angebote für diese Anfrage automatisch abgelehnt.' }}
+                    </span>
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter class="gap-2">
+                <button
+                    type="button"
+                    class="rounded-pill border border-ink-300 px-6 py-2.5 text-sm font-bold text-navy-700 transition hover:border-navy-700"
+                    @click="confirmDialogOpen = false"
+                >
+                    {{ 'Abbrechen' }}
+                </button>
+                <button
+                    type="button"
+                    class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600"
+                    @click="confirmAccept"
+                >
+                    {{ 'Verbindlich annehmen' }}
+                </button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>

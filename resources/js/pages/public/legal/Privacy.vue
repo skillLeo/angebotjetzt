@@ -20,7 +20,7 @@ import LegalPage from '@/components/marketing/LegalPage.vue';
         <p>{{ 'Zur Erbringung der Dienstleistung geben wir Ihre Anfrage an geprüfte Gutachter in Ihrer Region weiter. Vollständige Kontaktdaten werden erst nach verbindlicher Beauftragung offengelegt.' }}</p>
 
         <h2>{{ '5. Zahlungsabwicklung' }}</h2>
-        <p>{{ 'Zahlungen werden über den Zahlungsdienstleister Stripe abgewickelt. Dabei werden die für die Zahlung erforderlichen Daten an Stripe übermittelt. Es gelten ergänzend die Datenschutzbestimmungen von Stripe.' }}</p>
+        <p>{{ 'Die Zahlung für den beauftragten Gutachten-Auftrag erfolgt direkt zwischen Ihnen und dem beauftragten Gutachter, außerhalb der Plattform. AngebotJetzt ist an dieser Zahlung nicht beteiligt und verarbeitet hierzu keine Zahlungsdaten. Für ihre Vermittlungsleistung stellt AngebotJetzt dem Gutachter eine gesonderte Provisionsrechnung.' }}</p>
 
         <h2>{{ '6. Speicherdauer' }}</h2>
         <p>{{ 'Wir speichern Ihre Daten nur so lange, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen dies vorschreiben.' }}</p>

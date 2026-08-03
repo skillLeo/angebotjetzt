@@ -11,15 +11,15 @@ const sections = computed(() => [
             { q: 'Was kostet mich eine Anfrage?', a: 'Ihre Anfrage und der Angebotsvergleich sind vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des beauftragten Anbieters.' },
             { q: 'Wie schnell erhalte ich Angebote?', a: 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein.' },
             { q: 'Kann ich mehrere Angebote vergleichen?', a: 'Ja. Alle Angebote werden übersichtlich nebeneinander mit Preis, Anbieterprofil und Bewertung dargestellt.' },
-            { q: 'Wie bezahle ich?', a: 'Sicher online im Moment der Beauftragung über unseren verschlüsselten Zahlungsdienstleister.' },
+            { q: 'Wie bezahle ich?', a: 'Nach der verbindlichen Annahme eines Angebots vereinbaren Sie die Zahlung direkt mit dem Gutachter. Die Plattform ist an dieser Zahlung nicht beteiligt.' },
         ],
     },
     {
         title: 'Für Anbieter',
         items: [
             { q: 'Wie erhalte ich Anfragen?', a: 'Passende Anfragen aus Ihrem Servicegebiet werden Ihnen automatisch per E-Mail und im Dashboard angezeigt.' },
-            { q: 'Wie hoch ist die Provision?', a: 'Die Plattform behält 10 % je erfolgreich vermitteltem Auftrag ein. Es gibt keine monatliche Grundgebühr.' },
-            { q: 'Wann wird mein Guthaben ausgezahlt?', a: 'Ihr Anteil wird nach Abschluss und Bestätigung im Wallet gutgeschrieben. Auszahlungen fordern Sie jederzeit an.' },
+            { q: 'Wie hoch ist die Provision?', a: 'Für jeden erfolgreich vermittelten Auftrag stellt die Plattform Ihnen eine Provision von 10 % des Auftragswerts in Rechnung. Es gibt keine monatliche Grundgebühr.' },
+            { q: 'Wie und wann bezahle ich die Provision?', a: 'Sobald Sie ein Angebot gewinnen, erhalten Sie automatisch eine Provisionsrechnung mit 14 Tagen Zahlungsfrist per E-Mail sowie jederzeit zum Abruf unter „Rechnungen" in Ihrem Dashboard.' },
         ],
     },
 ]);

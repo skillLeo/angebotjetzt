@@ -2,7 +2,7 @@
 import HandDrawnFrame from '@/components/marketing/HandDrawnFrame.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Bell, Check, MapPin, Wallet } from 'lucide-vue-next';
+import { Bell, Check, MapPin, Receipt } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 
@@ -11,14 +11,14 @@ defineProps<{ stats: { inspectors: number; requests: number } }>();
 const steps = computed(() => [
     { icon: Bell, title: 'Anfragen automatisch erhalten', text: 'Passende Aufträge aus Ihrem Servicegebiet landen automatisch per E-Mail und im Dashboard.' },
     { icon: MapPin, title: 'Servicegebiet selbst bestimmen', text: 'Definieren Sie Städte und PLZ-Bereiche, in denen Sie tätig sein möchten.' },
-    { icon: Wallet, title: 'Guthaben im Wallet', text: 'Ihr Anteil landet im Wallet und wird auf Anforderung ausgezahlt – wann immer Sie möchten.' },
+    { icon: Receipt, title: 'Klare Provisionsrechnung', text: 'Nach jedem gewonnenen Auftrag erhalten Sie automatisch eine transparente Rechnung über die 10 % Provision.' },
 ]);
 const benefits = computed(() => [
     'Keine monatliche Grundgebühr',
     'Nur 10 % Provision je Buchung',
     'Eigene Preise pro Auftrag',
-    'Kunden zahlen vorab online',
-    'Volle Kontrolle über Ihr Guthaben',
+    'Direkte Zahlung durch den Kunden',
+    'Transparente Provisionsrechnung',
     'Bundesweites Kundennetzwerk',
 ]);
 const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=900&auto=format&fit=crop';
@@ -27,7 +27,7 @@ const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee2262
 <template>
     <Head>
         <title>{{ 'Für Anbieter – jetzt registrieren' }}</title>
-        <meta name="description" :content="'Werden Sie Anbieter bei AngebotJetzt: passende Anfragen automatisch, eigene Preise, faire 10 % Provision und volle Kontrolle über Auszahlungen.'" />
+        <meta name="description" :content="'Werden Sie Anbieter bei AngebotJetzt: passende Anfragen automatisch, eigene Preise, faire 10 % Provision und eine transparente Provisionsrechnung.'" />
     </Head>
 
     <section class="bg-navy-900 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">

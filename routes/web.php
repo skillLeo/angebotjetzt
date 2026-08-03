@@ -3,10 +3,10 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\InspectorAuthController;
-use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Customer\CustomerAreaController;
 use App\Http\Controllers\Inspector\InspectorAreaController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OfferAcceptanceController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\RequestWizardController;
 use App\Http\Controllers\SeoController;
@@ -69,15 +69,8 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('konto.')->grou
     Route::post('/bookings/{booking}/review', [CustomerAreaController::class, 'storeReview'])->name('bookings.review');
     Route::get('/payments', [CustomerAreaController::class, 'payments'])->name('payments');
 
-    Route::post('/offers/{offer}/accept', [CheckoutController::class, 'accept'])->name('offers.accept');
+    Route::post('/offers/{offer}/accept', [OfferAcceptanceController::class, 'accept'])->name('offers.accept');
 });
-
-Route::middleware('auth')->group(function () {
-    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-    Route::get('/checkout/cancelled', [CheckoutController::class, 'cancelled'])->name('checkout.cancelled');
-});
-
-Route::post('/stripe/webhook', [CheckoutController::class, 'webhook'])->name('stripe.webhook');
 
 Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])
     ->middleware('auth:web,inspector')
@@ -124,6 +117,8 @@ Route::middleware('auth:inspector')->prefix('inspector')->name('inspector.')->gr
     Route::get('/wallet', [InspectorAreaController::class, 'wallet'])->name('wallet');
     Route::get('/wallet/payout', [InspectorAreaController::class, 'payoutForm'])->name('payout');
     Route::post('/wallet/payout', [InspectorAreaController::class, 'storePayout'])->name('payout.store');
+    Route::get('/invoices', [InspectorAreaController::class, 'invoices'])->name('invoices');
+    Route::get('/invoices/{invoice}/download', [InspectorAreaController::class, 'downloadInvoice'])->name('invoices.download');
     Route::get('/profile', [InspectorAreaController::class, 'profile'])->name('profile');
     Route::post('/profile', [InspectorAreaController::class, 'updateProfile'])->name('profile.update');
 });
@@ -160,6 +155,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/wallets', [AdminController::class, 'wallets'])->name('wallets');
     Route::get('/payouts', [AdminController::class, 'payouts'])->name('payouts');
     Route::post('/payouts/{payout}/paid', [AdminController::class, 'markPayoutPaid'])->name('payouts.paid');
+    Route::get('/invoices', [AdminController::class, 'invoices'])->name('invoices');
+    Route::get('/invoices/{invoice}/download', [AdminController::class, 'downloadInvoice'])->name('invoices.download');
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
     Route::get('/customers/{customer}', [AdminController::class, 'customerDetail'])->name('customers.show');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
@@ -194,6 +191,5 @@ Route::redirect('/anfrage', '/request', 301);
 Route::redirect('/registrieren/gutachter', '/inspector/register', 301);
 Route::get('/konto/{path?}', fn (?string $path = null) => redirect('/account'.($path ? '/'.$path : ''), 301))->where('path', '.*');
 Route::get('/gutachter/{path?}', fn (?string $path = null) => redirect('/inspector'.($path ? '/'.$path : ''), 301))->where('path', '.*');
-Route::get('/kasse/{path?}', fn (?string $path = null) => redirect('/checkout'.($path ? '/'.$path : ''), 301))->where('path', '.*');
 
 require __DIR__.'/settings.php';

@@ -88,7 +88,7 @@ class CustomerAreaController extends Controller
     {
         return Inertia::render('customer/Bookings', [
             'bookings' => Auth::user()->bookings()
-                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name', 'payment', 'review:id,booking_id'])
+                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name', 'review:id,booking_id'])
                 ->latest()
                 ->paginate(10)
                 ->through(fn ($b) => $this->bookingSummary($b)),
@@ -99,7 +99,7 @@ class CustomerAreaController extends Controller
     {
         abort_unless($booking->user_id === Auth::id(), 403);
 
-        $booking->load(['inspector', 'offer', 'request.serviceType:id,name', 'payment', 'review']);
+        $booking->load(['inspector', 'offer', 'request.serviceType:id,name', 'review']);
 
         return Inertia::render('customer/BookingDetail', [
             'booking' => [
@@ -133,17 +133,22 @@ class CustomerAreaController extends Controller
         );
 
         // A customer rating is their confirmation the job was done — this is
-        // what finalizes the booking and releases the inspector's pending
-        // balance, the same as an admin's manual confirmation would.
+        // what finalizes the booking. Under the direct-agreement model there's
+        // no platform-held balance to release (the customer paid the provider
+        // directly); that only still applies to legacy bookings carrying a
+        // Payment from the old Stripe/wallet flow.
         if ($booking->status === 'completed_by_inspector') {
             $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
             $booking->request->update(['status' => 'completed']);
-            $walletService->releasePending($booking);
 
-            \App\Models\AppNotification::notify($booking->inspector, 'balance_released',
-                'Guthaben freigegeben',
-                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-                '/inspector/wallet');
+            if ($booking->payment) {
+                $walletService->releasePending($booking);
+
+                \App\Models\AppNotification::notify($booking->inspector, 'balance_released',
+                    'Guthaben freigegeben',
+                    "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                    '/inspector/wallet');
+            }
 
             \App\Models\ActivityLog::record('booking.confirmed', Auth::user(), $booking);
         }
@@ -217,7 +222,6 @@ class CustomerAreaController extends Controller
             'city' => $b->inspector->city,
             'price' => $b->offer->price_cents,
             'status' => $b->status,
-            'paid' => $b->payment?->status === 'paid',
             'date' => $b->created_at->format('d.m.Y'),
             'hasReview' => isset($b->review),
         ];

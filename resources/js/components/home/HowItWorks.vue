@@ -8,7 +8,7 @@ import { computed } from 'vue';
 const steps = computed(() => [
     { n: '01', title: 'Anfrage stellen', text: 'Beschreiben Sie, welche Leistung Sie benötigen, und Ihre Region. In zwei Minuten erledigt – kostenlos und unverbindlich.' },
     { n: '02', title: 'Angebote vergleichen', text: 'Geprüfte Anbieter aus Ihrer Nähe senden Ihnen individuelle Preisangebote. Sie sehen alle Angebote übersichtlich nebeneinander.' },
-    { n: '03', title: 'Anbieter beauftragen', text: 'Wählen Sie das beste Angebot, bezahlen Sie sicher online und beauftragen Sie Ihren Anbieter – alles in einem Schritt.' },
+    { n: '03', title: 'Anbieter beauftragen', text: 'Wählen Sie das beste Angebot und beauftragen Sie Ihren Anbieter verbindlich. Die Zahlung vereinbaren Sie anschließend direkt miteinander.' },
 ]);
 </script>
 

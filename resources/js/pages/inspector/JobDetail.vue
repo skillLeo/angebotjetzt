@@ -69,9 +69,10 @@ function complete() {
             <PageCard :title="'Vergütung'">
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between"><span class="text-ink-500">{{ 'Auftragswert' }}</span><span class="font-bold text-navy-700">{{ formatEuro(job.price) }}</span></div>
+                    <div class="flex justify-between"><span class="text-ink-500">{{ 'Provision (Rechnung folgt separat)' }}</span><span class="font-bold text-navy-700">{{ formatEuro(job.price - job.net) }}</span></div>
                     <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">{{ 'Ihr Anteil' }}</span><span class="font-display text-lg font-extrabold text-green-600">{{ formatEuro(job.net) }}</span></div>
                     <button
-                        v-if="['paid', 'in_progress'].includes(job.status)"
+                        v-if="['accepted', 'paid', 'in_progress'].includes(job.status)"
                         type="button"
                         :disabled="completing"
                         class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-pill bg-green-500 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
@@ -80,10 +81,10 @@ function complete() {
                         <Check :size="18" aria-hidden="true" /> {{ 'Auftrag als abgeschlossen markieren' }}
                     </button>
                     <p v-else-if="job.status === 'completed_by_inspector'" class="mt-3 rounded-card bg-green-50 p-3 text-center text-xs text-green-700">
-                        {{ 'Warte auf Bestätigung durch die Plattform. Danach wird Ihr Guthaben freigegeben.' }}
+                        {{ 'Als abgeschlossen markiert. Warte auf Bestätigung durch den Kunden bzw. die Plattform.' }}
                     </p>
                     <p v-else-if="job.status === 'confirmed'" class="mt-3 rounded-card bg-green-50 p-3 text-center text-xs text-green-700">
-                        {{ 'Abgeschlossen und bestätigt. Ihr Guthaben wurde freigegeben.' }}
+                        {{ 'Abgeschlossen und bestätigt.' }}
                     </p>
                 </div>
             </PageCard>

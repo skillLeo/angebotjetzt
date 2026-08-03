@@ -1,11 +1,15 @@
 <?php
 
+use App\Mail\BookingConfirmedCustomerMail;
+use App\Mail\BookingConfirmedInspectorMail;
+use App\Mail\CommissionInvoiceMail;
 use App\Mail\NewRequestNotificationMail;
+use App\Mail\OfferNotSelectedMail;
 use App\Mail\RequestConfirmationMail;
 use App\Models\Booking;
 use App\Models\Inspector;
+use App\Models\Invoice;
 use App\Models\Offer;
-use App\Models\Payment;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\User;
@@ -13,6 +17,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -165,10 +170,14 @@ it('lets an inspector submit an offer with a correct commission split', function
         ->and($offer->inspector_cents)->toBe(31500);
 });
 
-it('processes a Stripe checkout.session.completed webhook idempotently', function () {
+it('accepts an offer under the direct-agreement model: rejects competitors, unlocks contacts, notifies everyone and generates a downloadable commission invoice', function () {
+    Mail::fake();
+    Storage::fake('local');
+
+    $customer = User::factory()->create();
     $inspector = Inspector::has('matches')->first();
     $request = $inspector->matches()->first()->request;
-    $request->update(['status' => 'offers_received']);
+    $request->update(['status' => 'offers_received', 'user_id' => $customer->id]);
     $request->offers()->delete();
     $request->booking()?->delete();
 
@@ -185,31 +194,41 @@ it('processes a Stripe checkout.session.completed webhook idempotently', functio
         'status' => 'open',
     ]);
 
-    $payload = [
-        'id' => 'evt_test_'.uniqid(),
-        'type' => 'checkout.session.completed',
-        'data' => ['object' => [
-            'id' => 'cs_test_'.uniqid(),
-            'payment_intent' => 'pi_test_123',
-            'metadata' => ['offer_id' => (string) $offer->id, 'request_id' => (string) $request->id, 'user_id' => (string) $request->user_id],
-        ]],
-    ];
+    $this->actingAs($customer)
+        ->post("/account/offers/{$offer->id}/accept")
+        ->assertRedirect();
 
-    $this->postJson('/stripe/webhook', $payload)->assertOk();
-
+    // Booking created directly (no Stripe payment record); offer accepted, competitor rejected.
     $booking = Booking::where('offer_id', $offer->id)->first();
     expect($booking)->not->toBeNull()
-        ->and($booking->status)->toBe('paid')
+        ->and($booking->status)->toBe('accepted')
         ->and($offer->fresh()->status)->toBe('accepted')
-        ->and($rejected->fresh()->status)->toBe('rejected');
+        ->and($rejected->fresh()->status)->toBe('rejected')
+        ->and($request->fresh()->status)->toBe('accepted');
 
-    $payment = Payment::where('booking_id', $booking->id)->first();
-    expect($payment->commission_cents + $payment->inspector_cents)->toBe($payment->total_cents);
+    // Full contact details for both sides are unlocked purely by the booking existing.
+    expect($booking->user_id)->toBe($customer->id)
+        ->and($booking->inspector_id)->toBe($inspector->id);
 
-    // Inspector share is credited as pending.
-    expect($inspector->wallet->fresh()->pending_cents)->toBe(27000);
+    // A real, downloadable commission-invoice PDF was generated for 10% of the offer.
+    $invoice = Invoice::where('booking_id', $booking->id)->first();
+    expect($invoice)->not->toBeNull()
+        ->and($invoice->inspector_id)->toBe($inspector->id)
+        ->and($invoice->offer_amount_cents)->toBe(30000)
+        ->and($invoice->commission_cents)->toBe(3000)
+        ->and((float) $invoice->commission_percent)->toBe(10.0)
+        ->and($invoice->due_date->toDateString())->toBe(now()->addDays(14)->toDateString())
+        ->and($invoice->pdf_path)->not->toBeNull();
+    Storage::disk('local')->assertExists($invoice->pdf_path);
 
-    // Replaying the same event must not create a second booking.
-    $this->postJson('/stripe/webhook', $payload)->assertOk();
+    // All three acceptance emails plus the losing-provider notification went out.
+    Mail::assertQueued(BookingConfirmedCustomerMail::class);
+    Mail::assertQueued(BookingConfirmedInspectorMail::class);
+    Mail::assertQueued(CommissionInvoiceMail::class);
+    Mail::assertQueued(OfferNotSelectedMail::class);
+
+    // The offer can't be accepted twice.
+    $this->actingAs($customer)->post("/account/offers/{$offer->id}/accept")
+        ->assertSessionHasErrors('offer');
     expect(Booking::where('offer_id', $offer->id)->count())->toBe(1);
 });

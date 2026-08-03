@@ -46,6 +46,11 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function review(): HasOne
     {
         return $this->hasOne(Review::class);

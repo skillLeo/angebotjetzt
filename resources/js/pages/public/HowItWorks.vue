@@ -9,7 +9,7 @@ import { computed } from 'vue';
 const faq = computed(() => [
     { q: 'Ist die Anfrage wirklich kostenlos?', a: 'Ja. Anfrage und Angebotsvergleich sind für Kunden vollständig kostenlos und unverbindlich.' },
     { q: 'Wie viele Angebote erhalte ich?', a: 'Das hängt von den verfügbaren Anbietern in Ihrer Region ab – in der Regel erhalten Sie mehrere Angebote zum Vergleich.' },
-    { q: 'Wann bezahle ich?', a: 'Erst wenn Sie ein Angebot annehmen. Die Zahlung erfolgt sicher online im selben Schritt.' },
+    { q: 'Wann bezahle ich?', a: 'Erst wenn Sie ein Angebot verbindlich annehmen. Die Zahlung vereinbaren Sie dann direkt mit dem Anbieter, außerhalb der Plattform.' },
 ]);
 </script>
 

@@ -12,16 +12,16 @@ import LegalPage from '@/components/marketing/LegalPage.vue';
         <p>{{ 'AngebotJetzt vermittelt zwischen Kunden, die ein Kfz-Gutachten benötigen, und unabhängigen Gutachtern. Der Gutachtervertrag kommt unmittelbar zwischen Kunde und Gutachter zustande.' }}</p>
 
         <h2>{{ '§ 3 Ablauf der Vermittlung' }}</h2>
-        <p>{{ 'Der Kunde stellt eine kostenlose Anfrage. Passende Gutachter geben individuelle Angebote ab. Mit Annahme eines Angebots und erfolgreicher Online-Zahlung kommt ein verbindlicher Auftrag zustande.' }}</p>
+        <p>{{ 'Der Kunde stellt eine kostenlose Anfrage. Passende Gutachter geben individuelle Angebote ab. Mit der ausdrücklich bestätigten Annahme eines Angebots kommt ein verbindlicher Auftrag unmittelbar zwischen Kunde und Gutachter zustande.' }}</p>
 
         <h2>{{ '§ 4 Preise und Zahlung' }}</h2>
-        <p>{{ 'Die Preise werden von den Gutachtern individuell festgelegt. Die Zahlung erfolgt online im Moment der Beauftragung über unseren Zahlungsdienstleister.' }}</p>
+        <p>{{ 'Die Preise werden von den Gutachtern individuell festgelegt. Die Zahlung für den Auftrag erfolgt direkt zwischen Kunde und Gutachter und wird außerhalb der Plattform abgewickelt. AngebotJetzt ist an dieser Zahlung nicht beteiligt.' }}</p>
 
         <h2>{{ '§ 5 Provision' }}</h2>
-        <p>{{ 'AngebotJetzt behält je abgeschlossener Buchung eine Provision in Höhe von 10 % des Auftragswerts ein. Der verbleibende Betrag steht dem Gutachter zu.' }}</p>
+        <p>{{ 'Für die erfolgreiche Vermittlung stellt AngebotJetzt dem Gutachter eine Provision in Höhe von 10 % des Auftragswerts in Rechnung. Der Auftragswert selbst steht in voller Höhe dem Gutachter zu.' }}</p>
 
-        <h2>{{ '§ 6 Auszahlung an Gutachter' }}</h2>
-        <p>{{ 'Das Guthaben der Gutachter wird als Wallet-Guthaben auf der Plattform geführt. Auszahlungen erfolgen auf Anforderung des Gutachters manuell durch die Plattform.' }}</p>
+        <h2>{{ '§ 6 Rechnungsstellung' }}</h2>
+        <p>{{ 'Mit der Annahme eines Angebots erhält der Gutachter automatisch eine Provisionsrechnung mit Fälligkeitsdatum per E-Mail sowie zum Abruf im Gutachter-Dashboard.' }}</p>
 
         <h2>{{ '§ 7 Haftung' }}</h2>
         <p>{{ 'AngebotJetzt haftet nicht für die inhaltliche Richtigkeit der erstellten Gutachten. Diese liegt in der alleinigen Verantwortung des jeweiligen Gutachters.' }}</p>

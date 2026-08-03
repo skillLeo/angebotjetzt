@@ -11,7 +11,7 @@ import { toast } from 'vue-sonner';
 const props = defineProps<{
     booking: {
         id: number; number: string; service: string; vehicle: string; inspector: string; inspectorCompany: string | null;
-        city: string | null; price: number; status: string; paid: boolean; date: string;
+        city: string | null; price: number; status: string; date: string;
         inspectorPhone: string | null; inspectorEmail: string | null; message: string | null; hasReview: boolean;
     };
 }>();
@@ -85,13 +85,12 @@ function submitReview() {
         </div>
 
         <div>
-            <PageCard :title="'Zahlungsübersicht'">
+            <PageCard :title="'Auftragsübersicht'">
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between"><span class="text-ink-500">{{ 'Auftragswert' }}</span><span class="font-bold text-navy-700">{{ formatEuro(booking.price) }}</span></div>
-                    <div class="flex justify-between border-t border-ink-100 pt-3">
-                        <span class="text-ink-500">{{ 'Zahlung' }}</span>
-                        <StatusBadge :status="booking.paid ? 'paid' : 'pending'" />
-                    </div>
+                    <p class="border-t border-ink-100 pt-3 text-xs leading-relaxed text-ink-500">
+                        {{ 'Die Zahlung für diesen Auftrag erfolgt direkt zwischen Ihnen und dem Gutachter, außerhalb der Plattform.' }}
+                    </p>
                 </div>
             </PageCard>
         </div>

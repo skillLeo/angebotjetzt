@@ -12,7 +12,7 @@ class BookingConfirmedCustomerMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Zahlung erfolgreich — Auftrag {$this->booking->booking_number} bestätigt";
+        return "Auftrag {$this->booking->booking_number} bestätigt — Kontaktdaten Ihres Gutachters";
     }
 
     protected function title(): string
@@ -27,9 +27,9 @@ class BookingConfirmedCustomerMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->user->name},",
-            "Ihre Zahlung über <strong>{$price} €</strong> ist eingegangen. Ihr Auftrag <strong>{$b->booking_number}</strong> ist damit verbindlich bestätigt.",
-            "Ihr Gutachter: <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name})<br>Telefon: {$b->inspector->phone}",
-            'Der Gutachter wird sich zeitnah bei Ihnen melden, um den Termin abzustimmen.',
+            "Sie haben das Angebot über <strong>{$price} €</strong> angenommen. Ihr Auftrag <strong>{$b->booking_number}</strong> ist damit verbindlich bestätigt.",
+            "Ihr Gutachter: <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name})<br>Telefon: {$b->inspector->phone}<br>E-Mail: {$b->inspector->email}",
+            'Bitte stimmen Sie den Termin und die Bezahlung direkt mit dem Gutachter ab — beides erfolgt außerhalb der Plattform.',
         ];
     }
 

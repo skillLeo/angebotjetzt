@@ -8,14 +8,14 @@ const customerPoints = computed(() => [
     'Anfrage stellen – kostenlos',
     'Mehrere Angebote vergleichen',
     'Keine versteckten Gebühren',
-    'Sichere Online-Zahlung',
+    'Zahlung direkt an den Gutachter',
     'Nur der Anbieterpreis fällt an',
 ]);
 const inspectorPoints = computed(() => [
     'Passende Anfragen automatisch per E-Mail',
     'Eigene Preise pro Auftrag festlegen',
     'Faire, transparente Provision je Buchung',
-    'Guthaben im Wallet, jederzeit auszahlbar',
+    'Klare Provisionsrechnung nach jedem Auftrag',
     'Keine monatliche Grundgebühr',
 ]);
 </script>

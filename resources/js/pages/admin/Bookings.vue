@@ -36,8 +36,7 @@ const columns = [
         <template #actions>
             <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
                 <option value="">Alle Status</option>
-                <option value="awaiting_payment">Zahlung ausstehend</option>
-                <option value="paid">Bezahlt</option>
+                <option value="accepted">Angenommen</option>
                 <option value="in_progress">In Bearbeitung</option>
                 <option value="completed_by_inspector">Abgeschlossen (Gutachter)</option>
                 <option value="confirmed">Bestätigt</option>

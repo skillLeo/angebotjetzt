@@ -270,7 +270,7 @@ class InspectorAreaController extends Controller
         $inspector = Auth::guard('inspector')->user();
         abort_unless($booking->inspector_id === $inspector->id, 403);
 
-        if (! in_array($booking->status, ['paid', 'in_progress'], true)) {
+        if (! in_array($booking->status, ['accepted', 'paid', 'in_progress'], true)) {
             return back()->withErrors(['status' => 'Dieser Auftrag kann nicht abgeschlossen werden.']);
         }
 
@@ -330,6 +330,34 @@ class InspectorAreaController extends Controller
         $area->delete();
 
         return back()->with('success', 'Servicegebiet entfernt.');
+    }
+
+    public function invoices(): Response
+    {
+        return Inertia::render('inspector/Invoices', [
+            'invoices' => Auth::guard('inspector')->user()->invoices()
+                ->with('booking:id,booking_number')
+                ->latest()
+                ->paginate(15)
+                ->through(fn ($i) => [
+                    'id' => $i->id,
+                    'number' => $i->invoice_number,
+                    'booking' => $i->booking->booking_number,
+                    'offerAmount' => $i->offer_amount_cents,
+                    'commissionPercent' => $i->commission_percent,
+                    'commissionAmount' => $i->commission_cents,
+                    'dueDate' => $i->due_date->format('d.m.Y'),
+                    'date' => $i->created_at->format('d.m.Y'),
+                ]),
+        ]);
+    }
+
+    public function downloadInvoice(\App\Models\Invoice $invoice)
+    {
+        abort_unless($invoice->inspector_id === Auth::guard('inspector')->id(), 403);
+        abort_unless($invoice->pdf_path, 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
     }
 
     public function wallet(WalletService $walletService): Response

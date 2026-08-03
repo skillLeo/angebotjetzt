@@ -193,8 +193,8 @@ class AdminController extends Controller
                     'inspector' => $b->inspector->name,
                     'service' => $b->request->serviceType->name,
                     'total' => $b->offer->price_cents,
-                    'commission' => $b->payment?->commission_cents,
-                    'inspectorShare' => $b->payment?->inspector_cents,
+                    'commission' => $b->offer->commission_cents,
+                    'inspectorShare' => $b->offer->inspector_cents,
                     'status' => $b->status,
                     'date' => $b->created_at->format('d.m.Y'),
                 ]),
@@ -204,7 +204,7 @@ class AdminController extends Controller
 
     public function bookingDetail(Booking $booking): Response
     {
-        $booking->load(['request.serviceType:id,name', 'user:id,name,email,phone', 'inspector', 'offer', 'payment', 'review']);
+        $booking->load(['request.serviceType:id,name', 'user:id,name,email,phone', 'inspector', 'offer', 'payment', 'invoice', 'review']);
 
         return Inertia::render('admin/BookingDetail', [
             'booking' => [
@@ -217,12 +217,23 @@ class AdminController extends Controller
                 'vehicle' => $booking->request->vehicle_make.' '.$booking->request->vehicle_model,
                 'requestId' => $booking->request_id,
                 'requestNumber' => $booking->request->request_number,
+                'total' => $booking->offer->price_cents,
+                'commission' => $booking->offer->commission_cents,
+                'inspectorShare' => $booking->offer->inspector_cents,
+                // Legacy Stripe-paid bookings still carry a Payment; new
+                // direct-agreement bookings are invoiced for commission instead.
                 'moneyTrail' => $booking->payment ? [
                     'total' => $booking->payment->total_cents,
                     'commission' => $booking->payment->commission_cents,
                     'inspectorShare' => $booking->payment->inspector_cents,
                     'stripeRef' => $booking->payment->stripe_payment_intent_id,
                     'paidAt' => $booking->payment->paid_at?->format('d.m.Y H:i'),
+                ] : null,
+                'invoice' => $booking->invoice ? [
+                    'id' => $booking->invoice->id,
+                    'number' => $booking->invoice->invoice_number,
+                    'commissionAmount' => $booking->invoice->commission_cents,
+                    'dueDate' => $booking->invoice->due_date->format('d.m.Y'),
                 ] : null,
                 'completedAt' => $booking->completed_at?->format('d.m.Y H:i'),
                 'confirmedAt' => $booking->confirmed_at?->format('d.m.Y H:i'),
@@ -232,7 +243,10 @@ class AdminController extends Controller
     }
 
     /**
-     * Admin confirms a completed job — this releases the inspector's pending balance.
+     * Admin confirms a completed job. Under the direct-agreement model there's
+     * no platform-held balance to release (the customer already paid the
+     * provider directly) — that only still applies to legacy bookings that
+     * went through the old Stripe/wallet flow and still carry a Payment.
      */
     public function confirmBooking(Booking $booking, WalletService $walletService): RedirectResponse
     {
@@ -242,23 +256,26 @@ class AdminController extends Controller
 
         $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
         $booking->request->update(['status' => 'completed']);
-        $walletService->releasePending($booking);
 
-        AppNotification::notify($booking->inspector, 'balance_released',
-            'Guthaben freigegeben',
-            "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-            '/inspector/wallet');
-        \Illuminate\Support\Facades\Mail::to($booking->inspector->email)->queue(new \App\Mail\BalanceReleasedMail($booking));
+        if ($booking->payment) {
+            $walletService->releasePending($booking);
+
+            AppNotification::notify($booking->inspector, 'balance_released',
+                'Guthaben freigegeben',
+                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                '/inspector/wallet');
+            \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($booking->inspector->email)->queue(new \App\Mail\BalanceReleasedMail($booking)));
+        }
 
         AppNotification::notify($booking->user, 'booking_completed',
             'Auftrag abgeschlossen',
             "Auftrag {$booking->booking_number} wurde als abgeschlossen bestätigt.",
             "/account/bookings/{$booking->id}");
-        \Illuminate\Support\Facades\Mail::to($booking->user->email)->queue(new \App\Mail\BookingCompletedMail($booking));
+        \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($booking->user->email)->queue(new \App\Mail\BookingCompletedMail($booking)));
 
         ActivityLog::record('booking.confirmed', Auth::guard('admin')->user(), $booking);
 
-        return back()->with('success', 'Auftrag bestätigt — Guthaben wurde freigegeben.');
+        return back()->with('success', 'Auftrag bestätigt.');
     }
 
     public function payments(Request $request): Response
@@ -315,6 +332,39 @@ class AdminController extends Controller
             'filters' => ['von' => $from->toDateString(), 'bis' => $to->toDateString()],
             'commissionPercent' => Setting::commissionPercent(),
         ]);
+    }
+
+    public function invoices(Request $request): Response
+    {
+        $query = \App\Models\Invoice::with(['inspector:id,name,company_name', 'booking:id,booking_number']);
+
+        if ($search = $request->query('suche')) {
+            $query->where(fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")
+                ->orWhereHas('inspector', fn ($i) => $i->where('name', 'like', "%{$search}%")->orWhere('company_name', 'like', "%{$search}%")));
+        }
+
+        return Inertia::render('admin/Invoices', [
+            'invoices' => $query->latest()->paginate(20)->withQueryString()
+                ->through(fn ($i) => [
+                    'id' => $i->id,
+                    'number' => $i->invoice_number,
+                    'bookingId' => $i->booking_id,
+                    'booking' => $i->booking->booking_number,
+                    'inspector' => $i->inspector->company_name ?: $i->inspector->name,
+                    'offerAmount' => $i->offer_amount_cents,
+                    'commissionAmount' => $i->commission_cents,
+                    'dueDate' => $i->due_date->format('d.m.Y'),
+                    'date' => $i->created_at->format('d.m.Y'),
+                ]),
+            'filters' => $request->only(['suche']),
+        ]);
+    }
+
+    public function downloadInvoice(\App\Models\Invoice $invoice)
+    {
+        abort_unless($invoice->pdf_path, 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
     }
 
     public function inspectors(Request $request): Response
