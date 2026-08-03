@@ -15,7 +15,7 @@ defineProps<{
 <template>
     <Head>
         <title>{{ 'Bewertungen' }}</title>
-        <meta name="description" :content="'Echte Kundenbewertungen zu den Gutachtern auf AngebotJetzt.'" />
+        <meta name="description" :content="'Echte Kundenbewertungen zu den Anbietern auf AngebotJetzt.'" />
     </Head>
 
     <section class="bg-sand-100 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">

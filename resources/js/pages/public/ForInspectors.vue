@@ -26,21 +26,21 @@ const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee2262
 
 <template>
     <Head>
-        <title>{{ 'Für Gutachter – jetzt registrieren' }}</title>
-        <meta name="description" :content="'Werden Sie Gutachter bei AngebotJetzt: passende Anfragen automatisch, eigene Preise, faire 10 % Provision und volle Kontrolle über Auszahlungen.'" />
+        <title>{{ 'Für Anbieter – jetzt registrieren' }}</title>
+        <meta name="description" :content="'Werden Sie Anbieter bei AngebotJetzt: passende Anfragen automatisch, eigene Preise, faire 10 % Provision und volle Kontrolle über Auszahlungen.'" />
     </Head>
 
     <section class="bg-navy-900 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
             <div>
-                <p class="text-eyebrow mb-4 text-green-400">{{ 'Für Gutachter' }}</p>
+                <p class="text-eyebrow mb-4 text-green-400">{{ 'Für Anbieter' }}</p>
                 <h1 class="text-hero text-white">{{ 'Mehr Aufträge. Weniger Aufwand.' }}</h1>
                 <p class="text-lead mt-6 max-w-lg text-navy-100">
-                    {{ `Schließen Sie sich ${stats.inspectors}+ geprüften Kfz-Sachverständigen an. Erhalten Sie passende Anfragen automatisch und bestimmen Sie Ihre Preise selbst.` }}
+                    {{ `Schließen Sie sich ${stats.inspectors}+ geprüften Anbietern an. Erhalten Sie passende Anfragen automatisch und bestimmen Sie Ihre Preise selbst.` }}
                 </p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Link href="/inspector/register" class="rounded-pill bg-green-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
-                        {{ 'Als Gutachter registrieren' }}
+                        {{ 'Als Anbieter registrieren' }}
                     </Link>
                     <Link href="/login" class="rounded-pill border border-navy-500 px-7 py-3.5 text-center font-bold text-white transition hover:bg-navy-800">
                         {{ 'Zum Login' }}
@@ -48,7 +48,7 @@ const recruitmentImage = 'https://images.unsplash.com/photo-1581092160607-ee2262
                 </div>
             </div>
             <div class="relative">
-                <img :src="recruitmentImage" width="600" height="440" :alt="'Kfz-Gutachter bei der Arbeit'" class="aspect-[16/11] w-full rounded-panel object-cover shadow-lift" />
+                <img :src="recruitmentImage" width="600" height="440" :alt="'Anbieter bei der Arbeit'" class="aspect-[16/11] w-full rounded-panel object-cover shadow-lift" />
                 <HandDrawnFrame :label="'Sabine K. 5/5'" />
             </div>
         </div>

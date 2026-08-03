@@ -35,10 +35,10 @@ const benefits = computed(() => [
     </section>
 
     <section class="bg-white px-4 py-12 sm:px-6 lg:px-8 lg:py-24">
-        <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
-            <div>
+        <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[55fr_45fr] lg:gap-8">
+            <div class="min-w-0">
                 <p class="text-eyebrow mb-4 text-green-600">{{ 'Kfz-Gutachten' }}</p>
-                <h1 class="text-hero text-navy-700">{{ serviceType.name }}</h1>
+                <h1 class="text-hero text-navy-700 break-words">{{ serviceType.name }}</h1>
                 <p class="text-lead mt-6 text-ink-700">{{ serviceType.description }}</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Link

@@ -15,7 +15,7 @@ defineProps<{
             <div class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="p-8 sm:p-12 lg:p-16">
                     <Reveal>
-                        <p class="text-eyebrow mb-5 text-green-400">{{ 'Für Gutachter' }}</p>
+                        <p class="text-eyebrow mb-5 text-green-400">{{ 'Für Anbieter' }}</p>
                         <h2 class="text-section text-white">
                             {{ 'Mehr Aufträge.' }}<br />
                             <span class="text-green-400">{{ 'Kein Papierkram.' }}</span>
@@ -28,7 +28,7 @@ defineProps<{
                                 href="/for-inspectors"
                                 class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
                             >
-                                {{ 'Als Gutachter registrieren' }}
+                                {{ 'Als Anbieter registrieren' }}
                             </Link>
                             <Link
                                 href="/for-inspectors"
@@ -47,7 +47,7 @@ defineProps<{
                         height="500"
                         loading="eager"
                         decoding="async"
-                        :alt="'Kfz-Gutachter bei der Fahrzeugbegutachtung'"
+                        :alt="'Anbieter bei der Arbeit'"
                         class="h-full w-full object-cover lg:absolute lg:inset-0"
                     />
                     <HandDrawnFrame :label="'Thomas B. 5/5'" />

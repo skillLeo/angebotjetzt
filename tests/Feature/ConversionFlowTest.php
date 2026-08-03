@@ -81,7 +81,8 @@ it('lets a guest optionally set a password after submission to claim a real acco
     $this->assertAuthenticatedAs($user);
 });
 
-it('rejects a guest request submission for an email that already has an account, without creating duplicates', function () {
+it('lets a guest submit a request even when the email already has an account, without creating duplicates', function () {
+    Mail::fake();
     $type = ServiceType::where('slug', 'unfallschadengutachten')->first();
     $existing = User::factory()->create();
 
@@ -94,10 +95,28 @@ it('rejects a guest request submission for an email that already has an account,
         'agb' => true, 'privacy' => true,
     ]);
 
-    $response->assertSessionHasErrors('contact_email');
+    $response->assertSessionDoesntHaveErrors();
+    $response->assertRedirect();
     $this->assertGuest();
-    expect(User::where('email', $existing->email)->count())->toBe(1)
-        ->and(ServiceRequest::where('contact_email', $existing->email)->exists())->toBeFalse();
+
+    $request = ServiceRequest::where('contact_email', $existing->email)->first();
+    expect($request)->not->toBeNull()
+        ->and($request->user_id)->toBeNull()
+        ->and(User::where('email', $existing->email)->count())->toBe(1);
+
+    // The confirmation page must offer to log in, not to set a password
+    // (that would risk creating a confusing second credential for the
+    // same account, or masking that one already exists).
+    $confirmation = $this->get(route('wizard.confirmation', $request->request_number));
+    $confirmation->assertInertia(fn ($page) => $page
+        ->where('canLogin', true)
+        ->where('canClaim', false)
+    );
+
+    // Logging into the existing account retroactively claims the request.
+    $this->post('/login', ['email' => $existing->email, 'password' => 'password'])->assertRedirect();
+    $this->assertAuthenticatedAs($existing);
+    expect($request->fresh()->user_id)->toBe($existing->id);
 });
 
 it('lets an authenticated customer submit a request, matches inspectors and notifies them', function () {

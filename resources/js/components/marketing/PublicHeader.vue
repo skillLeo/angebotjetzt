@@ -3,6 +3,7 @@ import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import { onClickOutside } from '@vueuse/core';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
+    BadgeCheck,
     ChevronDown,
     ClipboardCheck,
     Flower2,
@@ -16,13 +17,14 @@ import {
     Truck,
     X,
 } from 'lucide-vue-next';
+import { mobileNavOpen as mobileOpen } from '@/composables/useMobileNav';
 import { Motion } from 'motion-v';
 import type { Component } from 'vue';
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 
+withDefaults(defineProps<{ reduced?: boolean }>(), { reduced: false });
 
 const scrolled = ref(false);
-const mobileOpen = ref(false);
 const servicesOpen = ref(false);
 const mobileServicesOpen = ref(false);
 const servicesRef = useTemplateRef('servicesRef');
@@ -69,9 +71,27 @@ function onScroll() {
 onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }));
 onUnmounted(() => window.removeEventListener('scroll', onScroll));
 
+// Locking scroll via `overflow: hidden` on an ancestor breaks the header's
+// `position: sticky` (a well-known CSS interaction) — if the page was already
+// scrolled down, the header un-sticks and scrolls away behind the open menu.
+// Freezing the body in place with a negative offset instead avoids that
+// entirely, and restores the exact scroll position on close.
+let savedScrollY = 0;
 watch(mobileOpen, (open) => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    if (!open) mobileServicesOpen.value = false;
+    if (open) {
+        savedScrollY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${savedScrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+    } else {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        window.scrollTo(0, savedScrollY);
+        mobileServicesOpen.value = false;
+    }
 });
 </script>
 
@@ -85,7 +105,12 @@ watch(mobileOpen, (open) => {
                 <BrandLogo />
             </Link>
 
-            <nav class="hidden items-center gap-8 lg:flex" aria-label="Hauptnavigation">
+            <div v-if="reduced" class="flex flex-1 items-center justify-center gap-2 text-sm font-semibold text-navy-700 sm:gap-2.5 sm:text-[15px]">
+                <BadgeCheck :size="18" class="shrink-0 text-green-500" aria-hidden="true" />
+                <span>{{ '8.000+ zufriedene Kunden in ganz Deutschland' }}</span>
+            </div>
+
+            <nav v-if="!reduced" class="hidden items-center gap-8 lg:flex" aria-label="Hauptnavigation">
                 <div ref="servicesRef" class="relative">
                     <button
                         type="button"
@@ -147,7 +172,7 @@ watch(mobileOpen, (open) => {
                 </Link>
             </nav>
 
-            <div class="hidden items-center gap-4 lg:flex">
+            <div v-if="!reduced" class="hidden items-center gap-4 lg:flex">
                 <Link
                     :href="isLoggedIn ? '/account' : '/login'"
                     class="text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
@@ -162,7 +187,7 @@ watch(mobileOpen, (open) => {
                 </Link>
             </div>
 
-            <div class="flex items-center gap-2 lg:hidden">
+            <div v-if="!reduced" class="flex items-center gap-2 lg:hidden">
                 <button
                     type="button"
                     class="flex h-11 w-11 items-center justify-center rounded-pill text-navy-700"
@@ -183,7 +208,7 @@ watch(mobileOpen, (open) => {
             leave-active-class="transition duration-200 ease-in"
             leave-to-class="opacity-0"
         >
-            <div v-if="mobileOpen" class="fixed inset-0 top-16 z-40 flex flex-col bg-white lg:hidden">
+            <div v-if="mobileOpen && !reduced" class="fixed inset-0 top-16 z-40 flex flex-col bg-white lg:hidden">
                 <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-6 pt-8" aria-label="Mobile Navigation">
                     <button
                         type="button"
@@ -201,14 +226,14 @@ watch(mobileOpen, (open) => {
                         />
                     </button>
                     <Transition
-                        enter-active-class="transition-all duration-200 ease-out"
+                        enter-active-class="transition-all duration-200 ease-out overflow-hidden"
                         enter-from-class="opacity-0 max-h-0"
                         enter-to-class="opacity-100 max-h-[640px]"
-                        leave-active-class="transition-all duration-150 ease-in"
+                        leave-active-class="transition-all duration-150 ease-in overflow-hidden"
                         leave-from-class="opacity-100 max-h-[640px]"
                         leave-to-class="opacity-0 max-h-0"
                     >
-                        <div v-if="mobileServicesOpen" class="flex flex-col gap-1 overflow-hidden pb-1">
+                        <div v-if="mobileServicesOpen" class="flex flex-col gap-1 pb-1">
                             <template v-for="cat in navCategories" :key="cat.id">
                                 <Link
                                     v-if="cat.is_active"

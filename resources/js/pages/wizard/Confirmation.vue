@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import FormField from '@/components/forms/FormField.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { CheckCircle2, Clock, KeyRound, Mail } from 'lucide-vue-next';
+import { CheckCircle2, Clock, KeyRound, LogIn, Mail } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 
 const props = defineProps<{
     request: { number: string; matched: number; unmatched: boolean; service: string; ort: string };
     canClaim: boolean;
+    canLogin: boolean;
     contactEmail: string | null;
 }>();
 
@@ -69,6 +70,27 @@ function claim() {
                 </template>
             </div>
 
+            <div v-if="canLogin" class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">
+                <div class="flex items-start gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-navy-50 text-navy-700">
+                        <LogIn :size="20" aria-hidden="true" />
+                    </span>
+                    <div>
+                        <p class="font-display font-bold text-navy-700">Sie haben bereits ein Konto</p>
+                        <p class="mt-1 text-sm text-ink-500">
+                            Für <span class="font-semibold text-navy-700">{{ contactEmail }}</span> besteht bereits ein Konto bei uns.
+                            Melden Sie sich an, um diese Anfrage und alle eingehenden Angebote in Ihrem Konto zu verfolgen.
+                        </p>
+                        <Link
+                            href="/login"
+                            class="mt-4 inline-block rounded-pill bg-green-500 px-7 py-3 font-bold text-white transition hover:bg-green-600"
+                        >
+                            Jetzt anmelden
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="canClaim" class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">
                 <div class="flex items-start gap-4">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-navy-50 text-navy-700">
@@ -104,7 +126,7 @@ function claim() {
             </div>
 
             <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link v-if="!canClaim" href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
+                <Link v-if="!canClaim && !canLogin" href="/account/requests" class="rounded-pill bg-green-500 px-7 py-3.5 font-bold text-white transition hover:bg-green-600">
                     Meine Anfragen ansehen
                 </Link>
                 <Link href="/" class="rounded-pill border border-ink-300 px-7 py-3.5 font-bold text-navy-700 transition hover:border-navy-700">

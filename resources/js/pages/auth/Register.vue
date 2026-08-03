@@ -112,13 +112,13 @@ watchEffect(() => {
         </div>
 
         <div class="border-t border-ink-100 pt-6 text-center text-sm text-muted-foreground">
-            <p class="mb-3">{{ 'Sind Sie Gutachter?' }}</p>
+            <p class="mb-3">{{ 'Sind Sie Anbieter?' }}</p>
             <div class="flex flex-col gap-2 sm:flex-row sm:justify-center">
                 <Button variant="outline" as-child class="w-full sm:w-auto">
-                    <Link :href="login()">{{ 'Gutachter-Login' }}</Link>
+                    <Link :href="login()">{{ 'Anbieter-Login' }}</Link>
                 </Button>
                 <Button variant="outline" as-child class="w-full sm:w-auto">
-                    <Link href="/inspector/register">{{ 'Als Gutachter registrieren' }}</Link>
+                    <Link href="/inspector/register">{{ 'Als Anbieter registrieren' }}</Link>
                 </Button>
             </div>
         </div>

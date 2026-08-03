@@ -10,7 +10,6 @@ use App\Services\RequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -64,11 +63,6 @@ class RequestWizardController extends Controller
             'privacy.accepted' => 'Bitte akzeptieren Sie die Datenschutzerklärung.',
         ];
 
-        if ($isGuest) {
-            $rules['contact_email'][] = Rule::unique('users', 'email');
-            $messages['contact_email.unique'] = 'Für diese E-Mail-Adresse existiert bereits ein Konto. Bitte melden Sie sich an, um eine Anfrage zu stellen.';
-        }
-
         $data = $request->validate($rules, $messages);
 
         $user = $isGuest ? null : Auth::user();
@@ -103,7 +97,8 @@ class RequestWizardController extends Controller
         $hasGuestAccess = $request->session()->get("request_access_{$serviceRequest->id}") === true;
         abort_unless($isOwner || $hasGuestAccess, 403);
 
-        $canClaim = $serviceRequest->user_id === null && ! Auth::check();
+        $isUnclaimedGuest = $serviceRequest->user_id === null && ! Auth::check();
+        $accountAlreadyExists = $isUnclaimedGuest && User::where('email', $serviceRequest->contact_email)->exists();
 
         return Inertia::render('wizard/Confirmation', [
             'request' => [
@@ -113,8 +108,11 @@ class RequestWizardController extends Controller
                 'service' => $serviceRequest->serviceType->name,
                 'ort' => $serviceRequest->ort,
             ],
-            'canClaim' => $canClaim,
-            'contactEmail' => $canClaim ? $serviceRequest->contact_email : null,
+            // Never prompt to set a password for an email that already has an
+            // account — that would only invite confusion. Offer to log in instead.
+            'canClaim' => $isUnclaimedGuest && ! $accountAlreadyExists,
+            'canLogin' => $accountAlreadyExists,
+            'contactEmail' => $isUnclaimedGuest ? $serviceRequest->contact_email : null,
         ]);
     }
 

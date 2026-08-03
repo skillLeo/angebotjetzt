@@ -54,7 +54,11 @@ onMounted(() => {
     }
     if (props.preselected) {
         const match = props.serviceTypes.find((t) => t.slug === props.preselected);
-        if (match) form.service_type_id = match.id;
+        if (match) {
+            form.service_type_id = match.id;
+            // Already chosen on the homepage/category page — don't ask again.
+            step.value = 2;
+        }
     }
     const q = new URLSearchParams(window.location.search);
     if (q.get('plz')) form.plz = q.get('plz') as string;

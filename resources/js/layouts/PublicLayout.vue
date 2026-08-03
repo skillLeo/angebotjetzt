@@ -3,15 +3,18 @@ import CookieBanner from '@/components/marketing/CookieBanner.vue';
 import PublicFooter from '@/components/marketing/PublicFooter.vue';
 import PublicHeader from '@/components/marketing/PublicHeader.vue';
 import { Toaster } from '@/components/ui/sonner';
+import { mobileNavOpen } from '@/composables/useMobileNav';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-// The request/booking flow (category → service → multi-step form) hides the
-// header and footer so nothing distracts from completing the submission.
-// Confirmation is intentionally excluded — chrome returns once submitted.
-const REQUEST_FLOW_COMPONENTS = ['public/RequestStart', 'wizard/RequestWizard'];
+// Only the actual multi-step form (not the category/service picker before it)
+// trims the header down to logo + trust message and hides the footer, so
+// nothing distracts from completing the submission. The category/service
+// picker keeps the normal site chrome. Confirmation is intentionally
+// excluded from both — full chrome returns once submitted.
+const REDUCED_HEADER_COMPONENTS = ['wizard/RequestWizard'];
 const page = usePage();
-const hideChrome = computed(() => REQUEST_FLOW_COMPONENTS.includes(page.component));
+const reducedHeader = computed(() => REDUCED_HEADER_COMPONENTS.includes(page.component));
 </script>
 
 <template>
@@ -22,12 +25,12 @@ const hideChrome = computed(() => REQUEST_FLOW_COMPONENTS.includes(page.componen
         >
             {{ 'Zum Inhalt springen' }}
         </a>
-        <PublicHeader v-if="!hideChrome" />
+        <PublicHeader :reduced="reducedHeader" />
         <main id="main" class="flex-1 [overflow-x:clip]">
             <slot />
         </main>
-        <PublicFooter v-if="!hideChrome" />
-        <CookieBanner />
+        <PublicFooter v-if="!reducedHeader" />
+        <CookieBanner v-if="!mobileNavOpen" />
         <Toaster position="top-center" rich-colors />
     </div>
 </template>

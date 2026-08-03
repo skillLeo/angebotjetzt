@@ -9,7 +9,7 @@ const customerPoints = computed(() => [
     'Mehrere Angebote vergleichen',
     'Keine versteckten Gebühren',
     'Sichere Online-Zahlung',
-    'Nur der Gutachterpreis fällt an',
+    'Nur der Anbieterpreis fällt an',
 ]);
 const inspectorPoints = computed(() => [
     'Passende Anfragen automatisch per E-Mail',
@@ -23,7 +23,7 @@ const inspectorPoints = computed(() => [
 <template>
     <Head>
         <title>{{ 'Preise & Provision' }}</title>
-        <meta name="description" :content="'Für Kunden kostenlos. Für Gutachter eine faire, transparente Provision je Buchung.'" />
+        <meta name="description" :content="'Für Kunden kostenlos. Für Anbieter eine faire, transparente Provision je Buchung.'" />
     </Head>
 
     <section class="bg-sand-100 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
@@ -31,7 +31,7 @@ const inspectorPoints = computed(() => [
             <p class="text-eyebrow mb-4 text-green-600">{{ 'Transparent & fair' }}</p>
             <h1 class="text-hero mx-auto max-w-3xl text-navy-700">{{ 'Faire Preise, keine Überraschungen' }}</h1>
             <p class="text-lead mx-auto mt-6 max-w-2xl text-ink-700">
-                {{ 'Für Kunden ist AngebotJetzt komplett kostenlos. Gutachter zahlen lediglich eine faire Provision je erfolgreich vermitteltem Auftrag.' }}
+                {{ 'Für Kunden ist AngebotJetzt komplett kostenlos. Anbieter zahlen lediglich eine faire Provision je erfolgreich vermitteltem Auftrag.' }}
             </p>
         </div>
     </section>
@@ -54,7 +54,7 @@ const inspectorPoints = computed(() => [
             </div>
 
             <div class="rounded-panel border-2 border-navy-700 bg-navy-900 p-8 text-white shadow-lift">
-                <p class="text-eyebrow text-green-400">{{ 'Für Gutachter' }}</p>
+                <p class="text-eyebrow text-green-400">{{ 'Für Anbieter' }}</p>
                 <p class="mt-4 font-display text-5xl font-extrabold">{{ 'Fair' }}</p>
                 <p class="mt-1 text-navy-100">{{ 'Provision je Buchung' }}</p>
                 <ul class="mt-7 space-y-3">
@@ -64,7 +64,7 @@ const inspectorPoints = computed(() => [
                     </li>
                 </ul>
                 <Link href="/for-inspectors" class="mt-8 block rounded-pill bg-green-500 py-3.5 text-center font-bold text-white transition hover:bg-green-600">
-                    {{ 'Als Gutachter registrieren' }}
+                    {{ 'Als Anbieter registrieren' }}
                 </Link>
             </div>
         </div>

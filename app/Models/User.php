@@ -54,15 +54,24 @@ class User extends Authenticatable implements PasskeyUser
 
     protected static function booted(): void
     {
-        // Guests can submit a request before ever creating an account. As soon as
-        // an account exists for that email — whether claimed right after
-        // submission or via a normal signup much later — link any orphaned
-        // guest requests to it so they're never permanently unreachable.
-        static::created(function (User $user) {
-            ServiceRequest::whereNull('user_id')
-                ->where('contact_email', $user->email)
-                ->update(['user_id' => $user->id]);
-        });
+        // Guests can submit a request before ever creating an account — or using
+        // an email that already has one. As soon as this account is provably
+        // theirs (created just now, or a real login later), link any orphaned
+        // guest requests matching this email so they're never unreachable.
+        static::created(fn (User $user) => $user->claimOrphanedRequests());
+    }
+
+    /**
+     * Link any guest-submitted, still-unclaimed requests for this account's
+     * email address. Only ever called once account ownership is proven
+     * (account creation or a successful login) — never at submission time,
+     * since typing an email address doesn't prove you control it.
+     */
+    public function claimOrphanedRequests(): void
+    {
+        ServiceRequest::whereNull('user_id')
+            ->where('contact_email', $this->email)
+            ->update(['user_id' => $this->id]);
     }
 
     public function requests(): HasMany

@@ -108,9 +108,9 @@ defineProps<{
         </div>
 
         <div class="border-t border-ink-100 pt-6 text-center text-sm text-muted-foreground">
-            <p class="mb-3">{{ 'Sind Sie Gutachter und noch nicht registriert?' }}</p>
+            <p class="mb-3">{{ 'Sind Sie Anbieter und noch nicht registriert?' }}</p>
             <Button variant="outline" as-child class="w-full sm:w-auto">
-                <Link href="/inspector/register">{{ 'Als Gutachter registrieren' }}</Link>
+                <Link href="/inspector/register">{{ 'Als Anbieter registrieren' }}</Link>
             </Button>
         </div>
     </Form>

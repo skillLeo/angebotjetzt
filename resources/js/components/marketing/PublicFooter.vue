@@ -30,8 +30,8 @@ const columns = computed(() => [
     {
         title: 'Für Dienstleister',
         links: [
-            { label: 'Gutachter werden', href: '/for-inspectors' },
-            { label: 'Gutachter-Login', href: '/login' },
+            { label: 'Anbieter werden', href: '/for-inspectors' },
+            { label: 'Anbieter-Login', href: '/login' },
             { label: 'Häufige Fragen', href: '/faq' },
         ],
     },

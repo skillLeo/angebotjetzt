@@ -16,12 +16,12 @@ function submit() {
 </script>
 
 <template>
-    <Head><title>{{ 'Als Gutachter registrieren' }}</title></Head>
+    <Head><title>{{ 'Als Anbieter registrieren' }}</title></Head>
 
     <SplitAuthShell
         :quote="'Endlich passende Aufträge ohne Kaltakquise – ich bestimme meine Preise selbst.'"
         quote-author="Sabine Krüger, Kfz-Sachverständige"
-        :title="'Als Gutachter registrieren'"
+        :title="'Als Anbieter registrieren'"
         :description="'Erhalten Sie passende Anfragen aus Ihrer Region automatisch.'"
         :icon="UserPlus"
     >
