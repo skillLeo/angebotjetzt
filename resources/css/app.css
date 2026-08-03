@@ -5,8 +5,6 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
-@custom-variant dark (&:is(.dark *));
-
 /* ============================================================
    AngebotJetzt — Brand Design Tokens
    Navy = structure. Green = action. Sand = warm backgrounds.
@@ -150,37 +148,6 @@
     --sidebar: #071b33;
 }
 
-.dark {
-    --background: #0b1420;
-    --foreground: #f1f6fb;
-    --card: #0f2c52;
-    --card-foreground: #f1f6fb;
-    --popover: #0f2c52;
-    --popover-foreground: #f1f6fb;
-    --primary: #3eae2b;
-    --primary-foreground: #ffffff;
-    --secondary: #14375e;
-    --secondary-foreground: #f1f6fb;
-    --muted: #14375e;
-    --muted-foreground: #c7cbd1;
-    --accent: #14375e;
-    --accent-foreground: #dbf3d4;
-    --destructive: #e5534b;
-    --destructive-foreground: #ffffff;
-    --border: #14375e;
-    --input: #1d4a7a;
-    --ring: #3eae2b;
-    --sidebar-background: #071b33;
-    --sidebar-foreground: #dce6f0;
-    --sidebar-primary: #3eae2b;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #0f2c52;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #0f2c52;
-    --sidebar-ring: #3eae2b;
-    --sidebar: #071b33;
-}
-
 @layer base {
     * {
         @apply border-border outline-ring/50;
@@ -191,6 +158,13 @@
            overflow-x:clip does not create a scroll container, so it never
            breaks position:sticky on descendants the way overflow:hidden would. */
         overflow-x: clip;
+        /* Reserve the vertical scrollbar's space permanently. Without this,
+           opening any scroll-locking overlay (a Select dropdown, Dialog, the
+           mobile nav) removes the scrollbar and every element shifts
+           sideways to fill the freed space, then shifts back on close —
+           the exact "page jumps" symptom reported when picking a homepage
+           category, since that Select also locks body scroll while open. */
+        scrollbar-gutter: stable;
     }
     body {
         @apply bg-background text-foreground;

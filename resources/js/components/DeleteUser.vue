@@ -32,7 +32,7 @@ const passwordInput = useTemplateRef('passwordInput');
         <div
             class="space-y-4 rounded-card border border-red-100 bg-red-50 p-4"
         >
-            <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
+            <div class="relative space-y-0.5 text-red-600">
                 <p class="font-medium">{{ 'Warnung' }}</p>
                 <p class="text-sm">
                     {{ 'Bitte mit Vorsicht fortfahren, dies kann nicht rückgängig gemacht werden.' }}

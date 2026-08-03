@@ -100,17 +100,29 @@ watch(mobileOpen, (open) => {
         class="sticky top-0 z-50 bg-white transition-shadow duration-300"
         :class="scrolled ? 'border-b border-ink-100 shadow-card' : ''"
     >
-        <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:h-[72px] lg:px-8">
+        <!-- Reduced (booking-flow) header: logo + trust message. A symmetric empty
+             spacer column mirrors the logo's column so the message is centered
+             against the full header width, not just the space left of the logo. -->
+        <div
+            v-if="reduced"
+            class="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 py-2.5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:py-0 lg:h-[72px] lg:px-8"
+        >
+            <Link href="/" aria-label="AngebotJetzt Startseite" class="lg:justify-self-start">
+                <BrandLogo />
+            </Link>
+            <div class="flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold text-navy-700 sm:gap-2.5 sm:text-[15px]">
+                <BadgeCheck :size="18" class="shrink-0 text-green-500" aria-hidden="true" />
+                <span>{{ '8.000+ zufriedene Kunden in ganz Deutschland' }}</span>
+            </div>
+            <div aria-hidden="true" class="hidden lg:block" />
+        </div>
+
+        <div v-else class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:h-[72px] lg:px-8">
             <Link href="/" aria-label="AngebotJetzt Startseite">
                 <BrandLogo />
             </Link>
 
-            <div v-if="reduced" class="flex flex-1 items-center justify-center gap-2 text-sm font-semibold text-navy-700 sm:gap-2.5 sm:text-[15px]">
-                <BadgeCheck :size="18" class="shrink-0 text-green-500" aria-hidden="true" />
-                <span>{{ '8.000+ zufriedene Kunden in ganz Deutschland' }}</span>
-            </div>
-
-            <nav v-if="!reduced" class="hidden items-center gap-8 lg:flex" aria-label="Hauptnavigation">
+            <nav class="hidden items-center gap-8 lg:flex" aria-label="Hauptnavigation">
                 <div ref="servicesRef" class="relative">
                     <button
                         type="button"
@@ -172,7 +184,7 @@ watch(mobileOpen, (open) => {
                 </Link>
             </nav>
 
-            <div v-if="!reduced" class="hidden items-center gap-4 lg:flex">
+            <div class="hidden items-center gap-4 lg:flex">
                 <Link
                     :href="isLoggedIn ? '/account' : '/login'"
                     class="text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
@@ -187,7 +199,7 @@ watch(mobileOpen, (open) => {
                 </Link>
             </div>
 
-            <div v-if="!reduced" class="flex items-center gap-2 lg:hidden">
+            <div class="flex items-center gap-2 lg:hidden">
                 <button
                     type="button"
                     class="flex h-11 w-11 items-center justify-center rounded-pill text-navy-700"
