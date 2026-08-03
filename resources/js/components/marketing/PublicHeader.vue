@@ -5,6 +5,8 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     BadgeCheck,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     ClipboardCheck,
     Flower2,
     Hammer,
@@ -26,7 +28,7 @@ withDefaults(defineProps<{ reduced?: boolean }>(), { reduced: false });
 
 const scrolled = ref(false);
 const servicesOpen = ref(false);
-const mobileServicesOpen = ref(false);
+const mobilePanel = ref<'main' | 'services'>('main');
 const servicesRef = useTemplateRef('servicesRef');
 onClickOutside(servicesRef, () => (servicesOpen.value = false));
 
@@ -90,7 +92,7 @@ watch(mobileOpen, (open) => {
         document.body.style.left = '';
         document.body.style.right = '';
         window.scrollTo(0, savedScrollY);
-        mobileServicesOpen.value = false;
+        mobilePanel.value = 'main';
     }
 });
 </script>
@@ -221,87 +223,96 @@ watch(mobileOpen, (open) => {
             leave-to-class="opacity-0"
         >
             <div v-if="mobileOpen && !reduced" class="fixed inset-0 top-16 z-40 flex flex-col bg-white lg:hidden">
-                <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-6 pt-8" aria-label="Mobile Navigation">
-                    <button
-                        type="button"
-                        class="flex w-full items-center justify-between rounded-card px-3 py-3 font-display text-xl font-bold text-navy-700"
-                        :aria-expanded="mobileServicesOpen"
-                        aria-haspopup="true"
-                        @click="mobileServicesOpen = !mobileServicesOpen"
+                <!-- Two full-size panels slide horizontally between the top-level
+                     menu and the services drill-down, like a native app's
+                     navigation stack — never an inline accordion that pushes
+                     the rest of the menu down. -->
+                <div class="relative flex-1 overflow-hidden">
+                    <nav
+                        class="absolute inset-0 flex flex-col gap-1 overflow-y-auto px-6 pt-8 transition-transform duration-200 ease-out"
+                        :class="mobilePanel === 'services' ? '-translate-x-full' : 'translate-x-0'"
+                        aria-label="Mobile Navigation"
                     >
-                        {{ 'Dienstleistungen' }}
-                        <ChevronDown
-                            :size="22"
-                            class="transition-transform duration-200"
-                            :class="mobileServicesOpen ? 'rotate-180' : ''"
-                            aria-hidden="true"
-                        />
-                    </button>
-                    <Transition
-                        enter-active-class="transition-all duration-200 ease-out overflow-hidden"
-                        enter-from-class="opacity-0 max-h-0"
-                        enter-to-class="opacity-100 max-h-[640px]"
-                        leave-active-class="transition-all duration-150 ease-in overflow-hidden"
-                        leave-from-class="opacity-100 max-h-[640px]"
-                        leave-to-class="opacity-0 max-h-0"
+                        <button
+                            type="button"
+                            class="flex w-full items-center justify-between rounded-card px-3 py-3 font-display text-xl font-bold text-navy-700"
+                            aria-haspopup="true"
+                            @click="mobilePanel = 'services'"
+                        >
+                            {{ 'Dienstleistungen' }}
+                            <ChevronRight :size="22" aria-hidden="true" />
+                        </button>
+                        <div class="my-3 border-t border-ink-100" />
+                        <Motion
+                            v-for="(item, i) in navItems"
+                            :key="item.href"
+                            :initial="{ opacity: 0, x: -16 }"
+                            :animate="{ opacity: 1, x: 0 }"
+                            :transition="{ delay: 0.06 * i, duration: 0.4, ease: [0.16, 1, 0.3, 1] }"
+                        >
+                            <Link
+                                :href="item.href"
+                                class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-navy-700"
+                                @click="mobileOpen = false"
+                            >
+                                {{ item.label }}
+                            </Link>
+                        </Motion>
+                        <Motion
+                            :initial="{ opacity: 0, x: -16 }"
+                            :animate="{ opacity: 1, x: 0 }"
+                            :transition="{ delay: 0.28, duration: 0.4 }"
+                        >
+                            <Link
+                                :href="isLoggedIn ? '/account' : '/login'"
+                                class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
+                                @click="mobileOpen = false"
+                            >
+                                {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
+                            </Link>
+                        </Motion>
+                    </nav>
+
+                    <div
+                        class="absolute inset-0 flex flex-col gap-1 overflow-y-auto px-6 pt-8 transition-transform duration-200 ease-out"
+                        :class="mobilePanel === 'services' ? 'translate-x-0' : 'translate-x-full'"
+                        aria-label="Dienstleistungen"
                     >
-                        <div v-if="mobileServicesOpen" class="flex flex-col gap-1 pb-1">
-                            <template v-for="cat in navCategories" :key="cat.id">
-                                <Link
-                                    v-if="cat.is_active"
-                                    href="/vehicle-reports"
-                                    class="flex items-center gap-3 rounded-card px-3 py-3 pl-4 font-display text-lg font-bold text-navy-700"
-                                    @click="mobileOpen = false"
-                                >
-                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xs bg-green-50 text-green-600">
-                                        <component :is="categoryIcons[cat.icon] ?? Sparkles" :size="18" aria-hidden="true" />
-                                    </span>
-                                    {{ cat.name }}
-                                </Link>
-                                <span
-                                    v-else
-                                    class="flex cursor-not-allowed items-center gap-3 rounded-card px-3 py-3 pl-4 font-display text-lg font-bold text-ink-300 select-none"
-                                    aria-disabled="true"
-                                >
-                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xs bg-sand-50 text-ink-300">
-                                        <component :is="categoryIcons[cat.icon] ?? Sparkles" :size="18" aria-hidden="true" />
-                                    </span>
-                                    <span class="flex-1">{{ cat.name }}</span>
-                                    <span class="rounded-pill bg-sand-100 px-2.5 py-1 text-xs font-bold text-ink-400">{{ 'Demnächst' }}</span>
+                        <button
+                            type="button"
+                            class="mb-4 flex items-center gap-1.5 rounded-card px-3 py-2 text-sm font-bold text-ink-500 transition-colors hover:text-navy-700"
+                            @click="mobilePanel = 'main'"
+                        >
+                            <ChevronLeft :size="20" aria-hidden="true" />
+                            {{ 'Zurück' }}
+                        </button>
+                        <p class="px-3 pb-2 font-display text-xl font-bold text-navy-700">{{ 'Dienstleistungen' }}</p>
+                        <template v-for="cat in navCategories" :key="cat.id">
+                            <Link
+                                v-if="cat.is_active"
+                                href="/vehicle-reports"
+                                class="flex items-center gap-3 rounded-card px-3 py-3 pl-4 font-display text-lg font-bold text-navy-700"
+                                @click="mobileOpen = false"
+                            >
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xs bg-green-50 text-green-600">
+                                    <component :is="categoryIcons[cat.icon] ?? Sparkles" :size="18" aria-hidden="true" />
                                 </span>
-                            </template>
-                        </div>
-                    </Transition>
-                    <div class="my-3 border-t border-ink-100" />
-                    <Motion
-                        v-for="(item, i) in navItems"
-                        :key="item.href"
-                        :initial="{ opacity: 0, x: -16 }"
-                        :animate="{ opacity: 1, x: 0 }"
-                        :transition="{ delay: 0.06 * i, duration: 0.4, ease: [0.16, 1, 0.3, 1] }"
-                    >
-                        <Link
-                            :href="item.href"
-                            class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-navy-700"
-                            @click="mobileOpen = false"
-                        >
-                            {{ item.label }}
-                        </Link>
-                    </Motion>
-                    <Motion
-                        :initial="{ opacity: 0, x: -16 }"
-                        :animate="{ opacity: 1, x: 0 }"
-                        :transition="{ delay: 0.28, duration: 0.4 }"
-                    >
-                        <Link
-                            :href="isLoggedIn ? '/account' : '/login'"
-                            class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
-                            @click="mobileOpen = false"
-                        >
-                            {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
-                        </Link>
-                    </Motion>
-                </nav>
+                                {{ cat.name }}
+                            </Link>
+                            <span
+                                v-else
+                                class="flex cursor-not-allowed items-center gap-3 rounded-card px-3 py-3 pl-4 font-display text-lg font-bold text-ink-300 select-none"
+                                aria-disabled="true"
+                            >
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xs bg-sand-50 text-ink-300">
+                                    <component :is="categoryIcons[cat.icon] ?? Sparkles" :size="18" aria-hidden="true" />
+                                </span>
+                                <span class="flex-1">{{ cat.name }}</span>
+                                <span class="rounded-pill bg-sand-100 px-2.5 py-1 text-xs font-bold text-ink-400">{{ 'Demnächst' }}</span>
+                            </span>
+                        </template>
+                    </div>
+                </div>
                 <div class="border-t border-ink-100 p-6">
                     <Link
                         href="/request/start"
