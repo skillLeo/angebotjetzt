@@ -192,8 +192,8 @@ class InspectorAreaController extends Controller
                 "/account/requests/{$serviceRequest->id}/offers");
         }
 
-        \Illuminate\Support\Facades\Mail::to($serviceRequest->contact_email)
-            ->queue(new \App\Mail\NewOfferMail($serviceRequest, $inspector));
+        \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($serviceRequest->contact_email)
+            ->queue(new \App\Mail\NewOfferMail($serviceRequest, $inspector)));
 
         ActivityLog::record('offer.submitted', $inspector, $serviceRequest);
 

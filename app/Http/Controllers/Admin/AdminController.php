@@ -513,7 +513,7 @@ class AdminController extends Controller
             }
             Wallet::firstOrCreate(['inspector_id' => $inspector->id]);
 
-            Mail::to($inspector->email)->queue(new \App\Mail\InspectorInvitationMail($inspector, $password));
+            \App\Support\SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new \App\Mail\InspectorInvitationMail($inspector, $password)));
             $created++;
         }
 

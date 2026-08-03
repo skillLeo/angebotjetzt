@@ -10,6 +10,7 @@ use App\Models\AppNotification;
 use App\Models\Inspector;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use App\Support\SafeMailer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -88,7 +89,7 @@ class RequestService
             );
         }
 
-        Mail::to($request->contact_email)->queue(new RequestMatchedMail($request));
+        SafeMailer::send(fn () => Mail::to($request->contact_email)->queue(new RequestMatchedMail($request)));
     }
 
     private function notifyInspectorOfMatch(Inspector $inspector, ServiceRequest $request): void
@@ -106,7 +107,7 @@ class RequestService
             now()->addDays(14),
             ['request' => $request->id, 'inspector' => $inspector->id]
         );
-        Mail::to($inspector->email)->queue(new NewRequestNotificationMail($request, $inspector, $signedLink));
+        SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new NewRequestNotificationMail($request, $inspector, $signedLink)));
     }
 
     /**
@@ -150,7 +151,7 @@ class RequestService
             $this->notifyInspectorOfMatch($inspector, $request);
         }
 
-        Mail::to($request->contact_email)->queue(new RequestConfirmationMail($request));
+        SafeMailer::send(fn () => Mail::to($request->contact_email)->queue(new RequestConfirmationMail($request)));
 
         ActivityLog::record('request.submitted', $user, $request, [
             'matched' => $inspectors->count(),

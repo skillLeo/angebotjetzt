@@ -165,7 +165,7 @@ class PublicController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        Mail::to(config('mail.from.address'))->queue(new ContactFormMail($data));
+        \App\Support\SafeMailer::send(fn () => Mail::to(config('mail.from.address'))->queue(new ContactFormMail($data)));
 
         return back()->with('success', 'Vielen Dank für Ihre Nachricht. Wir melden uns innerhalb von 24 Stunden bei Ihnen.');
     }
