@@ -2,10 +2,10 @@
 import PageCard from '@/components/dashboard/PageCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
-import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Send } from 'lucide-vue-next';
 
-defineProps<{
+const props = defineProps<{
     request: {
         id: number; number: string; status: string; service: string; date: string;
         customer: { name: string; email: string; phone: string | null };
@@ -16,6 +16,15 @@ defineProps<{
         offers: Array<{ id: number; inspector: string; price: number; status: string; date: string }>;
     };
 }>();
+
+const inviteForm = useForm({ email: '' });
+
+function invite() {
+    inviteForm.post(`/admin/requests/${props.request.id}/invite-provider`, {
+        preserveScroll: true,
+        onSuccess: () => inviteForm.reset('email'),
+    });
+}
 </script>
 
 <template>
@@ -57,6 +66,26 @@ defineProps<{
                     </div>
                 </div>
                 <p v-else class="px-5 py-6 text-center text-sm text-ink-500">Keine passenden Gutachter.</p>
+            </PageCard>
+
+            <PageCard title="Nicht registrierten Anbieter einladen" subtitle="Sendet einen Link zu dieser Anfrage per E-Mail" class="mt-6">
+                <form class="flex flex-col gap-3 p-5 sm:p-6" @submit.prevent="invite">
+                    <input
+                        v-model="inviteForm.email"
+                        type="email"
+                        required
+                        placeholder="anbieter@beispiel.de"
+                        class="w-full rounded-card border border-ink-300 px-4 py-2.5 text-sm focus:border-green-500 focus:outline-none"
+                    />
+                    <p v-if="inviteForm.errors.email" class="text-sm text-red-600">{{ inviteForm.errors.email }}</p>
+                    <button
+                        type="submit"
+                        :disabled="inviteForm.processing"
+                        class="inline-flex items-center justify-center gap-2 rounded-pill bg-navy-700 py-2.5 text-sm font-bold text-white transition hover:bg-navy-800 disabled:opacity-60"
+                    >
+                        <Send :size="15" aria-hidden="true" /> Einladen
+                    </button>
+                </form>
             </PageCard>
         </div>
     </div>

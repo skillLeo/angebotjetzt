@@ -9,18 +9,17 @@ withDefaults(
 </script>
 
 <template>
-    <span class="inline-flex flex-col leading-none select-none">
+    <span class="inline-flex flex-col items-start leading-none select-none">
         <span
-            class="font-display notranslate flex items-baseline gap-1.5 text-2xl font-extrabold tracking-tight md:text-[28px]"
+            class="notranslate inline-flex items-center rounded-sm"
+            :class="inverted ? 'bg-white px-3 py-1.5 shadow-sm' : ''"
             translate="no"
-            aria-label="AngebotJetzt"
         >
-            <span :class="inverted ? 'text-white' : 'text-navy-700'">Angebot</span>
-            <span class="text-green-500">Jetzt</span>
+            <img src="/images/logo-wordmark.png" alt="AngebotJetzt" class="h-7 w-auto md:h-8" />
         </span>
         <span
             v-if="tagline"
-            class="mt-1 text-[10px] font-bold tracking-wide"
+            class="mt-1.5 text-[10px] font-bold tracking-wide"
             :class="inverted ? 'text-navy-100' : 'text-ink-500'"
         >
             Anfragen. <span class="text-green-500">Vergleichen.</span> Beauftragen.

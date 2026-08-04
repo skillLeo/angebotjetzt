@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inspector;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InspectorVerifyEmailMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
@@ -13,10 +14,14 @@ use App\Models\PayoutRequest;
 use App\Models\RequestMatch;
 use App\Models\ServiceRequest;
 use App\Services\CommissionService;
+use App\Services\RequestService;
 use App\Services\WalletService;
+use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,6 +33,96 @@ class InspectorAreaController extends Controller
         Auth::guard('inspector')->login($inspector);
 
         return redirect()->route('inspector.requests.show', $request->id);
+    }
+
+    public function verificationNotice(): Response
+    {
+        return Inertia::render('inspector/VerifyEmailNotice', [
+            'email' => Auth::guard('inspector')->user()->email,
+        ]);
+    }
+
+    public function resendVerification(): RedirectResponse
+    {
+        $inspector = Auth::guard('inspector')->user();
+
+        if ($inspector->email_verified_at) {
+            return redirect()->route('inspector.dashboard');
+        }
+
+        $this->sendVerificationEmail($inspector);
+
+        return back()->with('success', 'E-Mail wurde erneut gesendet.');
+    }
+
+    public function onboardingProfile(): Response
+    {
+        $inspector = Auth::guard('inspector')->user();
+
+        return Inertia::render('inspector/CompleteProfile', [
+            'profile' => $inspector->only(['birthday', 'tax_id', 'street', 'plz', 'city', 'phone']),
+        ]);
+    }
+
+    public function storeOnboardingProfile(Request $httpRequest, RequestService $requestService): RedirectResponse
+    {
+        $inspector = Auth::guard('inspector')->user();
+
+        $data = $httpRequest->validate([
+            'birthday' => ['required', 'date', 'before:'.now()->subYears(18)->toDateString()],
+            'tax_id' => ['required', 'string', 'max:50'],
+            'street' => ['required', 'string', 'max:190'],
+            'plz' => ['required', 'digits:5'],
+            'city' => ['required', 'string', 'max:120'],
+            'phone' => ['required', 'string', 'max:40'],
+            'plz_from' => ['nullable', 'digits:5'],
+            'plz_to' => ['nullable', 'digits:5', 'gte:plz_from'],
+        ], [
+            'birthday.before' => 'Sie müssen mindestens 18 Jahre alt sein.',
+            'plz_to.gte' => 'Die End-PLZ muss größer oder gleich der Start-PLZ sein.',
+        ]);
+
+        $inspector->update([
+            'birthday' => $data['birthday'],
+            'tax_id' => $data['tax_id'],
+            'street' => $data['street'],
+            'plz' => $data['plz'],
+            'city' => $data['city'],
+            'phone' => $data['phone'],
+            'profile_completed_at' => now(),
+        ]);
+
+        $inspector->serviceAreas()->create(['type' => 'city', 'city_name' => $data['city']]);
+        if (! empty($data['plz_from']) && ! empty($data['plz_to'])) {
+            $inspector->serviceAreas()->create([
+                'type' => 'postal_range',
+                'postal_from' => (int) $data['plz_from'],
+                'postal_to' => (int) $data['plz_to'],
+            ]);
+        }
+
+        ActivityLog::record('inspector.profile_completed', $inspector);
+
+        // An admin-invited registration remembers which request brought them
+        // here so they land back on it once onboarding is otherwise done,
+        // instead of the generic dashboard.
+        if ($requestId = session()->pull('inspector_pending_request_id')) {
+            return redirect()->route('inspector.requests.show', $requestId)->with('success', 'Profil vervollständigt.');
+        }
+
+        return redirect()->route('inspector.dashboard')
+            ->with('success', 'Profil vervollständigt. Ihr Konto wird nun von unserem Team geprüft.');
+    }
+
+    private function sendVerificationEmail(Inspector $inspector): void
+    {
+        $signedLink = URL::temporarySignedRoute(
+            'inspector.verification.verify',
+            now()->addDays(14),
+            ['inspector' => $inspector->id]
+        );
+
+        SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorVerifyEmailMail($inspector, $signedLink)));
     }
 
     public function dashboard(WalletService $walletService): Response

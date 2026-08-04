@@ -81,6 +81,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '+491'.str_pad((string) (520000000 + $i * 731), 9, '0'),
                 'password' => Hash::make('Gutachter2026!'),
                 'email_verified_at' => now(),
+                'profile_completed_at' => now(),
                 'city' => $city,
                 'bio' => "Öffentlich bestellter und vereidigter Kfz-Sachverständiger mit Schwerpunkt Unfallschäden und Fahrzeugbewertung im Raum {$city}.",
                 'qualifications' => 'TÜV-zertifizierter Kfz-Sachverständiger, Mitglied im BVSK',

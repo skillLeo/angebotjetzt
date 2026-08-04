@@ -92,7 +92,11 @@ class RequestService
         SafeMailer::send(fn () => Mail::to($request->contact_email)->queue(new RequestMatchedMail($request)));
     }
 
-    private function notifyInspectorOfMatch(Inspector $inspector, ServiceRequest $request): void
+    /**
+     * Also called directly by AdminController::inviteProvider() when an admin
+     * manually matches an already-registered inspector to a request.
+     */
+    public function notifyInspectorOfMatch(Inspector $inspector, ServiceRequest $request): void
     {
         AppNotification::notify(
             $inspector,

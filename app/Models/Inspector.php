@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,8 +15,10 @@ class Inspector extends Authenticatable
 
     protected $fillable = [
         'company_name', 'name', 'email', 'phone', 'password', 'avatar_path',
-        'city', 'bio', 'qualifications', 'years_experience', 'is_active',
-        'is_approved', 'is_verified', 'member_since', 'imported_from', 'email_verified_at',
+        'city', 'street', 'plz', 'bio', 'qualifications', 'years_experience',
+        'birthday', 'tax_id', 'service_category_id', 'is_active', 'is_approved',
+        'is_verified', 'member_since', 'imported_from', 'email_verified_at',
+        'profile_completed_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
@@ -26,11 +29,18 @@ class Inspector extends Authenticatable
             'email_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'member_since' => 'date',
+            'birthday' => 'date',
+            'profile_completed_at' => 'datetime',
             'is_active' => 'boolean',
             'is_approved' => 'boolean',
             'is_verified' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    public function serviceCategory(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCategory::class);
     }
 
     public function serviceAreas(): HasMany

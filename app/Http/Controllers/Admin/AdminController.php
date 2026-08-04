@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InspectorApprovedMail;
 use App\Mail\PayoutPaidMail;
+use App\Mail\ProviderInviteToRegisterMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
@@ -11,16 +13,20 @@ use App\Models\Inspector;
 use App\Models\Offer;
 use App\Models\Payment;
 use App\Models\PayoutRequest;
+use App\Models\RequestMatch;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\Setting;
 use App\Models\Wallet;
+use App\Services\RequestService;
 use App\Services\WalletService;
+use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -148,6 +154,38 @@ class AdminController extends Controller
                 ]),
             ],
         ]);
+    }
+
+    public function inviteProvider(Request $httpRequest, ServiceRequest $serviceRequest, RequestService $requestService): RedirectResponse
+    {
+        $data = $httpRequest->validate([
+            'email' => ['required', 'email', 'max:190'],
+        ]);
+
+        $inspector = Inspector::where('email', $data['email'])->first();
+
+        if ($inspector) {
+            RequestMatch::firstOrCreate(
+                ['request_id' => $serviceRequest->id, 'inspector_id' => $inspector->id],
+                ['notified_at' => now()]
+            );
+
+            $requestService->notifyInspectorOfMatch($inspector, $serviceRequest);
+        } else {
+            $signedLink = URL::temporarySignedRoute(
+                'inspector.invite.accept',
+                now()->addDays(30),
+                ['serviceRequest' => $serviceRequest->id, 'email' => $data['email']]
+            );
+
+            SafeMailer::send(fn () => Mail::to($data['email'])->queue(new ProviderInviteToRegisterMail($data['email'], $serviceRequest, $signedLink)));
+        }
+
+        ActivityLog::record('request.provider_invited', Auth::guard('admin')->user(), $serviceRequest, ['email' => $data['email']]);
+
+        return back()->with('success', $inspector
+            ? 'Gutachter wurde zur Anfrage eingeladen.'
+            : 'Einladung wurde per E-Mail versendet.');
     }
 
     public function offers(Request $request): Response
@@ -404,7 +442,7 @@ class AdminController extends Controller
 
     public function inspectorDetail(Inspector $inspector): Response
     {
-        $inspector->load(['serviceAreas', 'wallet']);
+        $inspector->load(['serviceAreas', 'wallet', 'serviceCategory:id,name']);
         $inspector->loadCount(['bookings', 'offers', 'reviews']);
 
         return Inertia::render('admin/InspectorDetail', [
@@ -415,10 +453,17 @@ class AdminController extends Controller
                 'email' => $inspector->email,
                 'phone' => $inspector->phone,
                 'city' => $inspector->city,
+                'street' => $inspector->street,
+                'plz' => $inspector->plz,
+                'category' => $inspector->serviceCategory?->name,
+                'birthday' => $inspector->birthday?->format('d.m.Y'),
+                'taxId' => $inspector->tax_id,
                 'bio' => $inspector->bio,
                 'active' => $inspector->is_active,
                 'approved' => $inspector->is_approved,
                 'verified' => $inspector->is_verified,
+                'emailVerified' => $inspector->email_verified_at !== null,
+                'profileComplete' => $inspector->profile_completed_at !== null,
                 'since' => $inspector->member_since?->format('d.m.Y'),
                 'imported' => $inspector->imported_from,
                 'jobs' => $inspector->bookings_count,
@@ -467,6 +512,8 @@ class AdminController extends Controller
         }
 
         $inspector->update(['is_approved' => true]);
+
+        SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorApprovedMail($inspector)));
 
         ActivityLog::record('inspector.approved', Auth::guard('admin')->user(), $inspector);
 

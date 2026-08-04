@@ -98,10 +98,20 @@ Route::prefix('inspector')->name('gutachter.')->group(function () {
 Route::get('/inspector/register', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'show'])->name('gutachter.register');
 Route::post('/inspector/register', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
 
+Route::get('/inspector/verify-email/{inspector}/confirm', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'confirmEmail'])
+    ->middleware('signed')->name('inspector.verification.verify');
+Route::get('/inspector/invite/{serviceRequest}/accept', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'acceptInvite'])
+    ->middleware('signed')->name('inspector.invite.accept');
+
 Route::get('/inspector/requests/{request}/direct/{inspector}', [InspectorAreaController::class, 'signedRequest'])
     ->middleware('signed')->name('inspector.requests.signed');
 
-Route::middleware('auth:inspector')->prefix('inspector')->name('inspector.')->group(function () {
+Route::middleware(['auth:inspector', \App\Http\Middleware\EnsureInspectorOnboardingComplete::class])->prefix('inspector')->name('inspector.')->group(function () {
+    Route::get('/verify-email', [InspectorAreaController::class, 'verificationNotice'])->name('verification.notice');
+    Route::post('/verify-email/resend', [InspectorAreaController::class, 'resendVerification'])->name('verification.resend');
+    Route::get('/complete-profile', [InspectorAreaController::class, 'onboardingProfile'])->name('onboarding.profile');
+    Route::post('/complete-profile', [InspectorAreaController::class, 'storeOnboardingProfile'])->name('onboarding.profile.store');
+
     Route::get('/', [InspectorAreaController::class, 'dashboard'])->name('dashboard');
     Route::get('/requests', [InspectorAreaController::class, 'requests'])->name('requests');
     Route::get('/requests/{serviceRequest}', [InspectorAreaController::class, 'requestDetail'])->name('requests.show');
@@ -138,6 +148,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/requests', [AdminController::class, 'requests'])->name('requests');
     Route::get('/requests/{serviceRequest}', [AdminController::class, 'requestDetail'])->name('requests.show');
+    Route::post('/requests/{serviceRequest}/invite-provider', [AdminController::class, 'inviteProvider'])->name('requests.invite');
     Route::get('/offers', [AdminController::class, 'offers'])->name('offers');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/{booking}', [AdminController::class, 'bookingDetail'])->name('bookings.show');

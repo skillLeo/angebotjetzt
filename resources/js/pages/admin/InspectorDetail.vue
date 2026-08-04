@@ -3,12 +3,14 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, BadgeCheck, Clock, MapPin, Package, Star, Wallet } from 'lucide-vue-next';
+import { ArrowLeft, BadgeCheck, CheckCircle2, Clock, MapPin, Package, Star, Wallet, XCircle } from 'lucide-vue-next';
 
 const props = defineProps<{
     inspector: {
-        id: number; name: string; company: string | null; email: string; phone: string | null; city: string | null; bio: string | null;
-        active: boolean; approved: boolean; verified: boolean; since: string | null; imported: string | null;
+        id: number; name: string; company: string | null; email: string; phone: string | null; city: string | null;
+        street: string | null; plz: string | null; category: string | null; birthday: string | null; taxId: string | null; bio: string | null;
+        active: boolean; approved: boolean; verified: boolean; emailVerified: boolean; profileComplete: boolean;
+        since: string | null; imported: string | null;
         jobs: number; offers: number; reviews: number; rating: number | null;
         wallet: { available: number; pending: number; lifetime: number };
         areas: Array<{ id: number; type: string; city: string | null; from: number | null; to: number | null }>;
@@ -33,12 +35,22 @@ function toggleVerified() {
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 
-    <div v-if="!inspector.approved" class="mb-6 flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
-        <Clock :size="20" class="text-amber-600" aria-hidden="true" />
-        <p class="flex-1 text-sm font-semibold text-amber-800">Dieser Gutachter wartet auf Freischaltung und erhält noch keine Anfragen.</p>
-        <button type="button" class="rounded-pill bg-green-500 px-5 py-2 text-sm font-bold text-white transition hover:bg-green-600" @click="approve">
-            Freischalten
-        </button>
+    <div v-if="!inspector.approved" class="mb-6 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
+        <div class="flex items-center gap-3">
+            <Clock :size="20" class="shrink-0 text-amber-600" aria-hidden="true" />
+            <p class="flex-1 text-sm font-semibold text-amber-800">Dieser Gutachter wartet auf Freischaltung und erhält noch keine Anfragen.</p>
+            <button type="button" class="rounded-pill bg-green-500 px-5 py-2 text-sm font-bold text-white transition hover:bg-green-600" @click="approve">
+                Freischalten
+            </button>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-4 pl-8 text-xs font-semibold">
+            <span class="inline-flex items-center gap-1.5" :class="inspector.emailVerified ? 'text-green-700' : 'text-amber-800'">
+                <component :is="inspector.emailVerified ? CheckCircle2 : XCircle" :size="14" aria-hidden="true" /> E-Mail bestätigt
+            </span>
+            <span class="inline-flex items-center gap-1.5" :class="inspector.profileComplete ? 'text-green-700' : 'text-amber-800'">
+                <component :is="inspector.profileComplete ? CheckCircle2 : XCircle" :size="14" aria-hidden="true" /> Profil vervollständigt
+            </span>
+        </div>
     </div>
 
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -72,7 +84,11 @@ function toggleVerified() {
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
         <PageCard title="Profil">
             <div class="space-y-3 p-6 sm:p-8">
+                <div><p class="text-sm text-ink-500">Kategorie</p><p class="font-semibold text-navy-700">{{ inspector.category ?? '–' }}</p></div>
                 <div><p class="text-sm text-ink-500">Telefon</p><p class="font-semibold text-navy-700">{{ inspector.phone ?? '–' }}</p></div>
+                <div><p class="text-sm text-ink-500">Firmensitz</p><p class="font-semibold text-navy-700">{{ inspector.street ? `${inspector.street}, ${inspector.plz} ${inspector.city}` : '–' }}</p></div>
+                <div><p class="text-sm text-ink-500">Geburtsdatum</p><p class="font-semibold text-navy-700">{{ inspector.birthday ?? '–' }}</p></div>
+                <div><p class="text-sm text-ink-500">Steuernummer</p><p class="font-semibold text-navy-700">{{ inspector.taxId ?? '–' }}</p></div>
                 <div><p class="text-sm text-ink-500">Dabei seit</p><p class="font-semibold text-navy-700">{{ inspector.since ?? '–' }}</p></div>
                 <div v-if="inspector.bio"><p class="text-sm text-ink-500">Über</p><p class="text-navy-700">{{ inspector.bio }}</p></div>
             </div>
