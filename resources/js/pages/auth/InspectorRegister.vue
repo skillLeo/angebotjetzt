@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import SplitAuthShell from '@/components/auth/SplitAuthShell.vue';
 import FormField from '@/components/forms/FormField.vue';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { UserPlus } from 'lucide-vue-next';
+import { ChevronDown, UserPlus } from 'lucide-vue-next';
 
 const props = defineProps<{
     categories: Array<{ id: number; name: string }>;
@@ -39,14 +38,16 @@ function submit() {
         <form class="space-y-4" @submit.prevent="submit">
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Kategorie' }} <span class="text-green-600">*</span></label>
-                <Select v-model="form.service_category_id">
-                    <SelectTrigger class="h-12 w-full rounded-card border-ink-300 px-4 py-3 text-[15px] focus-visible:border-green-500">
-                        <SelectValue :placeholder="'Welche Kategorie?'" />
-                    </SelectTrigger>
-                    <SelectContent class="max-w-[calc(100vw-2rem)]">
-                        <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)">{{ cat.name }}</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div class="relative">
+                    <select
+                        v-model="form.service_category_id"
+                        class="h-12 w-full appearance-none rounded-card border border-ink-300 px-4 pr-10 text-[15px] focus:border-green-500 focus:outline-none"
+                    >
+                        <option value="" disabled>{{ 'Welche Kategorie?' }}</option>
+                        <option v-for="cat in categories" :key="cat.id" :value="String(cat.id)">{{ cat.name }}</option>
+                    </select>
+                    <ChevronDown class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink-300" :size="18" aria-hidden="true" />
+                </div>
                 <p v-if="form.errors.service_category_id" class="mt-1 text-sm text-red-600">{{ form.errors.service_category_id }}</p>
             </div>
             <FormField v-model="form.company_name" :label="'Firma (optional)'" :error="form.errors.company_name" />
