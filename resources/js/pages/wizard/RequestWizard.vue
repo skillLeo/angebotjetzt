@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import WizardDynamicStep, { type WizardFieldDef } from '@/components/wizard/WizardDynamicStep.vue';
 import WizardStep1 from '@/components/wizard/WizardStep1.vue';
 import WizardStep2 from '@/components/wizard/WizardStep2.vue';
 import WizardStep3 from '@/components/wizard/WizardStep3.vue';
 import WizardStep4 from '@/components/wizard/WizardStep4.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { Check } from 'lucide-vue-next';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     serviceTypes: Array<{ id: number; name: string; slug: string; description: string }>;
+    serviceTypeFields: Record<number, WizardFieldDef[]>;
     preselected: string | null;
 }>();
 
@@ -41,7 +43,14 @@ const form = useForm({
     agb: false as boolean,
     privacy: false as boolean,
     photos: [] as File[],
+    answers: {} as Record<string, string | number | File | null>,
 });
+
+// Kfz-Gutachten (and any other service with nothing defined yet) has zero
+// custom fields, so this stays empty and step 2 keeps rendering the existing
+// hardcoded vehicle-appraisal form exactly as before — only a service type an
+// admin has actually configured fields for switches to the dynamic renderer.
+const activeFields = computed(() => props.serviceTypeFields[form.service_type_id ?? -1] ?? []);
 
 onMounted(() => {
     const saved = localStorage.getItem(DRAFT_KEY);
@@ -65,7 +74,15 @@ onMounted(() => {
 });
 
 watch(
-    () => ({ ...form.data(), photos: undefined }),
+    () => ({
+        ...form.data(),
+        photos: undefined,
+        // File objects (from a dynamic file-upload field) aren't valid draft
+        // data either — same reasoning as excluding photos above.
+        answers: Object.fromEntries(
+            Object.entries(form.data().answers ?? {}).map(([k, v]) => [k, v instanceof File ? null : v]),
+        ),
+    }),
     (val) => localStorage.setItem(DRAFT_KEY, JSON.stringify(val)),
     { deep: true },
 );
@@ -127,7 +144,8 @@ function submit() {
 
             <div class="rounded-panel border border-ink-100 bg-white p-6 shadow-card sm:p-8">
                 <WizardStep1 v-if="step === 1" :form="form" :service-types="serviceTypes" @next="next" />
-                <WizardStep2 v-else-if="step === 2" :form="form" v-model:photos="photos" @next="next" @back="back" />
+                <WizardStep2 v-else-if="step === 2 && !activeFields.length" :form="form" v-model:photos="photos" @next="next" @back="back" />
+                <WizardDynamicStep v-else-if="step === 2" :form="form" :fields="activeFields" @next="next" @back="back" />
                 <WizardStep3 v-else-if="step === 3" :form="form" @next="next" @back="back" />
                 <WizardStep4 v-else :form="form" :service-types="serviceTypes" :is-guest="isGuest" @back="back" @submit="submit" />
             </div>

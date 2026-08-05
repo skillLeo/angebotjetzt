@@ -29,9 +29,13 @@ class RequestService
      * or already found others ("open"/"offers_received"). This re-checks every
      * still-live request the inspector isn't already matched to.
      *
+     * @param  bool  $onlyRecent  When true (used for brand-new approvals), only
+     *                            requests submitted in the last 48 hours are
+     *                            considered — a freshly-approved provider
+     *                            shouldn't be handed a backlog of old requests.
      * @return int number of requests newly matched to this inspector
      */
-    public function rematchUnmatchedRequestsFor(Inspector $inspector): int
+    public function rematchUnmatchedRequestsFor(Inspector $inspector, bool $onlyRecent = false): int
     {
         if (! $inspector->is_active || ! $inspector->is_approved) {
             return 0;
@@ -39,6 +43,7 @@ class RequestService
 
         $candidates = ServiceRequest::whereIn('status', ['unmatched', 'open', 'offers_received'])
             ->where('expires_at', '>', now())
+            ->when($onlyRecent, fn ($q) => $q->where('created_at', '>=', now()->subHours(48)))
             ->whereDoesntHave('matches', fn ($q) => $q->where('inspector_id', $inspector->id))
             ->get();
 

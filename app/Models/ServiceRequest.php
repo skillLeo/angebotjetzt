@@ -17,7 +17,7 @@ class ServiceRequest extends Model
     protected $fillable = [
         'request_number', 'user_id', 'service_type_id', 'vehicle_make', 'vehicle_model',
         'first_registration', 'mileage', 'vin', 'fuel_type', 'transmission',
-        'plz', 'ort', 'strasse', 'preferred_date', 'alternative_date', 'notes',
+        'plz', 'ort', 'strasse', 'preferred_date', 'alternative_date', 'notes', 'answers',
         'contact_name', 'contact_email', 'contact_phone', 'status', 'matched_count', 'expires_at',
     ];
 
@@ -27,6 +27,7 @@ class ServiceRequest extends Model
             'preferred_date' => 'date',
             'alternative_date' => 'date',
             'expires_at' => 'datetime',
+            'answers' => 'array',
         ];
     }
 

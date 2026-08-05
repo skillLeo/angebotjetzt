@@ -10,6 +10,7 @@ use App\Services\RequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,10 +20,23 @@ class RequestWizardController extends Controller
 
     public function show(Request $request): Response
     {
+        $activeTypes = ServiceType::where('is_active', true)
+            ->orderBy('sort_order')
+            ->with('fields')
+            ->get();
+
         return Inertia::render('wizard/RequestWizard', [
-            'serviceTypes' => ServiceType::where('is_active', true)
-                ->orderBy('sort_order')
-                ->get(['id', 'name', 'slug', 'description']),
+            'serviceTypes' => $activeTypes->map(fn ($t) => [
+                'id' => $t->id, 'name' => $t->name, 'slug' => $t->slug, 'description' => $t->description,
+            ])->values(),
+            // Keyed by service_type_id so the frontend can pick the right set
+            // once a service is chosen in step 1, without a second round-trip.
+            'serviceTypeFields' => $activeTypes->mapWithKeys(fn ($t) => [
+                $t->id => $t->fields->map(fn ($f) => [
+                    'key' => $f->key, 'label' => $f->label, 'type' => $f->type,
+                    'options' => $f->options, 'isRequired' => $f->is_required,
+                ]),
+            ]),
             'preselected' => $request->query('service'),
         ]);
     }
@@ -31,10 +45,14 @@ class RequestWizardController extends Controller
     {
         $isGuest = ! Auth::check();
 
+        $request->validate(['service_type_id' => ['required', 'exists:service_types,id']]);
+        $serviceType = ServiceType::with('fields')->findOrFail($request->input('service_type_id'));
+        $hasCustomFields = $serviceType->fields->isNotEmpty();
+
         $rules = [
             'service_type_id' => ['required', 'exists:service_types,id'],
-            'vehicle_make' => ['required', 'string', 'max:80'],
-            'vehicle_model' => ['required', 'string', 'max:120'],
+            'vehicle_make' => [$hasCustomFields ? 'nullable' : 'required', 'string', 'max:80'],
+            'vehicle_model' => [$hasCustomFields ? 'nullable' : 'required', 'string', 'max:120'],
             'first_registration' => ['nullable', 'string', 'regex:/^(0[1-9]|1[0-2])\/\d{4}$/'],
             'mileage' => ['nullable', 'integer', 'min:0', 'max:2000000'],
             'vin' => ['nullable', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/i'],
@@ -46,6 +64,7 @@ class RequestWizardController extends Controller
             'preferred_date' => ['nullable', 'date', 'after_or_equal:today'],
             'alternative_date' => ['nullable', 'date', 'after_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:3000'],
+            'answers' => ['nullable', 'array'],
             'contact_name' => ['required', 'string', 'max:120'],
             'contact_email' => ['required', 'email', 'max:190'],
             'contact_phone' => ['required', 'string', 'max:40', 'regex:/^[+0-9][0-9 \/\-()]{5,}$/'],
@@ -63,7 +82,33 @@ class RequestWizardController extends Controller
             'privacy.accepted' => 'Bitte akzeptieren Sie die Datenschutzerklärung.',
         ];
 
+        if ($hasCustomFields) {
+            foreach ($serviceType->fields as $field) {
+                $key = "answers.{$field->key}";
+                $rules[$key] = [
+                    $field->is_required ? 'required' : 'nullable',
+                    ...match ($field->type) {
+                        'text' => ['string', 'max:1000'],
+                        'textarea' => ['string', 'max:5000'],
+                        'number' => ['numeric'],
+                        'date' => ['date'],
+                        'select' => [Rule::in($field->options ?? [])],
+                        'file' => ['file', 'image', 'max:8192'],
+                    },
+                ];
+            }
+        }
+
         $data = $request->validate($rules, $messages);
+
+        if ($hasCustomFields) {
+            foreach ($serviceType->fields->where('type', 'file') as $field) {
+                if ($request->hasFile("answers.{$field->key}")) {
+                    $data['answers'][$field->key] = $request->file("answers.{$field->key}")
+                        ->store('request-photos', 'public');
+                }
+            }
+        }
 
         $user = $isGuest ? null : Auth::user();
 

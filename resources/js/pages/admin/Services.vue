@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PageCard from '@/components/dashboard/PageCard.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 defineProps<{
@@ -31,6 +31,12 @@ function toggle(id: number) {
                     <p class="mt-1 text-sm text-ink-500">
                         {{ cat.types.length }} Leistungen<span v-if="cat.interest > 0"> · {{ cat.interest }} Interessenten</span>
                     </p>
+                    <ul v-if="cat.types.length" class="mt-2 space-y-1">
+                        <li v-for="t in cat.types" :key="t.id" class="flex items-center gap-2 text-sm">
+                            <span class="text-ink-700">{{ t.name }}</span>
+                            <Link :href="`/admin/service-types/${t.id}/fields`" class="text-xs font-semibold text-green-600 hover:underline">Felder verwalten</Link>
+                        </li>
+                    </ul>
                 </div>
                 <button
                     type="button"

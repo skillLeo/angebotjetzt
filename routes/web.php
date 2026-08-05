@@ -117,6 +117,8 @@ Route::middleware(['auth:inspector', \App\Http\Middleware\EnsureInspectorOnboard
     Route::get('/requests/{serviceRequest}', [InspectorAreaController::class, 'requestDetail'])->name('requests.show');
     Route::get('/requests/{serviceRequest}/offer', [InspectorAreaController::class, 'offerForm'])->name('requests.offer');
     Route::post('/requests/{serviceRequest}/offer', [InspectorAreaController::class, 'storeOffer'])->name('requests.offer.store');
+    Route::get('/requests/{serviceRequest}/offer/edit', [InspectorAreaController::class, 'editOfferForm'])->name('requests.offer.edit');
+    Route::put('/requests/{serviceRequest}/offer', [InspectorAreaController::class, 'updateOffer'])->name('requests.offer.update');
     Route::get('/offers', [InspectorAreaController::class, 'offers'])->name('offers');
     Route::get('/jobs', [InspectorAreaController::class, 'jobs'])->name('jobs');
     Route::get('/jobs/{booking}', [InspectorAreaController::class, 'jobDetail'])->name('jobs.show');
@@ -172,6 +174,9 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/customers/{customer}', [AdminController::class, 'customerDetail'])->name('customers.show');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
     Route::post('/categories/{category}/status', [AdminController::class, 'toggleCategory'])->name('categories.toggle');
+    Route::get('/service-types/{serviceType}/fields', [AdminController::class, 'serviceTypeFields'])->name('service-types.fields');
+    Route::post('/service-types/{serviceType}/fields', [AdminController::class, 'storeServiceTypeField'])->name('service-types.fields.store');
+    Route::delete('/service-types/{serviceType}/fields/{field}', [AdminController::class, 'destroyServiceTypeField'])->name('service-types.fields.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/logs', [AdminController::class, 'logs'])->name('logs');

@@ -16,6 +16,8 @@ use App\Models\PayoutRequest;
 use App\Models\RequestMatch;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
+use App\Models\ServiceType;
+use App\Models\ServiceTypeField;
 use App\Models\Setting;
 use App\Models\Wallet;
 use App\Services\RequestService;
@@ -531,7 +533,7 @@ class AdminController extends Controller
 
         ActivityLog::record('inspector.approved', Auth::guard('admin')->user(), $inspector);
 
-        $rematched = $requestService->rematchUnmatchedRequestsFor($inspector);
+        $rematched = $requestService->rematchUnmatchedRequestsFor($inspector, onlyRecent: true);
 
         $message = 'Gutachter freigeschaltet.';
         if ($rematched > 0) {
@@ -810,6 +812,60 @@ class AdminController extends Controller
             Auth::guard('admin')->user(), $category);
 
         return back()->with('success', $category->is_active ? 'Kategorie „'.$category->name.'“ aktiviert.' : 'Kategorie „'.$category->name.'“ deaktiviert.');
+    }
+
+    public function serviceTypeFields(ServiceType $serviceType): Response
+    {
+        return Inertia::render('admin/ServiceTypeFields', [
+            'serviceType' => ['id' => $serviceType->id, 'name' => $serviceType->name],
+            'fields' => $serviceType->fields()->orderBy('sort_order')->get()->map(fn ($f) => [
+                'id' => $f->id, 'label' => $f->label, 'type' => $f->type,
+                'options' => $f->options, 'isRequired' => $f->is_required,
+            ]),
+        ]);
+    }
+
+    public function storeServiceTypeField(Request $request, ServiceType $serviceType): RedirectResponse
+    {
+        $data = $request->validate([
+            'label' => ['required', 'string', 'max:120'],
+            'type' => ['required', 'in:text,number,date,select,textarea,file'],
+            'options' => ['required_if:type,select', 'nullable', 'string'],
+            'is_required' => ['boolean'],
+        ]);
+
+        $key = Str::slug($data['label'], '_');
+        $suffix = 2;
+        while ($serviceType->fields()->where('key', $key)->exists()) {
+            $key = Str::slug($data['label'], '_').'_'.$suffix++;
+        }
+
+        $options = $data['type'] === 'select'
+            ? collect(explode(',', $data['options']))->map(fn ($o) => trim($o))->filter()->values()->all()
+            : null;
+
+        $serviceType->fields()->create([
+            'label' => $data['label'],
+            'key' => $key,
+            'type' => $data['type'],
+            'options' => $options,
+            'is_required' => $data['is_required'] ?? false,
+            'sort_order' => ($serviceType->fields()->max('sort_order') ?? 0) + 1,
+        ]);
+
+        ActivityLog::record('service_type_field.created', Auth::guard('admin')->user(), $serviceType, ['label' => $data['label']]);
+
+        return back()->with('success', 'Feld hinzugefügt.');
+    }
+
+    public function destroyServiceTypeField(ServiceTypeField $field): RedirectResponse
+    {
+        $serviceType = $field->serviceType;
+        $field->delete();
+
+        ActivityLog::record('service_type_field.deleted', Auth::guard('admin')->user(), $serviceType, ['label' => $field->label]);
+
+        return back()->with('success', 'Feld entfernt.');
     }
 
     public function settings(): Response

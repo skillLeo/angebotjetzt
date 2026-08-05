@@ -27,4 +27,9 @@ class ServiceType extends Model
     {
         return $this->hasMany(ServiceRequest::class);
     }
+
+    public function fields(): HasMany
+    {
+        return $this->hasMany(ServiceTypeField::class)->orderBy('sort_order');
+    }
 }
