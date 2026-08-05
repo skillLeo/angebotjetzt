@@ -7,11 +7,11 @@ import { UserPlus } from 'lucide-vue-next';
 
 const props = defineProps<{
     categories: Array<{ id: number; name: string }>;
-    prefill: { email: string | null; requestId: string | null };
+    prefill: { email: string | null; requestId: string | null; serviceCategoryId: number | null };
 }>();
 
 const form = useForm({
-    service_category_id: '',
+    service_category_id: props.prefill.serviceCategoryId ? String(props.prefill.serviceCategoryId) : '',
     company_name: '',
     name: '',
     email: props.prefill.email ?? '',

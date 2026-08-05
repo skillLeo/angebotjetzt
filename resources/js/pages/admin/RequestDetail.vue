@@ -14,6 +14,7 @@ const props = defineProps<{
         notes: string | null;
         matches: Array<{ inspector: string; company: string | null; city: string | null; notified: string | null; viewed: string | null }>;
         offers: Array<{ id: number; inspector: string; price: number; status: string; date: string }>;
+        invitedProviders: Array<{ email: string | null; date: string }>;
     };
 }>();
 
@@ -86,6 +87,15 @@ function invite() {
                         <Send :size="15" aria-hidden="true" /> Einladen
                     </button>
                 </form>
+                <div v-if="request.invitedProviders.length" class="border-t border-ink-100 px-5 py-4 sm:px-6">
+                    <p class="mb-2 text-xs font-semibold text-ink-500">Bisher eingeladen</p>
+                    <div class="space-y-1.5">
+                        <div v-for="(inv, i) in request.invitedProviders" :key="i" class="flex items-center justify-between text-sm">
+                            <span class="text-navy-700">{{ inv.email }}</span>
+                            <span class="text-xs text-ink-500">{{ inv.date }}</span>
+                        </div>
+                    </div>
+                </div>
             </PageCard>
         </div>
     </div>

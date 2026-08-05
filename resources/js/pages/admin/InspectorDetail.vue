@@ -39,7 +39,13 @@ function toggleVerified() {
         <div class="flex items-center gap-3">
             <Clock :size="20" class="shrink-0 text-amber-600" aria-hidden="true" />
             <p class="flex-1 text-sm font-semibold text-amber-800">Dieser Gutachter wartet auf Freischaltung und erhält noch keine Anfragen.</p>
-            <button type="button" class="rounded-pill bg-green-500 px-5 py-2 text-sm font-bold text-white transition hover:bg-green-600" @click="approve">
+            <button
+                type="button"
+                :disabled="!inspector.profileComplete"
+                :title="!inspector.profileComplete ? 'Profil erst vervollständigt freischaltbar' : undefined"
+                class="rounded-pill bg-green-500 px-5 py-2 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-ink-300 disabled:hover:bg-ink-300"
+                @click="approve"
+            >
                 Freischalten
             </button>
         </div>
@@ -51,6 +57,9 @@ function toggleVerified() {
                 <component :is="inspector.profileComplete ? CheckCircle2 : XCircle" :size="14" aria-hidden="true" /> Profil vervollständigt
             </span>
         </div>
+        <p v-if="!inspector.profileComplete" class="mt-2 pl-8 text-xs text-amber-800">
+            Freischaltung ist erst möglich, sobald der Anbieter Schritt 2 (Profil) abgeschlossen hat.
+        </p>
     </div>
 
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">

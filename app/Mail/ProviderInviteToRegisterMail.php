@@ -24,10 +24,16 @@ class ProviderInviteToRegisterMail extends BaseBrandMail
     {
         $r = $this->serviceRequest;
 
+        $details = "<strong>{$r->serviceType->name}</strong><br>Fahrzeug: {$r->vehicle_make} {$r->vehicle_model}<br>Ort: {$r->plz} {$r->ort}<br>Anfrage-Nr.: {$r->request_number}";
+        if (! empty($r->notes)) {
+            $details .= "<br>Beschreibung: {$r->notes}";
+        }
+
         return [
             'Guten Tag,',
-            'ein Kunde von AngebotJetzt sucht einen passenden Anbieter für folgende Anfrage:',
-            "<strong>{$r->serviceType->name}</strong><br>Fahrzeug: {$r->vehicle_make} {$r->vehicle_model}<br>Ort: {$r->plz} {$r->ort}<br>Anfrage-Nr.: {$r->request_number}",
+            'AngebotJetzt ist eine Plattform, die Kunden mit passenden Kfz-Gutachtern und weiteren Dienstleistern in ihrer Region verbindet.',
+            'Ein Kunde sucht aktuell einen passenden Anbieter für folgende Anfrage:',
+            $details,
             'Sie sind noch nicht bei AngebotJetzt registriert. Über den Link unten können Sie die Anfrage ansehen und sich anschließend registrieren, um ein Angebot abzugeben.',
         ];
     }

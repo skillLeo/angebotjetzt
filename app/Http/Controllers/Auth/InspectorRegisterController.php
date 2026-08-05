@@ -23,11 +23,17 @@ class InspectorRegisterController extends Controller
 {
     public function show(Request $request): Response
     {
+        $requestId = $request->query('request');
+        $serviceCategoryId = $requestId
+            ? ServiceRequest::find($requestId)?->serviceType?->service_category_id
+            : null;
+
         return Inertia::render('auth/InspectorRegister', [
             'categories' => ServiceCategory::orderBy('sort_order')->get(['id', 'name']),
             'prefill' => [
                 'email' => $request->query('email'),
-                'requestId' => $request->query('request'),
+                'requestId' => $requestId,
+                'serviceCategoryId' => $serviceCategoryId,
             ],
         ]);
     }

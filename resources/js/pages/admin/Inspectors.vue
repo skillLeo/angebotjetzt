@@ -79,7 +79,9 @@ function approve(id: number) {
                 <button
                     v-if="!row.approved"
                     type="button"
-                    class="inline-flex items-center gap-1.5 rounded-pill bg-green-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-green-600"
+                    :disabled="!row.profileComplete"
+                    :title="!row.profileComplete ? 'Profil erst vervollständigt freischaltbar' : undefined"
+                    class="inline-flex items-center gap-1.5 rounded-pill bg-green-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-ink-300 disabled:hover:bg-ink-300"
                     @click="approve(row.id as number)"
                 >
                     <Check :size="14" aria-hidden="true" /> Freischalten

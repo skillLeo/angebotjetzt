@@ -152,6 +152,15 @@ class AdminController extends Controller
                     'status' => $o->status,
                     'date' => $o->created_at->format('d.m.Y'),
                 ]),
+                'invitedProviders' => ActivityLog::where('action', 'request.provider_invited')
+                    ->where('subject_type', $serviceRequest->getMorphClass())
+                    ->where('subject_id', $serviceRequest->id)
+                    ->latest()
+                    ->get()
+                    ->map(fn ($log) => [
+                        'email' => $log->meta['email'] ?? null,
+                        'date' => $log->created_at->format('d.m.Y H:i'),
+                    ]),
             ],
         ]);
     }
@@ -430,6 +439,7 @@ class AdminController extends Controller
                     'active' => $i->is_active,
                     'approved' => $i->is_approved,
                     'verified' => $i->is_verified,
+                    'profileComplete' => $i->profile_completed_at !== null,
                     'jobs' => $i->bookings_count,
                     'offers' => $i->offers_count,
                     'balance' => $i->wallet?->available_cents ?? 0,
@@ -509,6 +519,10 @@ class AdminController extends Controller
     {
         if ($inspector->is_approved) {
             return back()->withErrors(['status' => 'Dieser Gutachter ist bereits freigeschaltet.']);
+        }
+
+        if (! $inspector->profile_completed_at) {
+            return back()->withErrors(['status' => 'Dieser Gutachter hat sein Profil noch nicht vervollständigt und kann noch nicht freigeschaltet werden.']);
         }
 
         $inspector->update(['is_approved' => true]);

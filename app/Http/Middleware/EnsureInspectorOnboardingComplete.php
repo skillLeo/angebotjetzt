@@ -17,16 +17,19 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureInspectorOnboardingComplete
 {
-    private const EXEMPT_ROUTES = [
+    private const VERIFICATION_ROUTES = [
         'inspector.verification.notice',
         'inspector.verification.resend',
+    ];
+
+    private const PROFILE_ROUTES = [
         'inspector.onboarding.profile',
         'inspector.onboarding.profile.store',
     ];
 
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->routeIs(self::EXEMPT_ROUTES)) {
+        if ($request->routeIs(self::VERIFICATION_ROUTES)) {
             return $next($request);
         }
 
@@ -34,6 +37,14 @@ class EnsureInspectorOnboardingComplete
 
         if (! $inspector->email_verified_at) {
             return redirect()->route('inspector.verification.notice');
+        }
+
+        // The profile-completion page itself must stay reachable once verified
+        // (else checking profile_completed_at against its own route would loop),
+        // but it's still gated behind the email-verified check above — a
+        // step-1-only account can never reach it directly.
+        if ($request->routeIs(self::PROFILE_ROUTES)) {
+            return $next($request);
         }
 
         if (! $inspector->profile_completed_at) {
