@@ -42,6 +42,12 @@ createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            // Provider onboarding steps (verify email, complete profile) run
+            // before the inspector has full dashboard access, so they use
+            // their own centered auth-style shell instead of the dashboard
+            // chrome every other inspector/* page gets.
+            case name === 'inspector/VerifyEmailNotice' || name === 'inspector/CompleteProfile':
+                return null;
             case name.startsWith('settings/'):
                 return [CustomerLayout, SettingsLayout];
             case name.startsWith('customer/'):

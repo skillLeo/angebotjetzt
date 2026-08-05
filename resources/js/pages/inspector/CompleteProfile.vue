@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SplitAuthShell from '@/components/auth/SplitAuthShell.vue';
+import CenteredAuthShell from '@/components/auth/CenteredAuthShell.vue';
 import FormField from '@/components/forms/FormField.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ClipboardCheck } from 'lucide-vue-next';
@@ -30,7 +30,7 @@ function submit() {
 <template>
     <Head><title>{{ 'Konto vervollständigen' }}</title></Head>
 
-    <SplitAuthShell
+    <CenteredAuthShell
         :title="'Vervollständigen Sie Ihr Konto'"
         :description="'Diese Angaben benötigen wir, bevor unser Team Ihr Konto freischalten kann.'"
         :icon="ClipboardCheck"
@@ -54,5 +54,5 @@ function submit() {
                 {{ 'Konto vervollständigen' }}
             </button>
         </form>
-    </SplitAuthShell>
+    </CenteredAuthShell>
 </template>

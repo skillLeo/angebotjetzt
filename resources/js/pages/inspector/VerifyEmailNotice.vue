@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SplitAuthShell from '@/components/auth/SplitAuthShell.vue';
+import CenteredAuthShell from '@/components/auth/CenteredAuthShell.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { MailCheck } from 'lucide-vue-next';
 
@@ -19,7 +19,7 @@ function logout() {
 <template>
     <Head><title>{{ 'E-Mail bestätigen' }}</title></Head>
 
-    <SplitAuthShell
+    <CenteredAuthShell
         :title="'Bitte bestätigen Sie Ihre E-Mail-Adresse'"
         :description="`Wir haben einen Bestätigungslink an ${email} gesendet. Bitte klicken Sie auf den Link, um fortzufahren.`"
         :icon="MailCheck"
@@ -38,5 +38,5 @@ function logout() {
                 {{ 'Abmelden' }}
             </button>
         </div>
-    </SplitAuthShell>
+    </CenteredAuthShell>
 </template>
