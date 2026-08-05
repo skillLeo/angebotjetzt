@@ -31,7 +31,14 @@ const servicesRef = useTemplateRef('servicesRef');
 onClickOutside(servicesRef, () => (servicesOpen.value = false));
 
 const page = usePage();
-const isLoggedIn = computed(() => Boolean((page.props.auth as { user?: unknown } | undefined)?.user));
+type AuthState = { user?: unknown; inspector?: unknown; admin?: unknown } | undefined;
+const accountLink = computed(() => {
+    const auth = page.props.auth as AuthState;
+    if (auth?.admin) return { href: '/admin', label: 'Mein Konto' };
+    if (auth?.inspector) return { href: '/inspector', label: 'Mein Konto' };
+    if (auth?.user) return { href: '/account', label: 'Mein Konto' };
+    return { href: '/login', label: 'Anmelden' };
+});
 
 type NavCategory = { id: number; name: string; slug: string; icon: string; is_active: boolean };
 const navCategories = computed(() => {
@@ -187,10 +194,10 @@ watch(mobileOpen, (open) => {
 
             <div class="hidden items-center gap-4 lg:flex">
                 <Link
-                    :href="isLoggedIn ? '/account' : '/login'"
+                    :href="accountLink.href"
                     class="text-[15px] font-medium text-ink-700 transition-colors hover:text-navy-700"
                 >
-                    {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
+                    {{ accountLink.label }}
                 </Link>
                 <Link
                     href="/request/start"
@@ -263,11 +270,11 @@ watch(mobileOpen, (open) => {
                             :transition="{ delay: 0.28, duration: 0.4 }"
                         >
                             <Link
-                                :href="isLoggedIn ? '/account' : '/login'"
+                                :href="accountLink.href"
                                 class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
                                 @click="mobileOpen = false"
                             >
-                                {{ isLoggedIn ? 'Mein Konto' : 'Anmelden' }}
+                                {{ accountLink.label }}
                             </Link>
                         </Motion>
                     </nav>
