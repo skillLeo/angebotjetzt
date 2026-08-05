@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Structural reference data the application cannot function without:
- * the 10 homepage categories, the 7 Kfz-Gutachten service types, the
+ * the 7 homepage categories, the 7 Kfz-Gutachten service types, the
  * commission setting, and one admin account.
  *
  * This is safe to run on a live production database — it contains no
@@ -32,16 +32,13 @@ class EssentialDataSeeder extends Seeder
         );
 
         $categories = [
-            ['Transport', 'transport', 'truck', 'Umzüge, Lieferungen und Transporte aller Art.', false, 1],
-            ['Kfz-Gutachten', 'kfz-gutachten', 'car', 'Unabhängige Kfz-Sachverständige für Gutachten und Bewertungen.', true, 2],
+            ['Kfz-Gutachten', 'kfz-gutachten', 'car', 'Unabhängige Kfz-Sachverständige für Gutachten und Bewertungen.', true, 1],
+            ['Transporte', 'transporte', 'truck', 'Umzüge, Lieferungen und Transporte aller Art.', false, 2],
             ['Handwerk', 'handwerk', 'hammer', 'Qualifizierte Handwerker für jedes Projekt.', false, 3],
-            ['Haus & Garten', 'haus-garten', 'flower-2', 'Gartenpflege, Hausmeisterservice und mehr.', false, 4],
+            ['Umzug & Entrümpelungen', 'umzug-entruempelungen', 'package', 'Umzüge, Haushaltsauflösungen und Entrümpelungen.', false, 4],
             ['Reinigung', 'reinigung', 'sparkles', 'Professionelle Reinigungsdienste.', false, 5],
-            ['Bau & Renovierung', 'bau-renovierung', 'paintbrush', 'Bauprojekte und Renovierungen.', false, 6],
-            ['Prüfung & Beratung', 'pruefung-beratung', 'clipboard-check', 'Sachverständige und Berater.', false, 7],
-            ['IT & Digital', 'it-digital', 'monitor', 'IT-Dienstleistungen und digitale Lösungen.', false, 8],
-            ['Events & Kreativ', 'events-kreativ', 'party-popper', 'Eventplanung und kreative Dienstleistungen.', false, 9],
-            ['Sicherheit', 'sicherheit', 'shield', 'Sicherheitsdienste und -technik.', false, 10],
+            ['Garten & Außenbereich', 'garten-aussenbereich', 'flower-2', 'Gartenpflege und Gestaltung des Außenbereichs.', false, 6],
+            ['IT & Digital', 'it-digital', 'monitor', 'IT-Dienstleistungen und digitale Lösungen.', false, 7],
         ];
 
         foreach ($categories as [$name, $slug, $icon, $desc, $active, $order]) {

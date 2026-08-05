@@ -26,7 +26,7 @@ const reducedHeader = computed(() => REDUCED_HEADER_COMPONENTS.includes(page.com
             {{ 'Zum Inhalt springen' }}
         </a>
         <PublicHeader :reduced="reducedHeader" />
-        <main id="main" class="flex-1 [overflow-x:clip]">
+        <main id="main" class="flex-1 [overflow-x:clip]" :class="reducedHeader ? 'pt-[92px] lg:pt-[72px]' : ''">
             <slot />
         </main>
         <PublicFooter v-if="!reducedHeader" />

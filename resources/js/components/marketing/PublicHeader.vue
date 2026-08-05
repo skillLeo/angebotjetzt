@@ -4,17 +4,15 @@ import { onClickOutside } from '@vueuse/core';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     BadgeCheck,
+    Car,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
-    ClipboardCheck,
     Flower2,
     Hammer,
     Menu,
     Monitor,
-    PaintbrushVertical,
-    PartyPopper,
-    Shield,
+    Package,
     Sparkles,
     Truck,
     X,
@@ -48,15 +46,13 @@ const navCategories = computed(() => {
 });
 
 const categoryIcons: Record<string, Component> = {
+    car: Car,
     truck: Truck,
     hammer: Hammer,
+    package: Package,
     'flower-2': Flower2,
     sparkles: Sparkles,
-    paintbrush: PaintbrushVertical,
-    'clipboard-check': ClipboardCheck,
     monitor: Monitor,
-    'party-popper': PartyPopper,
-    shield: Shield,
 };
 
 const navItems = computed(() => [
@@ -99,15 +95,18 @@ watch(mobileOpen, (open) => {
 
 <template>
     <header
-        class="sticky top-0 z-50 bg-white transition-shadow duration-300"
-        :class="scrolled ? 'border-b border-ink-100 shadow-card' : ''"
+        class="z-50 bg-white transition-shadow duration-300"
+        :class="[reduced ? 'fixed inset-x-0 top-0' : 'sticky top-0', scrolled ? 'border-b border-ink-100 shadow-card' : '']"
     >
-        <!-- Reduced (booking-flow) header: logo + trust message. A symmetric empty
-             spacer column mirrors the logo's column so the message is centered
+        <!-- Reduced (booking-flow) header: logo + trust message. Fixed (not
+             sticky) so it never moves while the long multi-step form scrolls;
+             PublicLayout.vue adds matching top padding to <main> to compensate
+             for it being taken out of document flow. A symmetric empty spacer
+             column mirrors the logo's column so the message is centered
              against the full header width, not just the space left of the logo. -->
         <div
             v-if="reduced"
-            class="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 py-2.5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:py-0 lg:h-[72px] lg:px-8"
+            class="mx-auto flex h-[92px] max-w-7xl flex-col items-center justify-center gap-2 px-4 py-2.5 sm:px-6 lg:grid lg:h-[72px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:py-0 lg:px-8"
         >
             <Link href="/" aria-label="AngebotJetzt Startseite" class="lg:justify-self-start">
                 <BrandLogo />

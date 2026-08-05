@@ -10,12 +10,14 @@ withDefaults(
 
 <template>
     <span class="inline-flex flex-col items-start leading-none select-none">
-        <span
-            class="notranslate inline-flex items-center rounded-sm"
-            :class="inverted ? 'bg-white px-3 py-1.5 shadow-sm' : ''"
-            translate="no"
-        >
-            <img src="/images/logo-wordmark.png" alt="AngebotJetzt" class="h-7 w-auto md:h-8" />
+        <span class="notranslate inline-flex items-center" translate="no">
+            <img
+                v-if="inverted"
+                src="/images/logo-light-wordmark.png"
+                alt="AngebotJetzt"
+                class="h-9 w-auto md:h-10"
+            />
+            <img v-else src="/images/logo-wordmark.png" alt="AngebotJetzt" class="h-9 w-auto md:h-10" />
         </span>
         <span
             v-if="tagline"

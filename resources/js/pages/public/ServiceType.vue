@@ -42,7 +42,7 @@ const benefits = computed(() => [
                 <p class="text-lead mt-6 text-ink-700">{{ serviceType.description }}</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Link
-                        :href="`/anfrage?service=${serviceType.slug}`"
+                        :href="`/request?service=${serviceType.slug}`"
                         class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
                     >
                         {{ 'Jetzt kostenlos Angebote erhalten' }}
@@ -109,7 +109,7 @@ const benefits = computed(() => [
                 {{ 'Stellen Sie jetzt kostenlos Ihre Anfrage und erhalten Sie unverbindliche Angebote aus Ihrer Region.' }}
             </p>
             <Link
-                :href="`/anfrage?service=${serviceType.slug}`"
+                :href="`/request?service=${serviceType.slug}`"
                 class="mt-8 inline-flex items-center gap-2 rounded-pill bg-green-500 px-8 py-4 text-base font-bold text-white transition hover:bg-green-600"
             >
                 <CheckCircle2 :size="20" aria-hidden="true" /> {{ 'Anfrage stellen' }}

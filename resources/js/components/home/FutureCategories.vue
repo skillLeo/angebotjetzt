@@ -2,13 +2,11 @@
 import Reveal from '@/components/marketing/Reveal.vue';
 import { Link } from '@inertiajs/vue3';
 import {
-    ClipboardCheck,
+    Car,
     Flower2,
     Hammer,
     Monitor,
-    PaintbrushVertical,
-    PartyPopper,
-    Shield,
+    Package,
     Sparkles,
     Truck,
 } from 'lucide-vue-next';
@@ -20,15 +18,13 @@ defineProps<{
 
 
 const icons: Record<string, Component> = {
+    car: Car,
     truck: Truck,
     hammer: Hammer,
+    package: Package,
     'flower-2': Flower2,
     sparkles: Sparkles,
-    paintbrush: PaintbrushVertical,
-    'clipboard-check': ClipboardCheck,
     monitor: Monitor,
-    'party-popper': PartyPopper,
-    shield: Shield,
 };
 </script>
 
