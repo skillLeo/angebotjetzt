@@ -1,16 +1,20 @@
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
-import type { FlashToast } from '@/types/ui';
+
+type FlashProps = {
+    success?: string | null;
+    error?: string | null;
+};
 
 export function initializeFlashToast(): void {
-    router.on('flash', (event) => {
-        const flash = (event as CustomEvent).detail?.flash;
-        const data = flash?.toast as FlashToast | undefined;
+    router.on('success', (event) => {
+        const flash = event.detail.page.props.flash as FlashProps | undefined;
 
-        if (!data) {
-            return;
+        if (flash?.success) {
+            toast.success(flash.success);
         }
-
-        toast[data.type](data.message);
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
     });
 }
