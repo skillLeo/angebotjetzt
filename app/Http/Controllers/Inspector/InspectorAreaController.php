@@ -231,10 +231,15 @@ class InspectorAreaController extends Controller
         ]);
     }
 
-    public function offerForm(ServiceRequest $serviceRequest): Response
+    public function offerForm(ServiceRequest $serviceRequest): Response|RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
         $this->assertMatched($serviceRequest, $inspector);
+
+        if (! $inspector->is_approved) {
+            return redirect()->route('inspector.dashboard')
+                ->with('error', 'Ihr Konto wird noch von unserem Team geprüft. Sobald Sie freigeschaltet sind, können Sie Angebote abgeben.');
+        }
 
         $serviceRequest->load('serviceType:id,name');
 
@@ -247,8 +252,12 @@ class InspectorAreaController extends Controller
     public function storeOffer(Request $httpRequest, ServiceRequest $serviceRequest, CommissionService $commission): RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
-        abort_unless($inspector->is_approved, 403);
         $this->assertMatched($serviceRequest, $inspector);
+
+        if (! $inspector->is_approved) {
+            return redirect()->route('inspector.dashboard')
+                ->with('error', 'Ihr Konto wird noch von unserem Team geprüft. Sobald Sie freigeschaltet sind, können Sie Angebote abgeben.');
+        }
 
         if (! in_array($serviceRequest->status, ['open', 'offers_received'], true)) {
             return back()->withErrors(['price' => 'Für diese Anfrage können keine Angebote mehr abgegeben werden.']);

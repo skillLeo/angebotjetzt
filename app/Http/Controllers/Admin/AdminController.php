@@ -858,9 +858,8 @@ class AdminController extends Controller
         return back()->with('success', 'Feld hinzugefügt.');
     }
 
-    public function destroyServiceTypeField(ServiceTypeField $field): RedirectResponse
+    public function destroyServiceTypeField(ServiceType $serviceType, ServiceTypeField $field): RedirectResponse
     {
-        $serviceType = $field->serviceType;
         $field->delete();
 
         ActivityLog::record('service_type_field.deleted', Auth::guard('admin')->user(), $serviceType, ['label' => $field->label]);
