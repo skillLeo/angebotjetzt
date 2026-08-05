@@ -11,6 +11,17 @@ const props = defineProps<{
     };
 }>();
 
+function isoDateYearsAgo(years: number): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - years);
+    return d.toISOString().slice(0, 10);
+}
+
+// Matches the server-side rule exactly (must be 18+) so the picker can't
+// even offer a date that would fail validation on submit.
+const maxBirthday = isoDateYearsAgo(18);
+const minBirthday = isoDateYearsAgo(100);
+
 const form = useForm({
     birthday: props.profile.birthday ?? '',
     tax_id: props.profile.tax_id ?? '',
@@ -37,7 +48,7 @@ function submit() {
     >
         <form class="space-y-4" @submit.prevent="submit">
             <div class="grid gap-4 sm:grid-cols-2">
-                <FormField v-model="form.birthday" :label="'Geburtsdatum'" type="date" required :error="form.errors.birthday" />
+                <FormField v-model="form.birthday" :label="'Geburtsdatum'" type="date" required :min="minBirthday" :max="maxBirthday" :error="form.errors.birthday" />
                 <FormField v-model="form.phone" :label="'Telefon'" required :error="form.errors.phone" />
             </div>
             <FormField v-model="form.tax_id" :label="'Steuernummer / USt-IdNr.'" required :error="form.errors.tax_id" />
