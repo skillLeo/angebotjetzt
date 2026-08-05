@@ -154,6 +154,12 @@
     }
     html {
         scroll-behavior: smooth;
+        /* Force light rendering regardless of the visitor's OS/browser dark
+           mode preference (client requirement) — without this, browsers
+           auto-apply their own dark styling to native form controls
+           (<select>, checkboxes) and scrollbars even though every color on
+           this site is hardcoded light, causing a visibly mismatched look. */
+        color-scheme: light;
         /* Hard guard against any horizontal scroll (client requirement).
            overflow-x:clip does not create a scroll container, so it never
            breaks position:sticky on descendants the way overflow:hidden would. */
