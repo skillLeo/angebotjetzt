@@ -198,6 +198,7 @@ class CustomerAreaController extends Controller
             'message' => $o->message,
             'estimatedDate' => $o->estimated_date?->format('d.m.Y'),
             'status' => $o->status,
+            'editedAt' => $o->edited_at?->format('d.m.Y H:i'),
             'inspector' => [
                 'name' => $inspector->name,
                 'company' => $inspector->company_name,

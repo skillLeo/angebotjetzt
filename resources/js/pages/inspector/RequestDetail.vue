@@ -13,7 +13,7 @@ defineProps<{
         vehicle: { make: string; model: string; firstRegistration: string | null; mileage: number | null; vin: string | null; fuel: string | null; transmission: string | null };
         preferredDate: string | null; alternativeDate: string | null; notes: string | null; photos: string[];
     };
-    ownOffer: { price: number; status: string } | null;
+    ownOffer: { price: number; message: string | null; estimatedDate: string | null; status: string; editedAt: string | null } | null;
 }>();
 </script>
 
@@ -57,6 +57,16 @@ defineProps<{
                         <p class="text-sm text-ink-500">{{ 'Sie haben angeboten' }}</p>
                         <p class="mt-1 font-display text-3xl font-extrabold text-navy-700">{{ formatEuro(ownOffer.price) }}</p>
                         <div class="mt-3 flex justify-center"><StatusBadge :status="ownOffer.status" /></div>
+                        <p v-if="ownOffer.estimatedDate" class="mt-3 text-sm text-ink-500">{{ 'Voraussichtlich fertig bis' }} {{ ownOffer.estimatedDate }}</p>
+                        <p v-if="ownOffer.message" class="mt-2 text-sm text-ink-700">{{ ownOffer.message }}</p>
+                        <p v-if="ownOffer.editedAt" class="mt-3 text-xs text-ink-500">{{ 'Zuletzt bearbeitet am' }} {{ ownOffer.editedAt }}</p>
+                        <Link
+                            v-if="ownOffer.status === 'open'"
+                            :href="`/inspector/requests/${request.id}/offer/edit`"
+                            class="mt-4 block rounded-pill border border-ink-300 py-3 text-center text-sm font-bold text-navy-700 transition hover:border-navy-700"
+                        >
+                            {{ 'Angebot bearbeiten' }}
+                        </Link>
                     </div>
                     <div v-else>
                         <p class="text-sm text-ink-500">{{ 'Sie haben noch kein Angebot abgegeben.' }}</p>

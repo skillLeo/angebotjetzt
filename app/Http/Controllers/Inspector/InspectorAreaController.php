@@ -223,7 +223,10 @@ class InspectorAreaController extends Controller
             ],
             'ownOffer' => $ownOffer ? [
                 'price' => $ownOffer->price_cents,
+                'message' => $ownOffer->message,
+                'estimatedDate' => $ownOffer->estimated_date?->format('d.m.Y'),
                 'status' => $ownOffer->status,
+                'editedAt' => $ownOffer->edited_at?->format('d.m.Y H:i'),
             ] : null,
         ]);
     }
@@ -293,6 +296,67 @@ class InspectorAreaController extends Controller
         ActivityLog::record('offer.submitted', $inspector, $serviceRequest);
 
         return redirect()->route('inspector.offers')->with('success', 'Ihr Angebot wurde übermittelt. Der Kunde wurde benachrichtigt.');
+    }
+
+    public function editOfferForm(ServiceRequest $serviceRequest): Response|RedirectResponse
+    {
+        $inspector = Auth::guard('inspector')->user();
+        $this->assertMatched($serviceRequest, $inspector);
+
+        $offer = $inspector->offers()->where('request_id', $serviceRequest->id)->firstOrFail();
+
+        if ($offer->status !== 'open') {
+            return redirect()->route('inspector.requests.show', $serviceRequest)
+                ->with('error', 'Dieses Angebot wurde bereits entschieden und kann nicht mehr bearbeitet werden.');
+        }
+
+        $serviceRequest->load('serviceType:id,name');
+
+        return Inertia::render('inspector/EditOffer', [
+            'request' => $this->requestRow($serviceRequest),
+            'commissionPercent' => \App\Models\Setting::commissionPercent(),
+            'offer' => [
+                'price' => number_format($offer->price_cents / 100, 2, '.', ''),
+                'estimated_date' => $offer->estimated_date?->format('Y-m-d'),
+                'message' => $offer->message,
+            ],
+        ]);
+    }
+
+    public function updateOffer(Request $httpRequest, ServiceRequest $serviceRequest, CommissionService $commission): RedirectResponse
+    {
+        $inspector = Auth::guard('inspector')->user();
+        $this->assertMatched($serviceRequest, $inspector);
+
+        $offer = $inspector->offers()->where('request_id', $serviceRequest->id)->firstOrFail();
+
+        if ($offer->status !== 'open') {
+            return back()->withErrors(['price' => 'Dieses Angebot kann nicht mehr bearbeitet werden.']);
+        }
+
+        $data = $httpRequest->validate([
+            'price' => ['required', 'numeric', 'min:10', 'max:100000'],
+            'estimated_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'message' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'price.min' => 'Der Angebotspreis muss mindestens 10 € betragen.',
+        ]);
+
+        $priceCents = (int) round($data['price'] * 100);
+        $split = $commission->split($priceCents);
+
+        $offer->update([
+            'price_cents' => $priceCents,
+            'commission_cents' => $split['commission'],
+            'inspector_cents' => $split['inspector'],
+            'message' => $data['message'] ?? null,
+            'estimated_date' => $data['estimated_date'] ?? null,
+            'edited_at' => now(),
+        ]);
+
+        ActivityLog::record('offer.updated', $inspector, $offer);
+
+        return redirect()->route('inspector.requests.show', $serviceRequest)->with('success', 'Ihr Angebot wurde aktualisiert.');
     }
 
     public function offers(): Response

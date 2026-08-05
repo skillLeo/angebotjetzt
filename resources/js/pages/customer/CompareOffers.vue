@@ -10,7 +10,7 @@ import { ref } from 'vue';
 const props = defineProps<{
     request: { id: number; number: string; service: string; vehicle: string; ort: string };
     offers: Array<{
-        id: number; price: number; message: string | null; estimatedDate: string | null; status: string;
+        id: number; price: number; message: string | null; estimatedDate: string | null; status: string; editedAt: string | null;
         inspector: { name: string; company: string | null; city: string | null; verified: boolean; experience: number | null; rating: number | null; reviews: number | null };
     }>;
 }>();
@@ -87,6 +87,7 @@ function confirmAccept() {
                 „{{ o.message }}"
             </p>
             <div v-else class="flex-1" />
+            <p v-if="o.editedAt" class="mt-2 text-xs text-ink-500">{{ 'Bearbeitet am' }} {{ o.editedAt }}</p>
 
             <button
                 type="button"

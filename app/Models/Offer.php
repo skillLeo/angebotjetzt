@@ -13,12 +13,12 @@ class Offer extends Model
 
     protected $fillable = [
         'request_id', 'inspector_id', 'price_cents', 'commission_cents',
-        'inspector_cents', 'message', 'estimated_date', 'status', 'expires_at',
+        'inspector_cents', 'message', 'estimated_date', 'status', 'expires_at', 'edited_at',
     ];
 
     protected function casts(): array
     {
-        return ['estimated_date' => 'date', 'expires_at' => 'datetime'];
+        return ['estimated_date' => 'date', 'expires_at' => 'datetime', 'edited_at' => 'datetime'];
     }
 
     public function request(): BelongsTo
