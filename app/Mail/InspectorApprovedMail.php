@@ -6,9 +6,7 @@ use App\Models\Inspector;
 
 class InspectorApprovedMail extends BaseBrandMail
 {
-    public function __construct(public Inspector $inspector)
-    {
-    }
+    public function __construct(public Inspector $inspector) {}
 
     protected function subjectLine(): string
     {
@@ -24,12 +22,13 @@ class InspectorApprovedMail extends BaseBrandMail
     {
         return [
             "Guten Tag {$this->inspector->name},",
-            'Ihr Anbieter-Konto bei AngebotJetzt wurde von unserem Team geprüft und freigeschaltet. Ab sofort erhalten Sie passende Anfragen aus Ihrem Servicegebiet und können eigene Angebote abgeben.',
+            'Ihr Anbieter-Konto bei AngebotJetzt wurde von unserem Team geprüft und freigeschaltet.',
+            'Ein letzter Schritt fehlt noch: Legen Sie Ihr Servicegebiet fest, damit wir Ihnen passende Anfragen aus Ihrer Region zusenden können. Ohne Servicegebiet erhalten Sie noch keine Anfragen.',
         ];
     }
 
     protected function cta(): ?array
     {
-        return ['url' => route('inspector.dashboard'), 'label' => 'Zum Gutachter-Portal'];
+        return ['url' => route('inspector.service-areas'), 'label' => 'Servicegebiet festlegen'];
     }
 }

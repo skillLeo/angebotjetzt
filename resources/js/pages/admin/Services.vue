@@ -1,51 +1,192 @@
 <script setup lang="ts">
 import PageCard from '@/components/dashboard/PageCard.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { ref } from 'vue';
 
+type ServiceTypeRow = { id: number; name: string; description: string | null; image: string | null; active: boolean };
+
 defineProps<{
-    categories: Array<{ id: number; name: string; slug: string; active: boolean; types: Array<{ id: number; name: string; active: boolean }>; interest: number }>;
+    categories: Array<{ id: number; name: string; slug: string; active: boolean; types: ServiceTypeRow[]; interest: number }>;
 }>();
 
 const processing = ref<number | null>(null);
-
 function toggle(id: number) {
     processing.value = id;
     router.post(`/admin/categories/${id}/status`, {}, { preserveScroll: true, onFinish: () => (processing.value = null) });
+}
+
+const addingFor = ref<number | null>(null);
+const editingId = ref<number | null>(null);
+
+const addForm = useForm<{ name: string; description: string; photo: File | null }>({ name: '', description: '', photo: null });
+const editForm = useForm<{ name: string; description: string; photo: File | null }>({ name: '', description: '', photo: null });
+
+function startAdd(categoryId: number) {
+    editingId.value = null;
+    addingFor.value = categoryId;
+    addForm.reset();
+    addForm.clearErrors();
+}
+function cancelAdd() {
+    addingFor.value = null;
+}
+function submitAdd(categoryId: number) {
+    addForm.post(`/admin/categories/${categoryId}/service-types`, {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            addingFor.value = null;
+            addForm.reset();
+        },
+    });
+}
+
+function startEdit(type: ServiceTypeRow) {
+    addingFor.value = null;
+    editingId.value = type.id;
+    editForm.name = type.name;
+    editForm.description = type.description ?? '';
+    editForm.photo = null;
+    editForm.clearErrors();
+}
+function cancelEdit() {
+    editingId.value = null;
+}
+function submitEdit(id: number) {
+    editForm.post(`/admin/service-types/${id}`, {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => (editingId.value = null),
+    });
+}
+
+function remove(id: number) {
+    router.delete(`/admin/service-types/${id}`, { preserveScroll: true });
 }
 </script>
 
 <template>
     <Head><title>Dienstleistungen</title></Head>
 
-    <PageCard title="Kategorien & Dienstleistungen" subtitle="Aktivieren Sie eine Kategorie, um sie auf der Startseite freizuschalten.">
+    <PageCard title="Kategorien & Dienstleistungen" subtitle="Aktivieren Sie eine Kategorie, um sie auf der Startseite freizuschalten, und verwalten Sie die einzelnen Leistungen darin.">
         <div class="divide-y divide-ink-100">
-            <div v-for="cat in categories" :key="cat.id" class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <p class="font-display font-bold text-navy-700">{{ cat.name }}</p>
-                        <span class="rounded-pill px-2.5 py-0.5 text-xs font-bold" :class="cat.active ? 'bg-green-50 text-green-700' : 'bg-ink-100 text-ink-500'">
-                            {{ cat.active ? 'Aktiv' : 'Demnächst' }}
-                        </span>
+            <div v-for="cat in categories" :key="cat.id" class="flex flex-col gap-4 px-5 py-5 sm:px-6">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-display font-bold text-navy-700">{{ cat.name }}</p>
+                            <span class="rounded-pill px-2.5 py-0.5 text-xs font-bold" :class="cat.active ? 'bg-green-50 text-green-700' : 'bg-ink-100 text-ink-500'">
+                                {{ cat.active ? 'Aktiv' : 'Demnächst' }}
+                            </span>
+                        </div>
+                        <p class="mt-1 text-sm text-ink-500">
+                            {{ cat.types.length }} Leistungen<span v-if="cat.interest > 0"> · {{ cat.interest }} Interessenten</span>
+                        </p>
                     </div>
-                    <p class="mt-1 text-sm text-ink-500">
-                        {{ cat.types.length }} Leistungen<span v-if="cat.interest > 0"> · {{ cat.interest }} Interessenten</span>
-                    </p>
-                    <ul v-if="cat.types.length" class="mt-2 space-y-1">
-                        <li v-for="t in cat.types" :key="t.id" class="flex items-center gap-2 text-sm">
-                            <span class="text-ink-700">{{ t.name }}</span>
-                            <Link :href="`/admin/service-types/${t.id}/fields`" class="text-xs font-semibold text-green-600 hover:underline">Felder verwalten</Link>
-                        </li>
-                    </ul>
+                    <button
+                        type="button"
+                        :disabled="processing === cat.id"
+                        class="rounded-pill px-5 py-2 text-sm font-bold transition disabled:opacity-60"
+                        :class="cat.active ? 'border border-ink-300 text-ink-700 hover:border-navy-700' : 'bg-green-500 text-white hover:bg-green-600'"
+                        @click="toggle(cat.id)"
+                    >
+                        {{ cat.active ? 'Deaktivieren' : 'Aktivieren' }}
+                    </button>
                 </div>
+
+                <ul v-if="cat.types.length" class="space-y-2">
+                    <li v-for="t in cat.types" :key="t.id" class="rounded-card border border-ink-100 bg-sand-50/60 p-4">
+                        <div v-if="editingId !== t.id" class="flex items-center gap-4">
+                            <div class="h-14 w-20 shrink-0 overflow-hidden rounded-xs bg-ink-100">
+                                <img v-if="t.image" :src="t.image" :alt="t.name" class="h-full w-full object-cover" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="font-semibold text-navy-700">{{ t.name }}</p>
+                                <p v-if="t.description" class="mt-0.5 truncate text-sm text-ink-500">{{ t.description }}</p>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1">
+                                <Link :href="`/admin/service-types/${t.id}/fields`" class="rounded-pill px-3 py-1.5 text-xs font-semibold text-green-600 hover:bg-green-50">
+                                    Felder
+                                </Link>
+                                <button type="button" class="flex h-9 w-9 items-center justify-center rounded-pill text-ink-500 transition hover:bg-navy-50 hover:text-navy-700" aria-label="Bearbeiten" @click="startEdit(t)">
+                                    <Pencil :size="16" aria-hidden="true" />
+                                </button>
+                                <button type="button" class="flex h-9 w-9 items-center justify-center rounded-pill text-ink-500 transition hover:bg-red-50 hover:text-red-600" aria-label="Entfernen" @click="remove(t.id)">
+                                    <Trash2 :size="16" aria-hidden="true" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <form v-else class="space-y-3" @submit.prevent="submitEdit(t.id)">
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold text-navy-700">Name</label>
+                                    <input v-model="editForm.name" type="text" class="w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+                                    <p v-if="editForm.errors.name" class="mt-1 text-xs text-red-600">{{ editForm.errors.name }}</p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold text-navy-700">Foto (optional)</label>
+                                    <label class="flex h-[38px] w-full cursor-pointer items-center gap-2 rounded-card border border-dashed border-ink-300 px-3 text-sm text-ink-500 hover:border-green-500">
+                                        <ImagePlus :size="16" aria-hidden="true" />
+                                        {{ editForm.photo ? editForm.photo.name : 'Datei wählen …' }}
+                                        <input type="file" accept="image/*" class="hidden" @change="(e) => (editForm.photo = (e.target as HTMLInputElement).files?.[0] ?? null)" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs font-semibold text-navy-700">Beschreibung</label>
+                                <textarea v-model="editForm.description" rows="2" class="w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+                                <p v-if="editForm.errors.description" class="mt-1 text-xs text-red-600">{{ editForm.errors.description }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="submit" :disabled="editForm.processing" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 disabled:opacity-60">Speichern</button>
+                                <button type="button" class="flex items-center gap-1 rounded-pill px-3 py-2 text-sm font-semibold text-ink-500 hover:text-navy-700" @click="cancelEdit">
+                                    <X :size="14" aria-hidden="true" /> Abbrechen
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+                <p v-else class="rounded-card border border-dashed border-ink-200 px-4 py-6 text-center text-sm text-ink-500">Noch keine Leistungen in dieser Kategorie.</p>
+
+                <form v-if="addingFor === cat.id" class="space-y-3 rounded-card border border-green-200 bg-green-50/40 p-4" @submit.prevent="submitAdd(cat.id)">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1 block text-xs font-semibold text-navy-700">Name</label>
+                            <input v-model="addForm.name" type="text" placeholder="z. B. Unfallschadengutachten" class="w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+                            <p v-if="addForm.errors.name" class="mt-1 text-xs text-red-600">{{ addForm.errors.name }}</p>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs font-semibold text-navy-700">Foto (optional)</label>
+                            <label class="flex h-[38px] w-full cursor-pointer items-center gap-2 rounded-card border border-dashed border-ink-300 px-3 text-sm text-ink-500 hover:border-green-500">
+                                <ImagePlus :size="16" aria-hidden="true" />
+                                {{ addForm.photo ? addForm.photo.name : 'Datei wählen …' }}
+                                <input type="file" accept="image/*" class="hidden" @change="(e) => (addForm.photo = (e.target as HTMLInputElement).files?.[0] ?? null)" />
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold text-navy-700">Beschreibung</label>
+                        <textarea v-model="addForm.description" rows="2" placeholder="Kurze Beschreibung für die öffentliche Seite" class="w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+                        <p v-if="addForm.errors.description" class="mt-1 text-xs text-red-600">{{ addForm.errors.description }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" :disabled="addForm.processing" class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 disabled:opacity-60">
+                            <Plus :size="16" aria-hidden="true" /> Leistung anlegen
+                        </button>
+                        <button type="button" class="flex items-center gap-1 rounded-pill px-3 py-2 text-sm font-semibold text-ink-500 hover:text-navy-700" @click="cancelAdd">
+                            <X :size="14" aria-hidden="true" /> Abbrechen
+                        </button>
+                    </div>
+                </form>
                 <button
+                    v-else
                     type="button"
-                    :disabled="processing === cat.id"
-                    class="rounded-pill px-5 py-2 text-sm font-bold transition disabled:opacity-60"
-                    :class="cat.active ? 'border border-ink-300 text-ink-700 hover:border-navy-700' : 'bg-green-500 text-white hover:bg-green-600'"
-                    @click="toggle(cat.id)"
+                    class="inline-flex items-center gap-2 self-start rounded-pill border border-dashed border-ink-300 px-4 py-2 text-sm font-semibold text-ink-500 transition hover:border-green-500 hover:text-green-600"
+                    @click="startAdd(cat.id)"
                 >
-                    {{ cat.active ? 'Deaktivieren' : 'Aktivieren' }}
+                    <Plus :size="16" aria-hidden="true" /> Leistung hinzufügen
                 </button>
             </div>
         </div>

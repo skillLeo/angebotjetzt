@@ -3,31 +3,39 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BalanceReleasedMail;
+use App\Mail\BookingCompletedMail;
 use App\Mail\InspectorApprovedMail;
+use App\Mail\InspectorInvitationMail;
 use App\Mail\PayoutPaidMail;
 use App\Mail\ProviderInviteToRegisterMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
 use App\Models\Inspector;
+use App\Models\Invoice;
 use App\Models\Offer;
 use App\Models\Payment;
 use App\Models\PayoutRequest;
 use App\Models\RequestMatch;
+use App\Models\Review;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\ServiceTypeField;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\Wallet;
 use App\Services\RequestService;
 use App\Services\WalletService;
 use App\Support\SafeMailer;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -297,7 +305,7 @@ class AdminController extends Controller
      * provider directly) — that only still applies to legacy bookings that
      * went through the old Stripe/wallet flow and still carry a Payment.
      */
-    public function confirmBooking(Booking $booking, WalletService $walletService): RedirectResponse
+    public function confirmBooking(Booking $booking, WalletService $walletService, RequestService $requestService): RedirectResponse
     {
         if ($booking->status !== 'completed_by_inspector') {
             return back()->withErrors(['status' => 'Nur vom Gutachter abgeschlossene Aufträge können bestätigt werden.']);
@@ -312,15 +320,17 @@ class AdminController extends Controller
             AppNotification::notify($booking->inspector, 'balance_released',
                 'Guthaben freigegeben',
                 "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-                '/inspector/wallet');
-            \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($booking->inspector->email)->queue(new \App\Mail\BalanceReleasedMail($booking)));
+                '/inspector');
+            SafeMailer::send(fn () => Mail::to($booking->inspector->email)->queue(new BalanceReleasedMail($booking)));
         }
 
         AppNotification::notify($booking->user, 'booking_completed',
             'Auftrag abgeschlossen',
             "Auftrag {$booking->booking_number} wurde als abgeschlossen bestätigt.",
             "/account/bookings/{$booking->id}");
-        \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($booking->user->email)->queue(new \App\Mail\BookingCompletedMail($booking)));
+        SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new BookingCompletedMail($booking)));
+
+        $requestService->sendReviewRequest($booking);
 
         ActivityLog::record('booking.confirmed', Auth::guard('admin')->user(), $booking);
 
@@ -360,8 +370,8 @@ class AdminController extends Controller
 
     public function commissions(Request $request): Response
     {
-        $from = $request->query('von') ? \Carbon\Carbon::parse($request->query('von')) : now()->subMonths(3);
-        $to = $request->query('bis') ? \Carbon\Carbon::parse($request->query('bis'))->endOfDay() : now();
+        $from = $request->query('von') ? Carbon::parse($request->query('von')) : now()->subMonths(3);
+        $to = $request->query('bis') ? Carbon::parse($request->query('bis'))->endOfDay() : now();
 
         $payments = Payment::where('status', 'paid')->whereBetween('paid_at', [$from, $to]);
 
@@ -385,7 +395,7 @@ class AdminController extends Controller
 
     public function invoices(Request $request): Response
     {
-        $query = \App\Models\Invoice::with(['inspector:id,name,company_name', 'booking:id,booking_number']);
+        $query = Invoice::with(['inspector:id,name,company_name', 'booking:id,booking_number']);
 
         if ($search = $request->query('suche')) {
             $query->where(fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")
@@ -409,11 +419,11 @@ class AdminController extends Controller
         ]);
     }
 
-    public function downloadInvoice(\App\Models\Invoice $invoice)
+    public function downloadInvoice(Invoice $invoice)
     {
         abort_unless($invoice->pdf_path, 404);
 
-        return \Illuminate\Support\Facades\Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
+        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
     }
 
     public function inspectors(Request $request): Response
@@ -426,8 +436,14 @@ class AdminController extends Controller
                 ->orWhere('city', 'like', "%{$search}%"));
         }
 
+        // A guest who submitted an offer via an email invite but never
+        // registered has no password and hasn't completed onboarding — there
+        // is nothing yet for an admin to review, so keep them out of the
+        // pending-approval view until they claim the account.
+        $excludeUnclaimedGuests = fn ($q) => $q->where(fn ($w) => $w->where('imported_from', '!=', 'guest_offer')->orWhereNotNull('profile_completed_at'));
+
         if ($request->query('status') === 'pending') {
-            $query->where('is_approved', false);
+            $query->where('is_approved', false)->tap($excludeUnclaimedGuests);
         }
 
         return Inertia::render('admin/Inspectors', [
@@ -447,7 +463,7 @@ class AdminController extends Controller
                     'balance' => $i->wallet?->available_cents ?? 0,
                     'imported' => $i->imported_from,
                 ]),
-            'pendingCount' => Inspector::where('is_approved', false)->count(),
+            'pendingCount' => Inspector::where('is_approved', false)->tap($excludeUnclaimedGuests)->count(),
             'filters' => $request->only(['suche', 'status']),
         ]);
     }
@@ -498,7 +514,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function toggleInspector(Inspector $inspector, \App\Services\RequestService $requestService): RedirectResponse
+    public function toggleInspector(Inspector $inspector, RequestService $requestService): RedirectResponse
     {
         $inspector->update(['is_active' => ! $inspector->is_active]);
 
@@ -517,7 +533,7 @@ class AdminController extends Controller
         return back()->with('success', $message);
     }
 
-    public function approveInspector(Inspector $inspector, \App\Services\RequestService $requestService): RedirectResponse
+    public function approveInspector(Inspector $inspector, RequestService $requestService): RedirectResponse
     {
         if ($inspector->is_approved) {
             return back()->withErrors(['status' => 'Dieser Gutachter ist bereits freigeschaltet.']);
@@ -530,6 +546,11 @@ class AdminController extends Controller
         $inspector->update(['is_approved' => true]);
 
         SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorApprovedMail($inspector)));
+
+        AppNotification::notify($inspector, 'account_approved',
+            'Konto freigeschaltet',
+            'Legen Sie jetzt Ihr Servicegebiet fest, um passende Anfragen zu erhalten.',
+            '/inspector/service-areas');
 
         ActivityLog::record('inspector.approved', Auth::guard('admin')->user(), $inspector);
 
@@ -626,7 +647,7 @@ class AdminController extends Controller
             }
             Wallet::firstOrCreate(['inspector_id' => $inspector->id]);
 
-            \App\Support\SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new \App\Mail\InspectorInvitationMail($inspector, $password)));
+            SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorInvitationMail($inspector, $password)));
             $created++;
         }
 
@@ -719,7 +740,7 @@ class AdminController extends Controller
         AppNotification::notify($payout->inspector, 'payout_paid',
             'Auszahlung überwiesen',
             'Ihre Auszahlung über '.number_format($payout->amount_cents / 100, 2, ',', '.').' € wurde überwiesen.',
-            '/inspector/wallet');
+            '/inspector');
 
         Mail::to($payout->inspector->email)->queue(new PayoutPaidMail($payout));
 
@@ -728,9 +749,44 @@ class AdminController extends Controller
         return back()->with('success', 'Auszahlung als bezahlt markiert und Wallet belastet.');
     }
 
+    public function reviews(Request $request): Response
+    {
+        $query = Review::with(['user:id,name', 'inspector:id,name,company_name', 'booking:id,booking_number']);
+
+        if ($request->query('status') === 'unpublished') {
+            $query->where('is_published', false);
+        }
+
+        return Inertia::render('admin/Reviews', [
+            'reviews' => $query->latest()->paginate(20)->withQueryString()
+                ->through(fn ($r) => [
+                    'id' => $r->id,
+                    'rating' => $r->rating,
+                    'comment' => $r->comment,
+                    'published' => $r->is_published,
+                    'customer' => $r->user?->name,
+                    'inspector' => $r->inspector?->name,
+                    'inspectorCompany' => $r->inspector?->company_name,
+                    'booking' => $r->booking?->booking_number,
+                    'date' => $r->created_at->format('d.m.Y H:i'),
+                ]),
+            'unpublishedCount' => Review::where('is_published', false)->count(),
+            'filters' => $request->only(['status']),
+        ]);
+    }
+
+    public function togglePublished(Review $review): RedirectResponse
+    {
+        $review->update(['is_published' => ! $review->is_published]);
+
+        ActivityLog::record($review->is_published ? 'review.published' : 'review.unpublished', Auth::guard('admin')->user(), $review);
+
+        return back()->with('success', $review->is_published ? 'Bewertung veröffentlicht.' : 'Bewertung ausgeblendet.');
+    }
+
     public function customers(Request $request): Response
     {
-        $query = \App\Models\User::withCount(['requests', 'bookings']);
+        $query = User::withCount(['requests', 'bookings']);
 
         if ($search = $request->query('suche')) {
             $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
@@ -751,7 +807,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function customerDetail(\App\Models\User $customer): Response
+    public function customerDetail(User $customer): Response
     {
         $customer->loadCount(['requests', 'bookings']);
 
@@ -788,7 +844,7 @@ class AdminController extends Controller
     public function services(): Response
     {
         return Inertia::render('admin/Services', [
-            'categories' => ServiceCategory::with('serviceTypes:id,service_category_id,name,is_active')
+            'categories' => ServiceCategory::with('serviceTypes:id,service_category_id,name,description,image_url,is_active')
                 ->orderBy('sort_order')
                 ->get()
                 ->map(fn ($c) => [
@@ -796,7 +852,13 @@ class AdminController extends Controller
                     'name' => $c->name,
                     'slug' => $c->slug,
                     'active' => $c->is_active,
-                    'types' => $c->serviceTypes->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'active' => $t->is_active]),
+                    'types' => $c->serviceTypes->map(fn ($t) => [
+                        'id' => $t->id,
+                        'name' => $t->name,
+                        'description' => $t->description,
+                        'image' => $t->image_url,
+                        'active' => $t->is_active,
+                    ]),
                     'interest' => $c->interestSignals()->count(),
                 ]),
         ]);
@@ -805,13 +867,87 @@ class AdminController extends Controller
     public function toggleCategory(ServiceCategory $category): RedirectResponse
     {
         $category->update(['is_active' => ! $category->is_active]);
-        \Illuminate\Support\Facades\Cache::forget('nav_categories');
-        \Illuminate\Support\Facades\Cache::forget('homepage_data');
+        Cache::forget('nav_categories');
+        Cache::forget('homepage_data');
 
         ActivityLog::record($category->is_active ? 'category.activated' : 'category.deactivated',
             Auth::guard('admin')->user(), $category);
 
         return back()->with('success', $category->is_active ? 'Kategorie „'.$category->name.'“ aktiviert.' : 'Kategorie „'.$category->name.'“ deaktiviert.');
+    }
+
+    public function storeServiceType(Request $request, ServiceCategory $category): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['required', 'string', 'max:2000'],
+            'photo' => ['nullable', 'file', 'image', 'max:4096'],
+        ]);
+
+        $slug = Str::slug($data['name']);
+        $suffix = 2;
+        while (ServiceType::where('slug', $slug)->exists()) {
+            $slug = Str::slug($data['name']).'-'.$suffix++;
+        }
+
+        $serviceType = $category->serviceTypes()->create([
+            'name' => $data['name'],
+            'slug' => $slug,
+            'description' => $data['description'],
+            'image_url' => $request->hasFile('photo') ? '/storage/'.$request->file('photo')->store('service-photos', 'public') : null,
+            'sort_order' => ($category->serviceTypes()->max('sort_order') ?? 0) + 1,
+        ]);
+
+        $this->forgetServiceCaches();
+        ActivityLog::record('service_type.created', Auth::guard('admin')->user(), $serviceType, ['name' => $data['name']]);
+
+        return back()->with('success', 'Leistung „'.$data['name'].'“ hinzugefügt.');
+    }
+
+    public function updateServiceType(Request $request, ServiceType $serviceType): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['required', 'string', 'max:2000'],
+            'photo' => ['nullable', 'file', 'image', 'max:4096'],
+        ]);
+
+        $serviceType->fill([
+            'name' => $data['name'],
+            'description' => $data['description'],
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $serviceType->image_url = '/storage/'.$request->file('photo')->store('service-photos', 'public');
+        }
+
+        $serviceType->save();
+
+        $this->forgetServiceCaches();
+        ActivityLog::record('service_type.updated', Auth::guard('admin')->user(), $serviceType, ['name' => $data['name']]);
+
+        return back()->with('success', 'Leistung aktualisiert.');
+    }
+
+    public function destroyServiceType(ServiceType $serviceType): RedirectResponse
+    {
+        if ($serviceType->requests()->exists()) {
+            return back()->with('error', 'Diese Leistung kann nicht gelöscht werden, da bereits Anfragen dafür vorliegen. Deaktivieren Sie sie stattdessen.');
+        }
+
+        $name = $serviceType->name;
+        $serviceType->delete();
+
+        $this->forgetServiceCaches();
+        ActivityLog::record('service_type.deleted', Auth::guard('admin')->user(), null, ['name' => $name]);
+
+        return back()->with('success', 'Leistung „'.$name.'“ entfernt.');
+    }
+
+    private function forgetServiceCaches(): void
+    {
+        Cache::forget('nav_categories');
+        Cache::forget('homepage_data');
     }
 
     public function serviceTypeFields(ServiceType $serviceType): Response

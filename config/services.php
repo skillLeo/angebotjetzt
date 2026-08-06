@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Placeholder until the client provides their real Trustpilot business
+    // review URL — a happy customer (rating 8-10 in the post-completion
+    // survey) is redirected here to leave a public review off-platform.
+    'trustpilot' => [
+        'review_url' => env('TRUSTPILOT_REVIEW_URL', 'https://www.trustpilot.com/review/angebotjetzt.de'),
+    ],
+
 ];

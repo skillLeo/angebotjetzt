@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\AppNotification;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\Review;
 use App\Models\ServiceRequest;
+use App\Services\RequestService;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +56,7 @@ class CustomerAreaController extends Controller
         abort_unless($serviceRequest->user_id === Auth::id(), 403);
 
         $serviceRequest->load(['serviceType:id,name', 'photos', 'offers' => fn ($q) => $q->with('inspector')->latest()]);
+        $labels = $serviceRequest->offerLabels();
 
         return Inertia::render('customer/RequestDetail', [
             'request' => [
@@ -68,7 +74,7 @@ class CustomerAreaController extends Controller
                 'matched' => $serviceRequest->matched_count,
                 'photos' => $serviceRequest->photos->map(fn ($p) => '/storage/'.$p->path),
             ],
-            'offers' => $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o)),
+            'offers' => $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o, $labels[$o->id])),
         ]);
     }
 
@@ -77,10 +83,11 @@ class CustomerAreaController extends Controller
         abort_unless($serviceRequest->user_id === Auth::id(), 403);
 
         $serviceRequest->load(['serviceType:id,name', 'offers' => fn ($q) => $q->with(['inspector' => fn ($i) => $i->withCount(['reviews' => fn ($r) => $r->where('is_published', true)])->withAvg(['reviews' => fn ($r) => $r->where('is_published', true)], 'rating')])->orderBy('price_cents')]);
+        $labels = $serviceRequest->offerLabels();
 
         return Inertia::render('customer/CompareOffers', [
             'request' => $this->requestSummary($serviceRequest),
-            'offers' => $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o, detailed: true)),
+            'offers' => $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o, $labels[$o->id], detailed: true)),
         ]);
     }
 
@@ -112,7 +119,7 @@ class CustomerAreaController extends Controller
         ]);
     }
 
-    public function storeReview(Request $request, Booking $booking, \App\Services\WalletService $walletService): RedirectResponse
+    public function storeReview(Request $request, Booking $booking, WalletService $walletService, RequestService $requestService): RedirectResponse
     {
         abort_unless($booking->user_id === Auth::id(), 403);
         abort_unless(in_array($booking->status, ['completed_by_inspector', 'confirmed'], true), 403);
@@ -144,14 +151,19 @@ class CustomerAreaController extends Controller
             if ($booking->payment) {
                 $walletService->releasePending($booking);
 
-                \App\Models\AppNotification::notify($booking->inspector, 'balance_released',
+                AppNotification::notify($booking->inspector, 'balance_released',
                     'Guthaben freigegeben',
                     "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-                    '/inspector/wallet');
+                    '/inspector');
             }
 
-            \App\Models\ActivityLog::record('booking.confirmed', Auth::user(), $booking);
+            ActivityLog::record('booking.confirmed', Auth::user(), $booking);
         }
+
+        // Always a no-op here in practice (the review created just above
+        // already satisfies it) — called anyway so this completion path
+        // can't silently skip it if that ever changes.
+        $requestService->sendReviewRequest($booking);
 
         return back()->with('success', 'Vielen Dank für Ihre Bewertung!');
     }
@@ -159,7 +171,7 @@ class CustomerAreaController extends Controller
     public function payments(): Response
     {
         return Inertia::render('customer/Payments', [
-            'payments' => \App\Models\Payment::whereHas('booking', fn ($q) => $q->where('user_id', Auth::id()))
+            'payments' => Payment::whereHas('booking', fn ($q) => $q->where('user_id', Auth::id()))
                 ->with('booking.request.serviceType:id,name')
                 ->latest()
                 ->paginate(15)
@@ -188,9 +200,10 @@ class CustomerAreaController extends Controller
         ];
     }
 
-    private function offerSummary($o, bool $detailed = false): array
+    private function offerSummary($o, string $label, bool $detailed = false): array
     {
         $inspector = $o->inspector;
+        $revealed = $o->status !== 'open';
 
         return [
             'id' => $o->id,
@@ -200,13 +213,17 @@ class CustomerAreaController extends Controller
             'status' => $o->status,
             'editedAt' => $o->edited_at?->format('d.m.Y H:i'),
             'inspector' => [
-                'name' => $inspector->name,
-                'company' => $inspector->company_name,
+                'label' => $label,
+                'name' => $revealed ? $inspector->name : null,
+                'company' => $revealed ? $inspector->company_name : null,
                 'city' => $inspector->city,
+                'bio' => $inspector->bio,
                 'verified' => $inspector->is_verified,
                 'experience' => $inspector->years_experience,
                 'rating' => $detailed && $inspector->reviews_avg_rating ? round((float) $inspector->reviews_avg_rating, 1) : null,
                 'reviews' => $detailed ? ($inspector->reviews_count ?? 0) : null,
+                'pendingVerification' => ! $inspector->is_approved,
+                'avatar' => $inspector->avatar_key ? ['key' => $inspector->avatar_key, ...config('avatars.'.$inspector->avatar_key, [])] : null,
             ],
         ];
     }

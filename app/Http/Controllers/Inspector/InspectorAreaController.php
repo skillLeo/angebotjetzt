@@ -4,24 +4,29 @@ namespace App\Http\Controllers\Inspector;
 
 use App\Http\Controllers\Controller;
 use App\Mail\InspectorVerifyEmailMail;
+use App\Mail\NewOfferMail;
+use App\Mail\OfferUpdatedMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
 use App\Models\Inspector;
 use App\Models\InspectorServiceArea;
+use App\Models\Invoice;
 use App\Models\Offer;
-use App\Models\PayoutRequest;
 use App\Models\RequestMatch;
 use App\Models\ServiceRequest;
+use App\Models\ServiceType;
+use App\Models\Setting;
 use App\Services\CommissionService;
 use App\Services\RequestService;
-use App\Services\WalletService;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -75,11 +80,8 @@ class InspectorAreaController extends Controller
             'plz' => ['required', 'digits:5'],
             'city' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:40'],
-            'plz_from' => ['nullable', 'digits:5'],
-            'plz_to' => ['nullable', 'digits:5', 'gte:plz_from'],
         ], [
             'birthday.before' => 'Sie müssen mindestens 18 Jahre alt sein.',
-            'plz_to.gte' => 'Die End-PLZ muss größer oder gleich der Start-PLZ sein.',
         ]);
 
         $inspector->update([
@@ -91,15 +93,6 @@ class InspectorAreaController extends Controller
             'phone' => $data['phone'],
             'profile_completed_at' => now(),
         ]);
-
-        $inspector->serviceAreas()->create(['type' => 'city', 'city_name' => $data['city']]);
-        if (! empty($data['plz_from']) && ! empty($data['plz_to'])) {
-            $inspector->serviceAreas()->create([
-                'type' => 'postal_range',
-                'postal_from' => (int) $data['plz_from'],
-                'postal_to' => (int) $data['plz_to'],
-            ]);
-        }
 
         ActivityLog::record('inspector.profile_completed', $inspector);
 
@@ -125,7 +118,7 @@ class InspectorAreaController extends Controller
         SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorVerifyEmailMail($inspector, $signedLink)));
     }
 
-    public function dashboard(WalletService $walletService): Response
+    public function dashboard(): Response
     {
         $inspector = Auth::guard('inspector')->user();
 
@@ -136,8 +129,6 @@ class InspectorAreaController extends Controller
                 'newRequests' => [],
             ]);
         }
-
-        $wallet = $walletService->walletFor($inspector);
 
         $matchedRequestIds = $inspector->matches()->pluck('request_id');
         $offeredRequestIds = $inspector->offers()->pluck('request_id');
@@ -152,12 +143,11 @@ class InspectorAreaController extends Controller
         $totalOffers = $inspector->offers()->count();
 
         return Inertia::render('inspector/Dashboard', [
+            'needsServiceArea' => ! $inspector->serviceAreas()->exists(),
             'stats' => [
                 'openRequests' => $matchedRequestIds->diff($offeredRequestIds)->count(),
                 'offers' => $totalOffers,
                 'wonJobs' => $inspector->bookings()->count(),
-                'walletAvailable' => $wallet->available_cents,
-                'walletPending' => $wallet->pending_cents,
                 'responseRate' => $matchedRequestIds->count() > 0
                     ? round($totalOffers / $matchedRequestIds->count() * 100)
                     : null,
@@ -188,7 +178,7 @@ class InspectorAreaController extends Controller
                     'totalOffers' => $r->offers_count,
                     'hasOwnOffer' => $inspector->offers()->where('request_id', $r->id)->exists(),
                 ]),
-            'serviceTypes' => \App\Models\ServiceType::where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'slug']),
+            'serviceTypes' => ServiceType::where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'slug']),
             'filter' => $httpRequest->query('service'),
         ]);
     }
@@ -245,7 +235,7 @@ class InspectorAreaController extends Controller
 
         return Inertia::render('inspector/SubmitOffer', [
             'request' => $this->requestRow($serviceRequest),
-            'commissionPercent' => \App\Models\Setting::commissionPercent(),
+            'commissionPercent' => Setting::commissionPercent(),
         ]);
     }
 
@@ -278,7 +268,7 @@ class InspectorAreaController extends Controller
         $priceCents = (int) round($data['price'] * 100);
         $split = $commission->split($priceCents);
 
-        Offer::create([
+        $offer = Offer::create([
             'request_id' => $serviceRequest->id,
             'inspector_id' => $inspector->id,
             'price_cents' => $priceCents,
@@ -292,15 +282,17 @@ class InspectorAreaController extends Controller
 
         $serviceRequest->update(['status' => 'offers_received']);
 
+        $label = $serviceRequest->offerLabel($offer->id);
+
         if ($serviceRequest->user) {
             AppNotification::notify($serviceRequest->user, 'new_offer',
                 'Neues Angebot erhalten',
-                "{$inspector->name} hat ein Angebot für Ihre Anfrage {$serviceRequest->request_number} abgegeben.",
+                "{$label} hat ein Angebot für Ihre Anfrage {$serviceRequest->request_number} abgegeben.",
                 "/account/requests/{$serviceRequest->id}/offers");
         }
 
-        \App\Support\SafeMailer::send(fn () => \Illuminate\Support\Facades\Mail::to($serviceRequest->contact_email)
-            ->queue(new \App\Mail\NewOfferMail($serviceRequest, $inspector)));
+        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)
+            ->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
 
         ActivityLog::record('offer.submitted', $inspector, $serviceRequest);
 
@@ -323,7 +315,7 @@ class InspectorAreaController extends Controller
 
         return Inertia::render('inspector/EditOffer', [
             'request' => $this->requestRow($serviceRequest),
-            'commissionPercent' => \App\Models\Setting::commissionPercent(),
+            'commissionPercent' => Setting::commissionPercent(),
             'offer' => [
                 'price' => number_format($offer->price_cents / 100, 2, '.', ''),
                 'estimated_date' => $offer->estimated_date?->format('Y-m-d'),
@@ -364,6 +356,8 @@ class InspectorAreaController extends Controller
         ]);
 
         ActivityLog::record('offer.updated', $inspector, $offer);
+
+        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new OfferUpdatedMail($serviceRequest, $inspector, $offer)));
 
         return redirect()->route('inspector.requests.show', $serviceRequest)->with('success', 'Ihr Angebot wurde aktualisiert.');
     }
@@ -465,7 +459,7 @@ class InspectorAreaController extends Controller
         ]);
     }
 
-    public function storeServiceArea(Request $httpRequest, \App\Services\RequestService $requestService): RedirectResponse
+    public function storeServiceArea(Request $httpRequest, RequestService $requestService): RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
 
@@ -520,87 +514,12 @@ class InspectorAreaController extends Controller
         ]);
     }
 
-    public function downloadInvoice(\App\Models\Invoice $invoice)
+    public function downloadInvoice(Invoice $invoice)
     {
         abort_unless($invoice->inspector_id === Auth::guard('inspector')->id(), 403);
         abort_unless($invoice->pdf_path, 404);
 
-        return \Illuminate\Support\Facades\Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
-    }
-
-    public function wallet(WalletService $walletService): Response
-    {
-        $inspector = Auth::guard('inspector')->user();
-        $wallet = $walletService->walletFor($inspector);
-
-        return Inertia::render('inspector/Wallet', [
-            'wallet' => [
-                'available' => $wallet->available_cents,
-                'pending' => $wallet->pending_cents,
-                'lifetime' => $wallet->lifetime_cents,
-            ],
-            'transactions' => $wallet->transactions()->latest()->paginate(15)
-                ->through(fn ($t) => [
-                    'id' => $t->id,
-                    'type' => $t->type,
-                    'amount' => $t->amount_cents,
-                    'balanceAfter' => $t->balance_after_cents,
-                    'description' => $t->description,
-                    'date' => $t->created_at->format('d.m.Y H:i'),
-                ]),
-        ]);
-    }
-
-    public function payoutForm(WalletService $walletService): Response
-    {
-        $inspector = Auth::guard('inspector')->user();
-        $wallet = $walletService->walletFor($inspector);
-
-        return Inertia::render('inspector/PayoutRequest', [
-            'available' => $wallet->available_cents,
-            'pendingPayout' => $inspector->payoutRequests()->where('status', 'pending')->sum('amount_cents'),
-            'history' => $inspector->payoutRequests()->latest('requested_at')->take(10)->get()
-                ->map(fn ($p) => [
-                    'id' => $p->id,
-                    'amount' => $p->amount_cents,
-                    'status' => $p->status,
-                    'requested' => $p->requested_at->format('d.m.Y'),
-                    'paid' => $p->paid_at?->format('d.m.Y'),
-                ]),
-        ]);
-    }
-
-    public function storePayout(Request $httpRequest, WalletService $walletService): RedirectResponse
-    {
-        $inspector = Auth::guard('inspector')->user();
-        $wallet = $walletService->walletFor($inspector);
-
-        $pendingPayouts = (int) $inspector->payoutRequests()->where('status', 'pending')->sum('amount_cents');
-        $maxAmount = ($wallet->available_cents - $pendingPayouts) / 100;
-
-        $data = $httpRequest->validate([
-            'amount' => ['required', 'numeric', 'min:1', "max:{$maxAmount}"],
-            'iban' => ['required', 'string', 'regex:/^DE\d{20}$/i'],
-            'bic' => ['nullable', 'string', 'max:11'],
-            'account_holder' => ['required', 'string', 'max:120'],
-        ], [
-            'amount.max' => 'Der Betrag übersteigt Ihr verfügbares Guthaben.',
-            'iban.regex' => 'Bitte geben Sie eine gültige deutsche IBAN ein (DE + 20 Ziffern).',
-        ]);
-
-        $payout = PayoutRequest::create([
-            'inspector_id' => $inspector->id,
-            'amount_cents' => (int) round($data['amount'] * 100),
-            'iban' => strtoupper(str_replace(' ', '', $data['iban'])),
-            'bic' => $data['bic'] ?? null,
-            'account_holder' => $data['account_holder'],
-            'status' => 'pending',
-            'requested_at' => now(),
-        ]);
-
-        ActivityLog::record('payout.requested', $inspector, $payout, ['amount_cents' => $payout->amount_cents]);
-
-        return redirect()->route('inspector.wallet')->with('success', 'Ihre Auszahlungsanfrage wurde übermittelt und wird in Kürze bearbeitet.');
+        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
     }
 
     public function profile(): Response
@@ -608,7 +527,13 @@ class InspectorAreaController extends Controller
         $inspector = Auth::guard('inspector')->user();
 
         return Inertia::render('inspector/Profile', [
-            'profile' => $inspector->only(['name', 'company_name', 'email', 'phone', 'city', 'bio', 'qualifications', 'years_experience']),
+            'profile' => $inspector->only(['name', 'company_name', 'email', 'phone', 'city', 'bio', 'qualifications', 'years_experience', 'avatar_key']),
+            'serviceTypes' => ServiceType::where('service_category_id', $inspector->service_category_id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'name']),
+            'selectedServiceTypeIds' => $inspector->serviceTypes()->pluck('service_types.id'),
+            'avatarOptions' => collect(config('avatars'))->map(fn ($a, $key) => ['key' => $key, ...$a])->values(),
         ]);
     }
 
@@ -624,9 +549,13 @@ class InspectorAreaController extends Controller
             'bio' => ['nullable', 'string', 'max:2000'],
             'qualifications' => ['nullable', 'string', 'max:2000'],
             'years_experience' => ['nullable', 'integer', 'min:0', 'max:70'],
+            'avatar_key' => ['nullable', 'string', Rule::in(array_keys(config('avatars')))],
+            'service_type_ids' => ['array'],
+            'service_type_ids.*' => ['integer', 'exists:service_types,id'],
         ]);
 
-        $inspector->update($data);
+        $inspector->update(collect($data)->except('service_type_ids')->all());
+        $inspector->serviceTypes()->sync($data['service_type_ids'] ?? []);
 
         return back()->with('success', 'Profil aktualisiert.');
     }

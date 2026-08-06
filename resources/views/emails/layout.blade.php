@@ -12,7 +12,7 @@
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
                     <tr>
                         <td style="padding:0 8px 24px;">
-                            <span style="font-size:26px;font-weight:800;color:#14375E;letter-spacing:-0.5px;">Angebot</span><span style="font-size:26px;font-weight:800;color:#3EAE2B;letter-spacing:-0.5px;">Jetzt</span>
+                            <img src="{{ config('app.url') }}/images/logo-wordmark.png" alt="AngebotJetzt" height="32" style="height:32px;width:auto;display:block;">
                         </td>
                     </tr>
                     <tr>

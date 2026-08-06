@@ -15,6 +15,7 @@ import { store } from '@/routes/register';
 
 defineProps<{
     passwordRules: string;
+    prefillEmail?: string | null;
 }>();
 
 watchEffect(() => {
@@ -56,6 +57,7 @@ watchEffect(() => {
                     :tabindex="2"
                     autocomplete="email"
                     name="email"
+                    :value="prefillEmail"
                     :placeholder="'ihre@email.de'"
                 />
                 <InputError :message="errors.email" />

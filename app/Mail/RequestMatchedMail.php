@@ -6,9 +6,7 @@ use App\Models\ServiceRequest;
 
 class RequestMatchedMail extends BaseBrandMail
 {
-    public function __construct(public ServiceRequest $serviceRequest)
-    {
-    }
+    public function __construct(public ServiceRequest $serviceRequest) {}
 
     protected function subjectLine(): string
     {
@@ -33,6 +31,6 @@ class RequestMatchedMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('konto.requests.show', $this->serviceRequest->id), 'label' => 'Anfrage ansehen'];
+        return ['url' => route('offers.view', $this->serviceRequest->id), 'label' => 'Anfrage ansehen'];
     }
 }

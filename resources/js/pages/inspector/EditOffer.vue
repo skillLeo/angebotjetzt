@@ -90,7 +90,7 @@ function submit() {
                         <span class="font-display text-lg font-extrabold text-green-600">{{ formatEuro(netCents) }}</span>
                     </div>
                     <p class="pt-2 text-xs text-ink-500">
-                        {{ 'Ihr Anteil wird nach Abschluss und Bestätigung des Auftrags Ihrem Wallet gutgeschrieben.' }}
+                        {{ 'Der Kunde zahlt den Angebotspreis direkt an Sie. Die Plattform-Provision stellen wir Ihnen nach Abschluss des Auftrags separat in Rechnung.' }}
                     </p>
                 </div>
             </PageCard>

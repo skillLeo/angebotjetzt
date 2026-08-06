@@ -3,17 +3,27 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\InspectorAuthController;
+use App\Http\Controllers\Auth\InspectorRegisterController;
 use App\Http\Controllers\Customer\CustomerAreaController;
+use App\Http\Controllers\Inspector\GuestOfferController;
 use App\Http\Controllers\Inspector\InspectorAreaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferAcceptanceController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\RequestWizardController;
+use App\Http\Controllers\ReviewSurveyController;
 use App\Http\Controllers\SeoController;
+use App\Http\Middleware\EnsureInspectorOnboardingComplete;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+
+Route::get('/reviews/{booking}/survey', [ReviewSurveyController::class, 'show'])
+    ->middleware('signed')->name('reviews.survey.show');
+Route::post('/reviews/{booking}/survey', [ReviewSurveyController::class, 'store'])->name('reviews.survey.store');
+Route::get('/reviews/survey/thanks', fn () => Inertia::render('public/ReviewThanks'))->name('reviews.survey.thanks');
 
 /*
 |--------------------------------------------------------------------------
@@ -95,18 +105,28 @@ Route::prefix('inspector')->name('gutachter.')->group(function () {
     Route::post('/logout', [InspectorAuthController::class, 'logout'])->name('logout');
 });
 
-Route::get('/inspector/register', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'show'])->name('gutachter.register');
-Route::post('/inspector/register', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
+Route::get('/offers/{serviceRequest}/view', [PublicController::class, 'viewOffers'])->name('offers.view');
 
-Route::get('/inspector/verify-email/{inspector}/confirm', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'confirmEmail'])
+Route::get('/inspector/register', [InspectorRegisterController::class, 'show'])->name('gutachter.register');
+Route::post('/inspector/register', [InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
+
+Route::get('/inspector/verify-email/{inspector}/confirm', [InspectorRegisterController::class, 'confirmEmail'])
     ->middleware('signed')->name('inspector.verification.verify');
-Route::get('/inspector/invite/{serviceRequest}/accept', [\App\Http\Controllers\Auth\InspectorRegisterController::class, 'acceptInvite'])
+Route::get('/inspector/invite/{serviceRequest}/accept', [InspectorRegisterController::class, 'acceptInvite'])
     ->middleware('signed')->name('inspector.invite.accept');
+
+// Guest offer submission — no inspector account needed yet. Gated by a
+// session flag set only after the signed invite link above is visited, not
+// by a signature of their own, since the form itself has no query params.
+Route::get('/inspector/invite/{serviceRequest}/offer', [GuestOfferController::class, 'create'])
+    ->name('inspector.guest-offer.create');
+Route::post('/inspector/invite/{serviceRequest}/offer', [GuestOfferController::class, 'store'])
+    ->name('inspector.guest-offer.store');
 
 Route::get('/inspector/requests/{request}/direct/{inspector}', [InspectorAreaController::class, 'signedRequest'])
     ->middleware('signed')->name('inspector.requests.signed');
 
-Route::middleware(['auth:inspector', \App\Http\Middleware\EnsureInspectorOnboardingComplete::class])->prefix('inspector')->name('inspector.')->group(function () {
+Route::middleware(['auth:inspector', EnsureInspectorOnboardingComplete::class])->prefix('inspector')->name('inspector.')->group(function () {
     Route::get('/verify-email', [InspectorAreaController::class, 'verificationNotice'])->name('verification.notice');
     Route::post('/verify-email/resend', [InspectorAreaController::class, 'resendVerification'])->name('verification.resend');
     Route::get('/complete-profile', [InspectorAreaController::class, 'onboardingProfile'])->name('onboarding.profile');
@@ -126,9 +146,6 @@ Route::middleware(['auth:inspector', \App\Http\Middleware\EnsureInspectorOnboard
     Route::get('/service-areas', [InspectorAreaController::class, 'serviceAreas'])->name('service-areas');
     Route::post('/service-areas', [InspectorAreaController::class, 'storeServiceArea'])->name('service-areas.store');
     Route::delete('/service-areas/{area}', [InspectorAreaController::class, 'deleteServiceArea'])->name('service-areas.delete');
-    Route::get('/wallet', [InspectorAreaController::class, 'wallet'])->name('wallet');
-    Route::get('/wallet/payout', [InspectorAreaController::class, 'payoutForm'])->name('payout');
-    Route::post('/wallet/payout', [InspectorAreaController::class, 'storePayout'])->name('payout.store');
     Route::get('/invoices', [InspectorAreaController::class, 'invoices'])->name('invoices');
     Route::get('/invoices/{invoice}/download', [InspectorAreaController::class, 'downloadInvoice'])->name('invoices.download');
     Route::get('/profile', [InspectorAreaController::class, 'profile'])->name('profile');
@@ -170,10 +187,15 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/payouts/{payout}/paid', [AdminController::class, 'markPayoutPaid'])->name('payouts.paid');
     Route::get('/invoices', [AdminController::class, 'invoices'])->name('invoices');
     Route::get('/invoices/{invoice}/download', [AdminController::class, 'downloadInvoice'])->name('invoices.download');
+    Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
+    Route::post('/reviews/{review}/published', [AdminController::class, 'togglePublished'])->name('reviews.published.toggle');
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
     Route::get('/customers/{customer}', [AdminController::class, 'customerDetail'])->name('customers.show');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
     Route::post('/categories/{category}/status', [AdminController::class, 'toggleCategory'])->name('categories.toggle');
+    Route::post('/categories/{category}/service-types', [AdminController::class, 'storeServiceType'])->name('service-types.store');
+    Route::post('/service-types/{serviceType}', [AdminController::class, 'updateServiceType'])->name('service-types.update');
+    Route::delete('/service-types/{serviceType}', [AdminController::class, 'destroyServiceType'])->name('service-types.destroy');
     Route::get('/service-types/{serviceType}/fields', [AdminController::class, 'serviceTypeFields'])->name('service-types.fields');
     Route::post('/service-types/{serviceType}/fields', [AdminController::class, 'storeServiceTypeField'])->name('service-types.fields.store');
     Route::delete('/service-types/{serviceType}/fields/{field}', [AdminController::class, 'destroyServiceTypeField'])->name('service-types.fields.destroy');

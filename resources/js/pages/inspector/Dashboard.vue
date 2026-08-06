@@ -2,15 +2,15 @@
 import EmptyState from '@/components/dashboard/EmptyState.vue';
 import PageCard from '@/components/dashboard/PageCard.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
-import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronRight, Clock, Inbox, Package, Star, Tag, Wallet } from 'lucide-vue-next';
+import { ChevronRight, Clock, Inbox, MapPin, Package, Star, Tag } from 'lucide-vue-next';
 
 
 defineProps<{
     pendingApproval?: boolean;
+    needsServiceArea?: boolean;
     stats: {
-        openRequests: number; offers: number; wonJobs: number; walletAvailable: number; walletPending: number; responseRate: number | null;
+        openRequests: number; offers: number; wonJobs: number; responseRate: number | null;
         rating: number | null; reviewsCount: number;
     } | null;
     newRequests: Array<{ id: number; number: string; service: string; vehicle: string; ort: string; date: string }>;
@@ -34,11 +34,28 @@ defineProps<{
         </div>
     </PageCard>
 
-    <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div
+        v-if="!pendingApproval && needsServiceArea"
+        class="mb-6 flex flex-col items-start gap-4 rounded-card border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+        <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-amber-100 text-amber-700">
+                <MapPin :size="18" aria-hidden="true" />
+            </span>
+            <div>
+                <p class="font-display font-bold text-navy-700">{{ 'Servicegebiet fehlt noch' }}</p>
+                <p class="text-sm text-ink-500">{{ 'Ohne Servicegebiet erhalten Sie keine passenden Anfragen.' }}</p>
+            </div>
+        </div>
+        <Link href="/inspector/service-areas" class="shrink-0 rounded-pill bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
+            {{ 'Jetzt festlegen' }}
+        </Link>
+    </div>
+
+    <div v-if="!pendingApproval" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard :label="'Offene Anfragen'" :value="stats.openRequests" :icon="Inbox" accent />
         <StatCard :label="'Abgegebene Angebote'" :value="stats.offers" :icon="Tag" />
         <StatCard :label="'Gewonnene Aufträge'" :value="stats.wonJobs" :icon="Package" />
-        <StatCard :label="'Verfügbares Guthaben'" :value="formatEuro(stats.walletAvailable)" :icon="Wallet" :hint="`${formatEuro(stats.walletPending)} ${'ausstehend'}`" />
         <StatCard
             :label="'Bewertung'"
             :value="stats.rating ? stats.rating.toFixed(1).replace('.', ',') : '–'"

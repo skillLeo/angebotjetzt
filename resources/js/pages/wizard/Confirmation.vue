@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FormField from '@/components/forms/FormField.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { CheckCircle2, Clock, KeyRound, LogIn, Mail } from 'lucide-vue-next';
+import { CheckCircle2, KeyRound, LogIn, Mail } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 
 const props = defineProps<{
@@ -40,34 +40,20 @@ function claim() {
             <p class="mt-3 text-ink-500">Anfrage-Nummer <span class="font-bold text-navy-700">{{ request.number }}</span></p>
 
             <div class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">
-                <template v-if="!request.unmatched">
-                    <div class="flex items-start gap-4">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-green-50 text-green-600">
-                            <Mail :size="20" aria-hidden="true" />
-                        </span>
-                        <div>
-                            <p class="font-display font-bold text-navy-700">{{ request.matched }} Gutachter benachrichtigt</p>
-                            <p class="mt-1 text-sm text-ink-500">
-                                Wir haben passende Gutachter in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
-                                informiert. Die ersten Angebote treffen meist innerhalb weniger Stunden ein.
-                            </p>
-                        </div>
+                <div class="flex items-start gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-green-50 text-green-600">
+                        <Mail :size="20" aria-hidden="true" />
+                    </span>
+                    <div>
+                        <p class="font-display font-bold text-navy-700">
+                            {{ request.matched > 0 ? `${request.matched} Gutachter benachrichtigt` : 'Gutachter benachrichtigt' }}
+                        </p>
+                        <p class="mt-1 text-sm text-ink-500">
+                            Wir haben passende Gutachter in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
+                            informiert. Die ersten Angebote treffen meist innerhalb weniger Stunden ein.
+                        </p>
                     </div>
-                </template>
-                <template v-else>
-                    <div class="flex items-start gap-4">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-amber-100 text-amber-700">
-                            <Clock :size="20" aria-hidden="true" />
-                        </span>
-                        <div>
-                            <p class="font-display font-bold text-navy-700">Wir melden uns persönlich</p>
-                            <p class="mt-1 text-sm text-ink-500">
-                                Für Ihre Region suchen wir gerade passende Gutachter. Unser Team meldet sich
-                                in Kürze persönlich bei Ihnen.
-                            </p>
-                        </div>
-                    </div>
-                </template>
+                </div>
             </div>
 
             <div v-if="canLogin" class="mt-8 rounded-panel border border-ink-100 bg-white p-6 text-left shadow-card">

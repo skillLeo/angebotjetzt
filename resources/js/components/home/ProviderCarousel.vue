@@ -71,7 +71,7 @@ function scroll(dir: number) {
                 <span
                     class="mt-4 inline-flex w-fit items-center gap-1.5 rounded-pill bg-green-50 px-3 py-1 text-sm font-bold text-green-700"
                 >
-                    <BadgeCheck :size="15" aria-hidden="true" /> {{ 'Geprüft' }}
+                    <BadgeCheck :size="15" aria-hidden="true" /> {{ 'Von AngebotJetzt geprüft' }}
                 </span>
 
                 <dl class="mt-5 space-y-2 text-sm">

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import StarRating from '@/components/marketing/StarRating.vue';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { avatarIcons } from '@/lib/avatars';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, BadgeCheck, CalendarClock, Check } from 'lucide-vue-next';
+import { ArrowLeft, BadgeCheck, CalendarClock, Check, UserRound } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 
@@ -11,7 +12,11 @@ const props = defineProps<{
     request: { id: number; number: string; service: string; vehicle: string; ort: string };
     offers: Array<{
         id: number; price: number; message: string | null; estimatedDate: string | null; status: string; editedAt: string | null;
-        inspector: { name: string; company: string | null; city: string | null; verified: boolean; experience: number | null; rating: number | null; reviews: number | null };
+        inspector: {
+            label: string; name: string | null; company: string | null; city: string | null; bio: string | null;
+            verified: boolean; experience: number | null; rating: number | null; reviews: number | null;
+            pendingVerification: boolean; avatar: { key: string; icon: string; color: string } | null;
+        };
     }>;
 }>();
 
@@ -60,23 +65,32 @@ function confirmAccept() {
                 {{ 'Günstigstes Angebot' }}
             </div>
             <div class="flex items-center gap-3">
-                <span class="flex h-12 w-12 items-center justify-center rounded-pill bg-navy-700 font-display text-lg font-bold text-white">
-                    {{ o.inspector.name.charAt(0) }}
+                <span
+                    v-if="!o.inspector.name && o.inspector.avatar"
+                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill text-white"
+                    :style="{ backgroundColor: o.inspector.avatar.color }"
+                >
+                    <component :is="avatarIcons[o.inspector.avatar.icon] ?? UserRound" :size="20" aria-hidden="true" />
+                </span>
+                <span v-else class="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-navy-700 font-display text-lg font-bold text-white">
+                    {{ (o.inspector.name ?? o.inspector.label).charAt(0) }}
                 </span>
                 <div>
-                    <p class="font-display font-bold text-navy-700">{{ o.inspector.name }}</p>
+                    <p class="font-display font-bold text-navy-700">{{ o.inspector.name ?? o.inspector.label }}</p>
                     <p class="text-sm text-ink-500">{{ o.inspector.city }}</p>
                 </div>
             </div>
 
             <div class="mt-3 flex flex-wrap items-center gap-2">
                 <span v-if="o.inspector.verified" class="inline-flex items-center gap-1 rounded-pill bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700">
-                    <BadgeCheck :size="13" aria-hidden="true" /> {{ 'Geprüft' }}
+                    <BadgeCheck :size="13" aria-hidden="true" /> {{ 'Von AngebotJetzt geprüft' }}
                 </span>
                 <span v-if="o.inspector.rating" class="inline-flex items-center gap-1 text-xs text-ink-500">
                     <StarRating :rating="o.inspector.rating" :size="13" /> {{ o.inspector.rating.toFixed(1).replace('.', ',') }} ({{ o.inspector.reviews }})
                 </span>
             </div>
+
+            <p v-if="o.inspector.bio" class="mt-3 text-sm leading-relaxed text-ink-500">{{ o.inspector.bio }}</p>
 
             <p class="mt-5 font-display text-3xl font-extrabold text-navy-700">{{ formatEuro(o.price) }}</p>
 
@@ -89,9 +103,13 @@ function confirmAccept() {
             <div v-else class="flex-1" />
             <p v-if="o.editedAt" class="mt-2 text-xs text-ink-500">{{ 'Bearbeitet am' }} {{ o.editedAt }}</p>
 
+            <p v-if="o.inspector.pendingVerification" class="mt-3 rounded-card bg-amber-50 p-3 text-xs font-semibold text-amber-700">
+                {{ 'Dieser Anbieter wird noch von unserem Team überprüft. Sie können das Angebot erst annehmen, sobald die Prüfung abgeschlossen ist.' }}
+            </p>
+
             <button
                 type="button"
-                :disabled="accepting !== null || o.status !== 'open'"
+                :disabled="accepting !== null || o.status !== 'open' || o.inspector.pendingVerification"
                 class="mt-5 inline-flex items-center justify-center gap-2 rounded-pill bg-green-500 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
                 @click="openConfirm(o)"
             >
@@ -111,7 +129,7 @@ function confirmAccept() {
                 <DialogTitle>{{ 'Angebot verbindlich annehmen?' }}</DialogTitle>
                 <DialogDescription class="space-y-3 pt-2 text-left">
                     <span class="block">
-                        {{ `Mit der Annahme des Angebots von ${pendingOffer.inspector.name} über ${formatEuro(pendingOffer.price)} schließen Sie eine verbindliche Vereinbarung direkt mit diesem Gutachter ab.` }}
+                        {{ `Mit der Annahme des Angebots von ${pendingOffer.inspector.name ?? pendingOffer.inspector.label} über ${formatEuro(pendingOffer.price)} schließen Sie eine verbindliche Vereinbarung direkt mit diesem Gutachter ab.` }}
                     </span>
                     <span class="block">
                         {{ 'Die Zahlung für den Auftrag erfolgt direkt zwischen Ihnen und dem Gutachter, außerhalb der Plattform. AngebotJetzt ist an dieser Zahlung nicht beteiligt.' }}

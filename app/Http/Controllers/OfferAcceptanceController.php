@@ -36,6 +36,10 @@ class OfferAcceptanceController extends Controller
             return back()->withErrors(['offer' => 'Dieses Angebot kann nicht mehr angenommen werden.']);
         }
 
+        if (! $offer->inspector->is_approved) {
+            return back()->withErrors(['offer' => 'Dieser Anbieter wird noch von unserem Team überprüft. Sie können das Angebot erst annehmen, sobald die Prüfung abgeschlossen ist.']);
+        }
+
         $losingOffers = Offer::where('request_id', $offer->request_id)
             ->where('id', '!=', $offer->id)
             ->where('status', 'open')

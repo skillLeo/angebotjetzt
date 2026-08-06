@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import StarRating from '@/components/marketing/StarRating.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { Facebook, Instagram, Linkedin } from 'lucide-vue-next';
 import { computed } from 'vue';
 
+const page = usePage();
+type NavCategory = { id: number; name: string; slug: string; is_active: boolean };
+const categoryLinks = computed(() => {
+    const cats = (page.props.navCategories as NavCategory[] | undefined) ?? [];
+    return [...cats]
+        .sort((a, b) => {
+            if (a.slug === 'kfz-gutachten') return -1;
+            if (b.slug === 'kfz-gutachten') return 1;
+            return 0;
+        })
+        .map((cat) => ({
+            label: cat.name,
+            href: cat.is_active ? '/vehicle-reports' : `/coming-soon/${cat.slug}`,
+        }));
+});
 
 const columns = computed(() => [
     {
@@ -19,13 +34,7 @@ const columns = computed(() => [
     },
     {
         title: 'Dienstleistungen',
-        links: [
-            { label: 'Unfallschadengutachten', href: '/vehicle-reports/unfallschadengutachten' },
-            { label: 'Fahrzeugbewertung', href: '/vehicle-reports/fahrzeugbewertung' },
-            { label: 'Gebrauchtwagencheck', href: '/vehicle-reports/gebrauchtwagencheck' },
-            { label: 'Wertminderungsgutachten', href: '/vehicle-reports/wertminderung-restwert' },
-            { label: 'Alle Kfz-Gutachten', href: '/vehicle-reports' },
-        ],
+        links: categoryLinks.value,
     },
     {
         title: 'Für Dienstleister',

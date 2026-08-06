@@ -15,9 +15,9 @@ withDefaults(
                 v-if="inverted"
                 src="/images/logo-light-wordmark.png"
                 alt="AngebotJetzt"
-                class="h-9 w-auto md:h-10"
+                class="h-8 w-auto md:h-9"
             />
-            <img v-else src="/images/logo-wordmark.png" alt="AngebotJetzt" class="h-9 w-auto md:h-10" />
+            <img v-else src="/images/logo-wordmark.png" alt="AngebotJetzt" class="h-8 w-auto md:h-9" />
         </span>
         <span
             v-if="tagline"

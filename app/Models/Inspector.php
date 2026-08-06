@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,7 +16,7 @@ class Inspector extends Authenticatable
 
     protected $fillable = [
         'company_name', 'name', 'email', 'phone', 'password', 'avatar_path',
-        'city', 'street', 'plz', 'bio', 'qualifications', 'years_experience',
+        'city', 'street', 'plz', 'bio', 'avatar_key', 'qualifications', 'years_experience',
         'birthday', 'tax_id', 'service_category_id', 'is_active', 'is_approved',
         'is_verified', 'member_since', 'imported_from', 'email_verified_at',
         'profile_completed_at',
@@ -46,6 +47,11 @@ class Inspector extends Authenticatable
     public function serviceAreas(): HasMany
     {
         return $this->hasMany(InspectorServiceArea::class);
+    }
+
+    public function serviceTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceType::class, 'inspector_service_types');
     }
 
     public function offers(): HasMany

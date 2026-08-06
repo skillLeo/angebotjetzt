@@ -20,7 +20,7 @@ defineProps<{
 
     <PageCard :title="'Meine Anfragen'">
         <template #actions>
-            <Link href="/request" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
+            <Link href="/request/start" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-600">
                 {{ 'Neue Anfrage' }}
             </Link>
         </template>
@@ -46,7 +46,7 @@ defineProps<{
             </Link>
         </div>
         <EmptyState v-else :title="'Noch keine Anfragen'" :description="'Ihre Anfragen erscheinen hier.'">
-            <Link href="/request" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ 'Anfrage stellen' }}</Link>
+            <Link href="/request/start" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ 'Anfrage stellen' }}</Link>
         </EmptyState>
 
         <Pagination :links="requests.links" />

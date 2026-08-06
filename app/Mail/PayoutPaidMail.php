@@ -6,9 +6,7 @@ use App\Models\PayoutRequest;
 
 class PayoutPaidMail extends BaseBrandMail
 {
-    public function __construct(public PayoutRequest $payout)
-    {
-    }
+    public function __construct(public PayoutRequest $payout) {}
 
     protected function subjectLine(): string
     {
@@ -34,6 +32,6 @@ class PayoutPaidMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('inspector.wallet'), 'label' => 'Wallet ansehen'];
+        return ['url' => route('inspector.dashboard'), 'label' => 'Zum Gutachter-Portal'];
     }
 }

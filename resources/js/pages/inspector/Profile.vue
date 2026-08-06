@@ -2,12 +2,25 @@
 import PageCard from '@/components/dashboard/PageCard.vue';
 import FormField from '@/components/forms/FormField.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { BadgeCheck, Car, Check, ClipboardCheck, Shield, UserRound, Wrench } from 'lucide-vue-next';
+import type { Component } from 'vue';
 import { toast } from 'vue-sonner';
 
-
 const props = defineProps<{
-    profile: { name: string; company_name: string | null; email: string; phone: string | null; city: string | null; bio: string | null; qualifications: string | null; years_experience: number | null };
+    profile: { name: string; company_name: string | null; email: string; phone: string | null; city: string | null; bio: string | null; qualifications: string | null; years_experience: number | null; avatar_key: string | null };
+    serviceTypes: Array<{ id: number; name: string }>;
+    selectedServiceTypeIds: number[];
+    avatarOptions: Array<{ key: string; icon: string; color: string }>;
 }>();
+
+const avatarIcons: Record<string, Component> = {
+    Shield,
+    Wrench,
+    BadgeCheck,
+    Car,
+    ClipboardCheck,
+    UserRound,
+};
 
 const form = useForm({
     name: props.profile.name,
@@ -17,7 +30,15 @@ const form = useForm({
     bio: props.profile.bio ?? '',
     qualifications: props.profile.qualifications ?? '',
     years_experience: props.profile.years_experience ?? '',
+    avatar_key: props.profile.avatar_key ?? '',
+    service_type_ids: [...props.selectedServiceTypeIds],
 });
+
+function toggleServiceType(id: number) {
+    const idx = form.service_type_ids.indexOf(id);
+    if (idx === -1) form.service_type_ids.push(id);
+    else form.service_type_ids.splice(idx, 1);
+}
 
 function submit() {
     form.post('/inspector/profile', {
@@ -47,6 +68,45 @@ function submit() {
                 <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Qualifikationen & Zertifikate' }}</label>
                 <textarea v-model="form.qualifications" rows="3" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
             </div>
+
+            <div v-if="serviceTypes.length">
+                <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Angebotene Leistungen' }}</label>
+                <p class="mb-2.5 text-sm text-ink-500">{{ 'Wählen Sie die konkreten Leistungen, die Sie anbieten.' }}</p>
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        v-for="st in serviceTypes"
+                        :key="st.id"
+                        type="button"
+                        class="rounded-pill border px-4 py-2 text-sm font-semibold transition"
+                        :class="form.service_type_ids.includes(st.id) ? 'border-green-500 bg-green-50 text-green-700' : 'border-ink-300 text-ink-700 hover:border-navy-700'"
+                        @click="toggleServiceType(st.id)"
+                    >
+                        {{ st.name }}
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Profilsymbol' }}</label>
+                <p class="mb-2.5 text-sm text-ink-500">{{ 'Dieses Symbol zeigen wir Kunden anstelle eines Fotos, solange Ihr Angebot noch nicht angenommen wurde.' }}</p>
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        v-for="opt in avatarOptions"
+                        :key="opt.key"
+                        type="button"
+                        class="relative flex h-12 w-12 items-center justify-center rounded-full text-white transition"
+                        :style="{ backgroundColor: opt.color }"
+                        :class="form.avatar_key === opt.key ? 'ring-2 ring-navy-700 ring-offset-2' : 'opacity-80 hover:opacity-100'"
+                        @click="form.avatar_key = opt.key"
+                    >
+                        <component :is="avatarIcons[opt.icon] ?? UserRound" :size="20" aria-hidden="true" />
+                        <span v-if="form.avatar_key === opt.key" class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-green-600 shadow-card">
+                            <Check :size="12" aria-hidden="true" />
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             <div class="rounded-card bg-sand-50 px-4 py-3 text-sm text-ink-500">{{ `E-Mail: ${profile.email} (Änderung über den Support)` }}</div>
             <button type="submit" :disabled="form.processing" class="rounded-pill bg-green-500 px-7 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60">
                 {{ 'Speichern' }}

@@ -6,10 +6,12 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Clock, Euro } from 'lucide-vue-n
 import { computed } from 'vue';
 
 
-defineProps<{
-    serviceType: { name: string; slug: string; description: string; image: string | null };
+const props = defineProps<{
+    serviceType: { name: string; slug: string; description: string; image: string | null; category: { name: string; slug: string } | null };
     others: Array<{ id: number; name: string; slug: string; description: string; image: string | null }>;
 }>();
+
+const categoryHref = computed(() => (props.serviceType.category?.slug === 'kfz-gutachten' ? '/vehicle-reports' : `/coming-soon/${props.serviceType.category?.slug}`));
 
 const benefits = computed(() => [
     { icon: ShieldCheck, title: 'Geprüfte Sachverständige', text: 'Unabhängige, oft öffentlich bestellte und vereidigte Gutachter mit langjähriger Erfahrung.' },
@@ -28,7 +30,7 @@ const benefits = computed(() => [
         <nav class="mx-auto max-w-7xl text-sm text-ink-500" aria-label="Brotkrümel">
             <Link href="/" class="hover:text-navy-700">{{ 'Startseite' }}</Link>
             <span class="mx-2">/</span>
-            <Link href="/vehicle-reports" class="hover:text-navy-700">{{ 'Kfz-Gutachten' }}</Link>
+            <Link v-if="serviceType.category" :href="categoryHref" class="hover:text-navy-700">{{ serviceType.category.name }}</Link>
             <span class="mx-2">/</span>
             <span class="text-navy-700">{{ serviceType.name }}</span>
         </nav>
@@ -37,7 +39,7 @@ const benefits = computed(() => [
     <section class="bg-white px-4 py-12 sm:px-6 lg:px-8 lg:py-24">
         <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[55fr_45fr] lg:gap-8">
             <div class="min-w-0">
-                <p class="text-eyebrow mb-4 text-green-600">{{ 'Kfz-Gutachten' }}</p>
+                <p v-if="serviceType.category" class="text-eyebrow mb-4 text-green-600">{{ serviceType.category.name }}</p>
                 <h1 class="text-hero text-navy-700 break-words">{{ serviceType.name }}</h1>
                 <p class="text-lead mt-6 text-ink-700">{{ serviceType.description }}</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">

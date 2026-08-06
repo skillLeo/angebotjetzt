@@ -46,7 +46,7 @@ createInertiaApp({
             // before the inspector has full dashboard access, so they use
             // their own centered auth-style shell instead of the dashboard
             // chrome every other inspector/* page gets.
-            case name === 'inspector/VerifyEmailNotice' || name === 'inspector/CompleteProfile':
+            case name === 'inspector/VerifyEmailNotice' || name === 'inspector/CompleteProfile' || name === 'inspector/GuestOffer':
                 return null;
             case name.startsWith('settings/'):
                 return [CustomerLayout, SettingsLayout];

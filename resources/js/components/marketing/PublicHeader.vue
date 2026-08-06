@@ -102,15 +102,13 @@ watch(mobileOpen, (open) => {
 
 <template>
     <header
-        class="z-50 bg-white transition-shadow duration-300"
-        :class="[reduced ? 'fixed inset-x-0 top-0' : 'sticky top-0', scrolled ? 'border-b border-ink-100 shadow-card' : '']"
+        class="sticky top-0 z-50 bg-white transition-shadow duration-300"
+        :class="scrolled ? 'border-b border-ink-100 shadow-card' : ''"
     >
-        <!-- Reduced (booking-flow) header: logo + trust message. Fixed (not
-             sticky) so it never moves while the long multi-step form scrolls;
-             PublicLayout.vue adds matching top padding to <main> to compensate
-             for it being taken out of document flow. A symmetric empty spacer
-             column mirrors the logo's column so the message is centered
-             against the full header width, not just the space left of the logo. -->
+        <!-- Reduced (booking-flow) header: logo + trust message. A symmetric
+             empty spacer column mirrors the logo's column so the message is
+             centered against the full header width, not just the space left
+             of the logo. -->
         <div
             v-if="reduced"
             class="mx-auto flex h-[92px] max-w-7xl flex-col items-center justify-center gap-2 px-4 py-2.5 sm:px-6 lg:grid lg:h-[72px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:py-0 lg:px-8"
@@ -241,14 +239,13 @@ watch(mobileOpen, (open) => {
                     >
                         <button
                             type="button"
-                            class="flex w-full items-center justify-between rounded-card px-3 py-3 font-display text-xl font-bold text-navy-700"
+                            class="flex w-full items-center justify-between rounded-card px-3 py-4 font-display text-2xl font-bold text-navy-700"
                             aria-haspopup="true"
                             @click="mobilePanel = 'services'"
                         >
                             {{ 'Dienstleistungen' }}
                             <ChevronRight :size="22" aria-hidden="true" />
                         </button>
-                        <div class="my-3 border-t border-ink-100" />
                         <Motion
                             v-for="(item, i) in navItems"
                             :key="item.href"
@@ -271,7 +268,7 @@ watch(mobileOpen, (open) => {
                         >
                             <Link
                                 :href="accountLink.href"
-                                class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-ink-500"
+                                class="block rounded-card px-3 py-4 font-display text-2xl font-bold text-navy-700"
                                 @click="mobileOpen = false"
                             >
                                 {{ accountLink.label }}

@@ -44,21 +44,32 @@ class InspectorRegisterController extends Controller
             'service_category_id' => ['required', 'exists:service_categories,id'],
             'company_name' => ['nullable', 'string', 'max:190'],
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:190', 'unique:inspectors,email'],
+            'email' => ['required', 'email', 'max:190'],
             'password' => ['required', 'confirmed', 'min:8'],
             'agb' => ['accepted'],
             'request_id' => ['nullable', 'integer', 'exists:requests,id'],
         ], [
             'agb.accepted' => 'Bitte akzeptieren Sie die AGB.',
-            'email.unique' => 'Für diese E-Mail-Adresse existiert bereits ein Gutachter-Konto.',
         ]);
+
+        // A guest who already submitted an offer via an email invite (without
+        // registering) has an unclaimed placeholder account waiting under this
+        // email — claim and complete it instead of erroring on a duplicate.
+        $placeholder = Inspector::where('email', $data['email'])
+            ->where('imported_from', 'guest_offer')
+            ->whereNull('profile_completed_at')
+            ->first();
+
+        if (! $placeholder && Inspector::where('email', $data['email'])->exists()) {
+            return back()->withErrors(['email' => 'Für diese E-Mail-Adresse existiert bereits ein Gutachter-Konto.'])->withInput();
+        }
 
         // Registering via an admin's invite link for a specific request already
         // proves inbox access (they clicked a signed link emailed to exactly
         // this address), so that path skips the separate email-verification step.
         $viaInvite = ! empty($data['request_id']);
 
-        $inspector = Inspector::create([
+        $attributes = [
             'service_category_id' => $data['service_category_id'],
             'company_name' => $data['company_name'] ?? null,
             'name' => $data['name'],
@@ -67,12 +78,16 @@ class InspectorRegisterController extends Controller
             'is_active' => true,
             'is_approved' => false,
             'is_verified' => false,
-            'member_since' => now(),
+            'member_since' => $placeholder?->member_since ?? now(),
             'email_verified_at' => $viaInvite ? now() : null,
-        ]);
+        ];
+
+        $inspector = $placeholder
+            ? tap($placeholder)->update($attributes)
+            : Inspector::create($attributes);
 
         Wallet::firstOrCreate(['inspector_id' => $inspector->id]);
-        ActivityLog::record('inspector.registered', $inspector);
+        ActivityLog::record($placeholder ? 'inspector.claimed' : 'inspector.registered', $inspector);
 
         Auth::guard('inspector')->login($inspector);
 
@@ -119,9 +134,16 @@ class InspectorRegisterController extends Controller
     {
         $email = (string) $request->query('email');
         $inspector = Inspector::where('email', $email)->first();
+        $isUnclaimedPlaceholder = $inspector && $inspector->imported_from === 'guest_offer' && ! $inspector->profile_completed_at;
 
-        if (! $inspector) {
-            return redirect()->route('gutachter.register', ['email' => $email, 'request' => $serviceRequest->id]);
+        if (! $inspector || $isUnclaimedPlaceholder) {
+            // No account at all yet — let them submit a real offer straight
+            // away without registering first; they can turn this into a full
+            // account afterward. An unclaimed guest-offer placeholder (if this
+            // email already submitted a guest offer before) also lands here.
+            $request->session()->put("guest_offer_access_{$serviceRequest->id}", $email);
+
+            return redirect()->route('inspector.guest-offer.create', $serviceRequest->id);
         }
 
         Auth::guard('inspector')->login($inspector);

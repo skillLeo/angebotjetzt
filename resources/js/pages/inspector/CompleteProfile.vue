@@ -29,8 +29,6 @@ const form = useForm({
     plz: props.profile.plz ?? '',
     city: props.profile.city ?? '',
     phone: props.profile.phone ?? '',
-    plz_from: '',
-    plz_to: '',
 });
 
 function submit() {
@@ -55,12 +53,11 @@ function submit() {
             <FormField v-model="form.street" :label="'Straße & Hausnummer (Firmensitz)'" required :error="form.errors.street" />
             <div class="grid gap-4 sm:grid-cols-2">
                 <FormField v-model="form.plz" :label="'PLZ'" inputmode="numeric" :maxlength="5" required :error="form.errors.plz" />
-                <FormField v-model="form.city" :label="'Stadt (Ihr Servicegebiet)'" required :error="form.errors.city" />
+                <FormField v-model="form.city" :label="'Stadt (Rechnungsadresse)'" required :error="form.errors.city" />
             </div>
-            <div class="grid gap-4 sm:grid-cols-2">
-                <FormField v-model="form.plz_from" :label="'PLZ von (optional)'" inputmode="numeric" :maxlength="5" :error="form.errors.plz_from" />
-                <FormField v-model="form.plz_to" :label="'PLZ bis (optional)'" inputmode="numeric" :maxlength="5" :error="form.errors.plz_to" />
-            </div>
+            <p class="text-sm text-ink-500">
+                {{ 'Ihr Servicegebiet legen Sie fest, sobald Ihr Konto freigeschaltet ist.' }}
+            </p>
             <button type="submit" :disabled="form.processing" class="w-full rounded-pill bg-green-500 py-3.5 font-bold text-white transition hover:bg-green-600 disabled:opacity-60">
                 {{ 'Konto vervollständigen' }}
             </button>

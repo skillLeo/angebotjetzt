@@ -13,7 +13,7 @@ defineProps<{
         vehicle: { make: string; model: string; firstRegistration: string | null; mileage: number | null; fuel: string | null; transmission: string | null };
         photos: string[];
     };
-    offers: Array<{ id: number; price: number; message: string | null; estimatedDate: string | null; status: string; inspector: { name: string; company: string | null; city: string | null; verified: boolean; experience: number | null } }>;
+    offers: Array<{ id: number; price: number; message: string | null; estimatedDate: string | null; status: string; inspector: { label: string; name: string | null; company: string | null; city: string | null; verified: boolean; experience: number | null } }>;
 }>();
 </script>
 
@@ -47,7 +47,7 @@ defineProps<{
                 <div v-if="offers.length" class="space-y-3 p-5">
                     <div v-for="o in offers" :key="o.id" class="rounded-card border border-ink-100 p-4">
                         <div class="flex items-center justify-between">
-                            <p class="font-semibold text-navy-700">{{ o.inspector.name }}</p>
+                            <p class="font-semibold text-navy-700">{{ o.inspector.name ?? o.inspector.label }}</p>
                             <span class="font-display text-lg font-extrabold text-navy-700">{{ formatEuro(o.price) }}</span>
                         </div>
                         <p class="text-sm text-ink-500">{{ o.inspector.city }}</p>

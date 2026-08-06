@@ -61,6 +61,28 @@ class ServiceRequest extends Model
         return $this->hasOne(Booking::class, 'request_id');
     }
 
+    /**
+     * A stable "Anbieter A/B/C" label per offer, ranked by submission order
+     * (offer id ascending) so the same provider gets the same letter
+     * everywhere a page displays this request's offers, regardless of that
+     * page's own sort order (price, recency, ...) — used to keep a
+     * provider's identity anonymous to the customer until their offer is
+     * accepted or otherwise decided.
+     *
+     * @return array<int, string>
+     */
+    public function offerLabels(): array
+    {
+        return $this->offers()->orderBy('id')->pluck('id')
+            ->mapWithKeys(fn ($id, $i) => [$id => 'Anbieter '.chr(65 + $i)])
+            ->all();
+    }
+
+    public function offerLabel(int $offerId): string
+    {
+        return $this->offerLabels()[$offerId] ?? 'Anbieter';
+    }
+
     public static function nextRequestNumber(): string
     {
         $year = now()->year;

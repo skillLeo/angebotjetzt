@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Admin;
+use App\Models\Booking;
 use App\Models\Inspector;
+use App\Models\ServiceRequest;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +28,7 @@ it('serves all public pages', function () {
 
 it('serves all customer pages', function () {
     $user = User::whereNotNull('email_verified_at')->first();
-    $request = $user->requests()->first() ?? \App\Models\ServiceRequest::first();
+    $request = $user->requests()->first() ?? ServiceRequest::first();
     $user = $request->user;
     $booking = $user->bookings()->first();
 
@@ -51,7 +53,7 @@ it('serves all inspector pages', function () {
     $this->actingAs($inspector, 'inspector');
 
     foreach (['/gutachter', '/gutachter/anfragen', '/gutachter/angebote', '/gutachter/auftraege',
-        '/gutachter/servicegebiet', '/gutachter/wallet', '/gutachter/wallet/auszahlung', '/gutachter/profil'] as $p) {
+        '/gutachter/servicegebiet', '/gutachter/profil'] as $p) {
         $this->get($p)->assertOk();
     }
     $this->get("/gutachter/anfragen/{$request->id}")->assertOk();
@@ -63,8 +65,8 @@ it('serves all inspector pages', function () {
 it('serves all admin pages', function () {
     $admin = Admin::first();
     $inspector = Inspector::first();
-    $request = \App\Models\ServiceRequest::first();
-    $booking = \App\Models\Booking::first();
+    $request = ServiceRequest::first();
+    $booking = Booking::first();
 
     $this->actingAs($admin, 'admin');
 

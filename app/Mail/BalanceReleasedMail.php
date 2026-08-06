@@ -6,9 +6,7 @@ use App\Models\Booking;
 
 class BalanceReleasedMail extends BaseBrandMail
 {
-    public function __construct(public Booking $booking)
-    {
-    }
+    public function __construct(public Booking $booking) {}
 
     protected function subjectLine(): string
     {
@@ -27,12 +25,12 @@ class BalanceReleasedMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->inspector->name},",
-            "Ihr Anteil über <strong>{$amount} €</strong> für Auftrag <strong>{$b->booking_number}</strong> wurde freigegeben und steht Ihnen jetzt in Ihrem Wallet zur Auszahlung zur Verfügung.",
+            "Ihr Anteil über <strong>{$amount} €</strong> für Auftrag <strong>{$b->booking_number}</strong> wurde freigegeben und steht Ihnen jetzt zur Auszahlung zur Verfügung.",
         ];
     }
 
     protected function cta(): ?array
     {
-        return ['url' => route('inspector.wallet'), 'label' => 'Wallet ansehen'];
+        return ['url' => route('inspector.dashboard'), 'label' => 'Zum Gutachter-Portal'];
     }
 }

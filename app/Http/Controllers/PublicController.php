@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactFormMail;
+use App\Models\Booking;
 use App\Models\CategoryInterestSignal;
 use App\Models\Inspector;
+use App\Models\Offer;
 use App\Models\Review;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
+use App\Models\User;
+use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -82,9 +87,9 @@ class PublicController extends Controller
 
             return [
                 'stats' => [
-                    'bookings' => \App\Models\Booking::count(),
+                    'bookings' => Booking::count(),
                     'inspectors' => Inspector::where('is_active', true)->count(),
-                    'avgOffers' => round(\App\Models\Offer::count() / max(1, ServiceRequest::count()), 1),
+                    'avgOffers' => round(Offer::count() / max(1, ServiceRequest::count()), 1),
                     'avgResponseHours' => 3,
                 ],
                 'providers' => $providers,
@@ -120,12 +125,18 @@ class PublicController extends Controller
 
     public function serviceType(ServiceType $serviceType): Response
     {
+        $serviceType->loadMissing('category:id,name,slug');
+
         return Inertia::render('public/ServiceType', [
             'serviceType' => [
                 'name' => $serviceType->name,
                 'slug' => $serviceType->slug,
                 'description' => $serviceType->description,
-                'image' => config('media.services.'.$serviceType->slug),
+                'image' => $serviceType->image_url ?? config('media.hero.inspection'),
+                'category' => $serviceType->category ? [
+                    'name' => $serviceType->category->name,
+                    'slug' => $serviceType->category->slug,
+                ] : null,
             ],
             'others' => $this->serviceTypes()->where('slug', '!=', $serviceType->slug)->values(),
         ]);
@@ -165,7 +176,7 @@ class PublicController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        \App\Support\SafeMailer::send(fn () => Mail::to(config('mail.from.address'))->queue(new ContactFormMail($data)));
+        SafeMailer::send(fn () => Mail::to(config('mail.from.address'))->queue(new ContactFormMail($data)));
 
         return back()->with('success', 'Vielen Dank für Ihre Nachricht. Wir melden uns innerhalb von 24 Stunden bei Ihnen.');
     }
@@ -219,6 +230,29 @@ class PublicController extends Controller
         return Inertia::render('public/legal/Cookies');
     }
 
+    /**
+     * Unauthenticated landing point for a customer clicking an offer
+     * notification email. Guarded routes like konto.requests.offers always
+     * bounce anonymous visitors to /login regardless of whether they even
+     * have an account yet — wrong for a guest who submitted their request
+     * without registering. This decides the right next step instead: already
+     * signed in → straight to the offers; an account exists for this
+     * request's email → log in; otherwise → register, with that email
+     * pre-filled.
+     */
+    public function viewOffers(ServiceRequest $serviceRequest): RedirectResponse
+    {
+        if (Auth::check()) {
+            return redirect()->route('konto.requests.offers', $serviceRequest->id);
+        }
+
+        if (User::where('email', $serviceRequest->contact_email)->exists()) {
+            return redirect()->route('login');
+        }
+
+        return redirect()->route('register', ['email' => $serviceRequest->contact_email]);
+    }
+
     public function comingSoon(ServiceCategory $category): Response
     {
         abort_if($category->is_active, 404);
@@ -250,13 +284,13 @@ class PublicController extends Controller
     {
         return ServiceType::where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'description', 'service_category_id'])
+            ->get(['id', 'name', 'slug', 'description', 'image_url', 'service_category_id'])
             ->map(fn ($t) => [
                 'id' => $t->id,
                 'name' => $t->name,
                 'slug' => $t->slug,
                 'description' => $t->description,
-                'image' => config('media.services.'.$t->slug),
+                'image' => $t->image_url ?? config('media.hero.inspection'),
                 'categoryId' => $t->service_category_id,
             ]);
     }

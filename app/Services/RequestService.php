@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Mail\NewRequestNotificationMail;
 use App\Mail\RequestConfirmationMail;
 use App\Mail\RequestMatchedMail;
+use App\Mail\ReviewRequestMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
+use App\Models\Booking;
 use App\Models\Inspector;
 use App\Models\ServiceRequest;
 use App\Models\User;
@@ -17,9 +19,7 @@ use Illuminate\Support\Facades\URL;
 
 class RequestService
 {
-    public function __construct(private MatchingService $matching)
-    {
-    }
+    public function __construct(private MatchingService $matching) {}
 
     /**
      * Called when an inspector is newly approved, reactivated, or adds/changes
@@ -117,6 +117,33 @@ class RequestService
             ['request' => $request->id, 'inspector' => $inspector->id]
         );
         SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new NewRequestNotificationMail($request, $inspector, $signedLink)));
+    }
+
+    /**
+     * Send the post-completion review survey — called from both places a
+     * booking can be marked complete (admin confirmation and the customer's
+     * own in-app star review) so neither path can miss it. A no-op if a
+     * review already exists for this booking, from either channel.
+     */
+    public function sendReviewRequest(Booking $booking): void
+    {
+        if ($booking->review) {
+            return;
+        }
+
+        $booking->loadMissing('user');
+
+        if (! $booking->user) {
+            return;
+        }
+
+        $signedLink = URL::temporarySignedRoute(
+            'reviews.survey.show',
+            now()->addDays(30),
+            ['booking' => $booking->id]
+        );
+
+        SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new ReviewRequestMail($booking, $signedLink)));
     }
 
     /**

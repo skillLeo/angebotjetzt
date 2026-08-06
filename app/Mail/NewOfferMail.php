@@ -7,9 +7,7 @@ use App\Models\ServiceRequest;
 
 class NewOfferMail extends BaseBrandMail
 {
-    public function __construct(public ServiceRequest $serviceRequest, public Inspector $inspector)
-    {
-    }
+    public function __construct(public ServiceRequest $serviceRequest, public Inspector $inspector, public string $label) {}
 
     protected function subjectLine(): string
     {
@@ -25,7 +23,7 @@ class NewOfferMail extends BaseBrandMail
     {
         return [
             "Guten Tag {$this->serviceRequest->contact_name},",
-            "<strong>{$this->inspector->name}</strong> ({$this->inspector->company_name}) hat ein Angebot für Ihre Anfrage <strong>{$this->serviceRequest->request_number}</strong> abgegeben.",
+            "<strong>{$this->label}</strong> hat ein Angebot für Ihre Anfrage <strong>{$this->serviceRequest->request_number}</strong> abgegeben.",
             'Vergleichen Sie alle eingegangenen Angebote in Ihrem Konto und nehmen Sie das passende direkt online an.',
         ];
     }
@@ -33,7 +31,7 @@ class NewOfferMail extends BaseBrandMail
     protected function cta(): ?array
     {
         return [
-            'url' => route('konto.requests.offers', $this->serviceRequest->id),
+            'url' => route('offers.view', $this->serviceRequest->id),
             'label' => 'Angebote vergleichen',
         ];
     }
