@@ -33,7 +33,12 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Invoices on this disk are only ever handed out through an
+            // authenticated download() call — never publicly. Framework
+            // default is `serve: true`, but that claims the same /storage
+            // URL the public disk below needs, and there's nothing on this
+            // disk that should be web-accessible unauthenticated anyway.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -43,6 +48,11 @@ return [
             'root' => storage_path('app/public'),
             'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
+            // Lets Laravel's own built-in storage-serving route handle
+            // /storage/* without a real symlink — required on this host,
+            // since both symlink() and exec() are disabled, so
+            // `storage:link` can never create public/storage here.
+            'serve' => true,
             'throw' => false,
             'report' => false,
         ],
