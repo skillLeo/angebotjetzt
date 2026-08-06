@@ -15,17 +15,16 @@ defineProps<{
             v-for="(type, i) in serviceTypes"
             :key="type.id"
             :delay="i * 0.07"
-            :class="i === 0 ? 'md:col-span-2 lg:col-span-2' : ''"
         >
             <Link
                 :href="`/vehicle-reports/${type.slug}`"
                 class="group relative flex h-full flex-col overflow-hidden rounded-card border border-ink-100 bg-white transition-shadow hover:shadow-lift"
             >
-                <div class="relative overflow-hidden" :class="i === 0 ? 'aspect-[16/8]' : 'aspect-[16/10]'">
+                <div class="relative overflow-hidden aspect-[16/10]">
                     <img
                         :src="type.image"
-                        :width="i === 0 ? 800 : 440"
-                        :height="i === 0 ? 400 : 275"
+                        width="440"
+                        height="275"
                         loading="lazy"
                         :alt="`${type.name} ${'durch einen Kfz-Sachverständigen'}`"
                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

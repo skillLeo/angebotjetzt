@@ -6,7 +6,7 @@ import WizardStep3 from '@/components/wizard/WizardStep3.vue';
 import WizardStep4 from '@/components/wizard/WizardStep4.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { Check } from 'lucide-vue-next';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     serviceTypes: Array<{ id: number; name: string; slug: string; description: string }>;
@@ -51,6 +51,17 @@ const form = useForm({
 // hardcoded vehicle-appraisal form exactly as before — only a service type an
 // admin has actually configured fields for switches to the dynamic renderer.
 const activeFields = computed(() => props.serviceTypeFields[form.service_type_id ?? -1] ?? []);
+
+// The dropdown fields in this wizard sit close to the sticky top bar on a
+// page short enough to barely need scrolling. Closing one of those
+// dropdowns triggers the browser's own "keep the focused control clear of
+// the sticky header" scroll correction — real, and not something CSS
+// scroll-margin fully cancels, but the smooth-scroll animation is what
+// makes that correction look like a jarring page jump/blink. Landing
+// instantly instead of gliding removes that, without touching smooth
+// scrolling anywhere else on the site.
+onMounted(() => document.documentElement.classList.add('scroll-auto-override'));
+onUnmounted(() => document.documentElement.classList.remove('scroll-auto-override'));
 
 onMounted(() => {
     const saved = localStorage.getItem(DRAFT_KEY);

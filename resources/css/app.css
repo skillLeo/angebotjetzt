@@ -172,6 +172,10 @@
            category, since that Select also locks body scroll while open. */
         scrollbar-gutter: stable;
     }
+    /* See RequestWizard.vue's onMounted for why this exists. */
+    html.scroll-auto-override {
+        scroll-behavior: auto;
+    }
     body {
         @apply bg-background text-foreground;
         font-family: var(--font-sans);

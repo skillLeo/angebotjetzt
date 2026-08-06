@@ -69,8 +69,12 @@ function submit() {
                 <textarea v-model="form.qualifications" rows="3" class="w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
             </div>
 
-            <div v-if="serviceTypes.length">
+            <div>
                 <label class="mb-1.5 block text-sm font-semibold text-navy-700">{{ 'Angebotene Leistungen' }}</label>
+                <p v-if="!serviceTypes.length" class="text-sm text-ink-500">
+                    {{ 'Für Ihre Kategorie sind noch keine speziellen Leistungen hinterlegt.' }}
+                </p>
+                <template v-else>
                 <p class="mb-2.5 text-sm text-ink-500">{{ 'Wählen Sie die konkreten Leistungen, die Sie anbieten.' }}</p>
                 <div class="flex flex-wrap gap-2">
                     <button
@@ -84,6 +88,7 @@ function submit() {
                         {{ st.name }}
                     </button>
                 </div>
+                </template>
             </div>
 
             <div>

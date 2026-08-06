@@ -17,6 +17,20 @@ use App\Http\Middleware\EnsureInspectorOnboardingComplete;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// The `public/storage` symlink `php artisan storage:link` normally creates
+// can't be used on this host — both `symlink()` and `exec()` are disabled at
+// the PHP level (a security hardening measure on this shared host), so the
+// artisan command has no way to create it. Serving these files through a
+// route instead means uploaded photos work with zero dependency on a symlink
+// existing at all, on this host or any other.
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/'.$path);
+    abort_unless(str_starts_with(realpath($fullPath) ?: '', storage_path('app/public')), 404);
+    abort_unless(is_file($fullPath), 404);
+
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.local');
+
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
