@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BrandLogo from '@/components/marketing/BrandLogo.vue';
 import { Toaster } from '@/components/ui/sonner';
+import { avatarIcons } from '@/lib/avatars';
 import { onClickOutside } from '@vueuse/core';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { Bell, BellOff, LogOut, Menu, X } from 'lucide-vue-next';
@@ -13,6 +14,7 @@ const props = defineProps<{
     logoutRoute: string;
     userName: string;
     userRole: string;
+    userAvatar?: { icon: string; color: string } | null;
 }>();
 
 const sidebarOpen = ref(false);
@@ -193,6 +195,14 @@ function markAllRead() {
                             <p class="text-xs text-ink-500">{{ userRole }}</p>
                         </div>
                         <span
+                            v-if="userAvatar"
+                            class="flex h-9 w-9 items-center justify-center rounded-pill text-white ring-2 ring-navy-50"
+                            :style="{ backgroundColor: userAvatar.color }"
+                        >
+                            <component :is="avatarIcons[userAvatar.icon] ?? undefined" :size="16" aria-hidden="true" />
+                        </span>
+                        <span
+                            v-else
                             class="flex h-9 w-9 items-center justify-center rounded-pill bg-navy-700 font-display text-sm font-bold text-white ring-2 ring-navy-50"
                         >
                             {{ userName.charAt(0) }}

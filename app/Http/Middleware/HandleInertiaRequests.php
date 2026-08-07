@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                     'name' => $inspector->name,
                     'company' => $inspector->company_name,
                     'email' => $inspector->email,
+                    'avatar' => $inspector->avatar_key ? ['key' => $inspector->avatar_key, ...config('avatars.'.$inspector->avatar_key, [])] : null,
                 ] : null,
                 'admin' => $admin ? [
                     'id' => $admin->id,

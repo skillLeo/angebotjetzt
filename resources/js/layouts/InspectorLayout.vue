@@ -7,7 +7,9 @@ import { computed } from 'vue';
 
 const page = usePage();
 const url = computed(() => page.url);
-const inspector = computed(() => (page.props.auth as { inspector?: { name?: string; company?: string } }).inspector);
+const inspector = computed(
+    () => (page.props.auth as { inspector?: { name?: string; company?: string; avatar?: { icon: string; color: string } | null } }).inspector,
+);
 
 const nav = computed(() => [
     { label: 'Dashboard', href: '/inspector', icon: LayoutDashboard, active: url.value === '/inspector' },
@@ -27,6 +29,7 @@ const nav = computed(() => [
         logout-route="/inspector/logout"
         :user-name="inspector?.name ?? 'Gutachter'"
         :user-role="'Gutachter'"
+        :user-avatar="inspector?.avatar"
     >
         <slot />
     </DashboardShell>
