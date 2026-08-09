@@ -33,6 +33,6 @@ class OfferReminderMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('offers.view', $this->serviceRequest->id), 'label' => 'Angebote vergleichen'];
+        return ['url' => $this->serviceRequest->offersViewUrl(), 'label' => 'Angebote vergleichen'];
     }
 }

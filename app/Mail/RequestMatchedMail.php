@@ -31,6 +31,6 @@ class RequestMatchedMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('offers.view', $this->serviceRequest->id), 'label' => 'Anfrage ansehen'];
+        return ['url' => $this->serviceRequest->offersViewUrl(), 'label' => 'Anfrage ansehen'];
     }
 }

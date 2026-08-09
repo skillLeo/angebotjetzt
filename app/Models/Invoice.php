@@ -12,12 +12,12 @@ class Invoice extends Model
 
     protected $fillable = [
         'invoice_number', 'booking_id', 'inspector_id', 'offer_amount_cents',
-        'commission_percent', 'commission_cents', 'due_date', 'pdf_path',
+        'commission_percent', 'commission_cents', 'due_date', 'pdf_path', 'paid_at',
     ];
 
     protected function casts(): array
     {
-        return ['due_date' => 'date', 'commission_percent' => 'float'];
+        return ['due_date' => 'date', 'commission_percent' => 'float', 'paid_at' => 'datetime'];
     }
 
     public function booking(): BelongsTo

@@ -9,6 +9,7 @@ const props = defineProps<{
     canClaim: boolean;
     canLogin: boolean;
     contactEmail: string | null;
+    contactName: string | null;
 }>();
 
 const claimForm = useForm({
@@ -85,20 +86,31 @@ function claim() {
                     <div>
                         <p class="font-display font-bold text-navy-700">Konto anlegen und Anfrage verfolgen</p>
                         <p class="mt-1 text-sm text-ink-500">
-                            Optional: Vergeben Sie ein Passwort für <span class="font-semibold text-navy-700">{{ contactEmail }}</span>,
-                            um Ihre Anfrage und alle Angebote jederzeit einzusehen. Ganz ohne Konto geht es aber genauso weiter –
-                            wir informieren Sie per E-Mail.
+                            Vergeben Sie ein Passwort, um Ihre Anfrage und alle Angebote jederzeit einzusehen. Ganz ohne Konto
+                            geht es aber genauso weiter – wir informieren Sie per E-Mail.
                         </p>
                     </div>
                 </div>
-                <form class="mt-5 grid gap-4 sm:grid-cols-2" @submit.prevent="claim">
-                    <FormField
-                        v-model="claimForm.password"
-                        label="Passwort"
-                        type="password"
-                        :error="claimForm.errors.password"
-                    />
-                    <FormField v-model="claimForm.password_confirmation" label="Passwort bestätigen" type="password" />
+                <form class="mt-5 grid gap-4" @submit.prevent="claim">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-navy-700">Name</label>
+                            <p class="rounded-card border border-ink-100 bg-sand-50 px-4 py-3 text-[15px] text-ink-700">{{ contactName }}</p>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-navy-700">E-Mail</label>
+                            <p class="rounded-card border border-ink-100 bg-sand-50 px-4 py-3 text-[15px] text-ink-700">{{ contactEmail }}</p>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <FormField
+                            v-model="claimForm.password"
+                            label="Passwort"
+                            type="password"
+                            :error="claimForm.errors.password"
+                        />
+                        <FormField v-model="claimForm.password_confirmation" label="Passwort bestätigen" type="password" />
+                    </div>
                     <div class="sm:col-span-2">
                         <button
                             type="submit"

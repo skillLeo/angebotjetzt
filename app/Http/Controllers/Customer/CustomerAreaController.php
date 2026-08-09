@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
-use App\Models\Payment;
 use App\Models\ServiceRequest;
 use App\Services\RequestService;
 use App\Services\WalletService;
@@ -144,7 +143,7 @@ class CustomerAreaController extends Controller
 
             AppNotification::notify($booking->inspector, 'balance_released',
                 'Guthaben freigegeben',
-                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                "Ihr Anteil für Auftrag {$booking->request->request_number} ist jetzt verfügbar.",
                 '/inspector');
         }
 
@@ -153,24 +152,6 @@ class CustomerAreaController extends Controller
         $requestService->sendReviewRequest($booking);
 
         return back()->with('success', 'Auftrag bestätigt! Wir haben Ihnen eine E-Mail zur Bewertung Ihrer Erfahrung gesendet.');
-    }
-
-    public function payments(): Response
-    {
-        return Inertia::render('customer/Payments', [
-            'payments' => Payment::whereHas('booking', fn ($q) => $q->where('user_id', Auth::id()))
-                ->with('booking.request.serviceType:id,name')
-                ->latest()
-                ->paginate(15)
-                ->through(fn ($p) => [
-                    'id' => $p->id,
-                    'booking' => $p->booking->booking_number,
-                    'service' => $p->booking->request->serviceType->name,
-                    'total' => $p->total_cents,
-                    'status' => $p->status,
-                    'date' => $p->paid_at?->format('d.m.Y H:i'),
-                ]),
-        ]);
     }
 
     private function requestSummary(ServiceRequest $r): array
@@ -220,7 +201,10 @@ class CustomerAreaController extends Controller
     {
         return [
             'id' => $b->id,
-            'number' => $b->booking_number,
+            // The customer's own request number, not the internal
+            // booking_number — that reference must never change or take
+            // over from the AJ-... number the customer already knows.
+            'number' => $b->request->request_number,
             'service' => $b->request->serviceType->name,
             'vehicle' => $b->request->vehicle_make.' '.$b->request->vehicle_model,
             'inspector' => $b->inspector->name,

@@ -132,7 +132,7 @@ class RequestService
             return;
         }
 
-        $booking->loadMissing('user');
+        $booking->loadMissing(['user', 'request']);
 
         if (! $booking->user) {
             return;

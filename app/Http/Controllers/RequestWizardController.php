@@ -158,6 +158,7 @@ class RequestWizardController extends Controller
             'canClaim' => $isUnclaimedGuest && ! $accountAlreadyExists,
             'canLogin' => $accountAlreadyExists,
             'contactEmail' => $isUnclaimedGuest ? $serviceRequest->contact_email : null,
+            'contactName' => $isUnclaimedGuest ? $serviceRequest->contact_name : null,
         ]);
     }
 

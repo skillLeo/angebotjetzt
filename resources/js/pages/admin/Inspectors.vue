@@ -24,7 +24,7 @@ const columns = [
     { key: 'city', label: 'Stadt' },
     { key: 'jobs', label: 'Aufträge', align: 'center' as const },
     { key: 'offers', label: 'Angebote', align: 'center' as const },
-    { key: 'balance', label: 'Guthaben', align: 'right' as const },
+    { key: 'outstandingCommission', label: 'Offene Provision', align: 'right' as const },
     { key: 'active', label: 'Status' },
     { key: 'approveAction', label: '' },
 ];
@@ -66,7 +66,7 @@ function approve(id: number) {
                     </div>
                 </div>
             </template>
-            <template #balance="{ value }">{{ formatEuro(value as number) }}</template>
+            <template #outstandingCommission="{ value }">{{ formatEuro(value as number) }}</template>
             <template #active="{ value, row }">
                 <span v-if="!row.approved" class="inline-flex rounded-pill bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
                     Ausstehend

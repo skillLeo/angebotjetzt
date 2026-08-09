@@ -478,7 +478,7 @@ class InspectorAreaController extends Controller
 
         ActivityLog::record('booking.completed_by_inspector', $inspector, $booking);
 
-        return back()->with('success', 'Auftrag als abgeschlossen markiert. Nach Bestätigung durch die Plattform wird Ihr Guthaben freigegeben.');
+        return back()->with('success', 'Auftrag als abgeschlossen markiert. Der Kunde wird nun um Bestätigung gebeten.');
     }
 
     public function serviceAreas(): Response
@@ -536,13 +536,13 @@ class InspectorAreaController extends Controller
     {
         return Inertia::render('inspector/Invoices', [
             'invoices' => Auth::guard('inspector')->user()->invoices()
-                ->with('booking:id,booking_number')
+                ->with('booking.request:id,request_number')
                 ->latest()
                 ->paginate(15)
                 ->through(fn ($i) => [
                     'id' => $i->id,
                     'number' => $i->invoice_number,
-                    'booking' => $i->booking->booking_number,
+                    'booking' => $i->booking->request->request_number,
                     'offerAmount' => $i->offer_amount_cents,
                     'commissionPercent' => $i->commission_percent,
                     'commissionAmount' => $i->commission_cents,
@@ -647,7 +647,9 @@ class InspectorAreaController extends Controller
     {
         return [
             'id' => $b->id,
-            'number' => $b->booking_number,
+            // The original request number, not the internal booking_number
+            // — must stay the same reference the provider already knows.
+            'number' => $b->request->request_number,
             'service' => $b->request->serviceType->name,
             'vehicle' => $b->request->vehicle_make.' '.$b->request->vehicle_model,
             'ort' => $b->request->ort,

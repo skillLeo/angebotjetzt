@@ -77,7 +77,6 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('konto.')->grou
     Route::get('/bookings', [CustomerAreaController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/{booking}', [CustomerAreaController::class, 'bookingDetail'])->name('bookings.show');
     Route::post('/bookings/{booking}/confirm', [CustomerAreaController::class, 'confirmCompletion'])->name('bookings.confirm');
-    Route::get('/payments', [CustomerAreaController::class, 'payments'])->name('payments');
 
     Route::post('/offers/{offer}/accept', [OfferAcceptanceController::class, 'accept'])->name('offers.accept');
 });
@@ -105,7 +104,8 @@ Route::prefix('inspector')->name('gutachter.')->group(function () {
     Route::post('/logout', [InspectorAuthController::class, 'logout'])->name('logout');
 });
 
-Route::get('/offers/{serviceRequest}/view', [PublicController::class, 'viewOffers'])->name('offers.view');
+Route::get('/offers/{serviceRequest}/view', [PublicController::class, 'viewOffers'])
+    ->middleware('signed')->name('offers.view');
 
 Route::get('/inspector/register', [InspectorRegisterController::class, 'show'])->name('gutachter.register');
 Route::post('/inspector/register', [InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
@@ -182,11 +182,9 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/inspectors/{inspector}/status', [AdminController::class, 'toggleInspector'])->name('inspectors.toggle');
     Route::post('/inspectors/{inspector}/approve', [AdminController::class, 'approveInspector'])->name('inspectors.approve');
     Route::post('/inspectors/{inspector}/verified', [AdminController::class, 'toggleVerified'])->name('inspectors.verified.toggle');
-    Route::get('/wallets', [AdminController::class, 'wallets'])->name('wallets');
-    Route::get('/payouts', [AdminController::class, 'payouts'])->name('payouts');
-    Route::post('/payouts/{payout}/paid', [AdminController::class, 'markPayoutPaid'])->name('payouts.paid');
     Route::get('/invoices', [AdminController::class, 'invoices'])->name('invoices');
     Route::get('/invoices/{invoice}/download', [AdminController::class, 'downloadInvoice'])->name('invoices.download');
+    Route::post('/invoices/{invoice}/paid', [AdminController::class, 'markInvoicePaid'])->name('invoices.paid');
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
     Route::post('/reviews/{review}/published', [AdminController::class, 'togglePublished'])->name('reviews.published.toggle');
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers');

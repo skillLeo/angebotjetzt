@@ -12,7 +12,7 @@ class BookingCompletedMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Auftrag {$this->booking->booking_number} abgeschlossen";
+        return "Auftrag {$this->booking->request->request_number} abgeschlossen";
     }
 
     protected function title(): string
@@ -26,7 +26,7 @@ class BookingCompletedMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->user->name},",
-            "Ihr Auftrag <strong>{$b->booking_number}</strong> bei <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name}) wurde als abgeschlossen bestätigt.",
+            "Ihr Auftrag <strong>{$b->request->request_number}</strong> bei <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name}) wurde als abgeschlossen bestätigt.",
             'Wir würden uns freuen, wenn Sie Ihre Erfahrung mit einer kurzen Bewertung teilen.',
         ];
     }

@@ -29,7 +29,7 @@ class CommissionInvoiceMail extends BaseBrandMail
 
         return [
             "Guten Tag {$i->inspector->name},",
-            "herzlichen Glückwunsch — Sie haben den Auftrag {$i->booking->booking_number} erhalten. Anbei finden Sie die Rechnung über unsere Vermittlungsprovision in Höhe von <strong>{$amount} €</strong>.",
+            "herzlichen Glückwunsch — Sie haben den Auftrag {$i->booking->request->request_number} erhalten. Anbei finden Sie die Rechnung über unsere Vermittlungsprovision in Höhe von <strong>{$amount} €</strong>.",
             "Bitte begleichen Sie den Betrag bis zum <strong>{$i->due_date->format('d.m.Y')}</strong> unter Angabe der Rechnungsnummer {$i->invoice_number}.",
         ];
     }

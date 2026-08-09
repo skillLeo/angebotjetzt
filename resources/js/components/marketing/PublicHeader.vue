@@ -113,7 +113,7 @@ watch(mobileOpen, (open) => {
             v-if="reduced"
             class="mx-auto flex h-[92px] max-w-7xl flex-col items-center justify-center gap-2 px-4 py-2.5 sm:px-6 lg:grid lg:h-[72px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:py-0 lg:px-8"
         >
-            <Link href="/" aria-label="AngebotJetzt Startseite" class="lg:justify-self-start">
+            <Link href="/" aria-label="AngebotJetzt Startseite" class="flex items-center lg:justify-self-start">
                 <BrandLogo />
             </Link>
             <div class="flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold text-navy-700 sm:gap-2.5 sm:text-[15px]">
@@ -124,7 +124,7 @@ watch(mobileOpen, (open) => {
         </div>
 
         <div v-else class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:h-[72px] lg:px-8">
-            <Link href="/" aria-label="AngebotJetzt Startseite">
+            <Link href="/" aria-label="AngebotJetzt Startseite" class="flex items-center">
                 <BrandLogo />
             </Link>
 

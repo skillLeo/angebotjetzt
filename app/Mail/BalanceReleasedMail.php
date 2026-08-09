@@ -10,7 +10,7 @@ class BalanceReleasedMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Guthaben freigegeben für Auftrag {$this->booking->booking_number}";
+        return "Guthaben freigegeben für Auftrag {$this->booking->request->request_number}";
     }
 
     protected function title(): string
@@ -25,7 +25,7 @@ class BalanceReleasedMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->inspector->name},",
-            "Ihr Anteil über <strong>{$amount} €</strong> für Auftrag <strong>{$b->booking_number}</strong> wurde freigegeben und steht Ihnen jetzt zur Auszahlung zur Verfügung.",
+            "Ihr Anteil über <strong>{$amount} €</strong> für Auftrag <strong>{$b->request->request_number}</strong> wurde freigegeben und steht Ihnen jetzt zur Auszahlung zur Verfügung.",
         ];
     }
 

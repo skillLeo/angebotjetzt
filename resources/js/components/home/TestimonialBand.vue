@@ -11,6 +11,7 @@ defineProps<{
         rating: number;
         service: string | null;
         city: string | null;
+        isPlaceholder: boolean;
     }>;
     personImage: string;
 }>();
@@ -65,6 +66,14 @@ function scroll(dir: number) {
                             class="flex w-[320px] shrink-0 snap-start flex-col rounded-panel bg-white p-7 shadow-lift"
                         >
                             <span
+                                v-if="rev.isPlaceholder"
+                                class="w-fit rounded-pill bg-ink-100 px-3 py-1 text-xs font-bold tracking-wide text-ink-500 uppercase"
+                                :title="'Illustratives Beispiel, keine echte Kundenbewertung'"
+                            >
+                                {{ 'Beispielbewertung' }}
+                            </span>
+                            <span
+                                v-else
                                 class="w-fit rounded-pill bg-green-50 px-3 py-1 text-xs font-bold tracking-wide text-green-700 uppercase"
                             >
                                 {{ 'Positiv' }}

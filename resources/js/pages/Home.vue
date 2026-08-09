@@ -20,9 +20,9 @@ defineProps<{
     categories: Array<{ id: number; name: string; slug: string; icon: string; description: string; is_active: boolean }>;
     serviceTypes: Array<{ id: number; name: string; slug: string; description: string; image: string }>;
     stats: { bookings: number; inspectors: number; avgOffers: number; avgResponseHours: number };
-    providers: Array<{ name: string; city: string | null; reviews: number; rating: number | null; jobs: number; since: string | null; photo: string }>;
+    providers: Array<{ name: string; city: string | null; reviews: number; rating: number | null; jobs: number; since: string | null; photo: string | null; isPlaceholder: boolean }>;
     recentRequests: Array<{ title: string; service: string; ort: string; plz: string; price: number | null; photo: string }>;
-    reviews: Array<{ name: string; text: string | null; rating: number; service: string | null; city: string | null }>;
+    reviews: Array<{ name: string; text: string | null; rating: number; service: string | null; city: string | null; isPlaceholder: boolean }>;
     cityCounts: Record<string, number>;
     totalReviews: number;
 }>();

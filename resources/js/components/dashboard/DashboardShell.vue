@@ -39,7 +39,7 @@ function markAllRead() {
         <!-- Sidebar (desktop) -->
         <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-navy-950 lg:flex">
             <div class="flex h-16 items-center border-b border-navy-800 px-6">
-                <Link href="/">
+                <Link href="/" class="flex items-center">
                     <BrandLogo inverted />
                 </Link>
             </div>

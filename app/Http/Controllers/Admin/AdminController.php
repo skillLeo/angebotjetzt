@@ -7,7 +7,6 @@ use App\Mail\BalanceReleasedMail;
 use App\Mail\BookingCompletedMail;
 use App\Mail\InspectorApprovedMail;
 use App\Mail\InspectorInvitationMail;
-use App\Mail\PayoutPaidMail;
 use App\Mail\ProviderInviteToRegisterMail;
 use App\Models\ActivityLog;
 use App\Models\AppNotification;
@@ -16,7 +15,6 @@ use App\Models\Inspector;
 use App\Models\Invoice;
 use App\Models\Offer;
 use App\Models\Payment;
-use App\Models\PayoutRequest;
 use App\Models\RequestMatch;
 use App\Models\Review;
 use App\Models\ServiceCategory;
@@ -64,8 +62,8 @@ class AdminController extends Controller
                 'bookings' => Booking::count(),
                 'revenue' => Payment::where('status', 'paid')->sum('total_cents'),
                 'commission' => Payment::where('status', 'paid')->sum('commission_cents'),
-                'pendingPayouts' => PayoutRequest::where('status', 'pending')->count(),
-                'pendingPayoutAmount' => PayoutRequest::where('status', 'pending')->sum('amount_cents'),
+                'outstandingInvoices' => Invoice::whereNull('paid_at')->count(),
+                'outstandingInvoiceAmount' => Invoice::whereNull('paid_at')->sum('commission_cents'),
                 'unmatchedRequests' => ServiceRequest::where('status', 'unmatched')->count(),
                 'inspectors' => Inspector::where('is_active', true)->count(),
             ],
@@ -319,14 +317,14 @@ class AdminController extends Controller
 
             AppNotification::notify($booking->inspector, 'balance_released',
                 'Guthaben freigegeben',
-                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                "Ihr Anteil für Auftrag {$booking->request->request_number} ist jetzt verfügbar.",
                 '/inspector');
             SafeMailer::send(fn () => Mail::to($booking->inspector->email)->queue(new BalanceReleasedMail($booking)));
         }
 
         AppNotification::notify($booking->user, 'booking_completed',
             'Auftrag abgeschlossen',
-            "Auftrag {$booking->booking_number} wurde als abgeschlossen bestätigt.",
+            "Auftrag {$booking->request->request_number} wurde als abgeschlossen bestätigt.",
             "/account/bookings/{$booking->id}");
         SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new BookingCompletedMail($booking)));
 
@@ -393,13 +391,23 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * "Commissions & Invoices" — replaces the deprecated Wallet/Payout admin
+     * pages entirely under the commission-invoice model: every invoice
+     * AngebotJetzt has billed a provider for its commission, whether it's
+     * been paid yet, and running totals of both.
+     */
     public function invoices(Request $request): Response
     {
-        $query = Invoice::with(['inspector:id,name,company_name', 'booking:id,booking_number']);
+        $query = Invoice::with(['inspector:id,name,company_name', 'booking.request:id,request_number']);
 
         if ($search = $request->query('suche')) {
             $query->where(fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")
                 ->orWhereHas('inspector', fn ($i) => $i->where('name', 'like', "%{$search}%")->orWhere('company_name', 'like', "%{$search}%")));
+        }
+
+        if ($status = $request->query('status')) {
+            $query->where(fn ($q) => $status === 'paid' ? $q->whereNotNull('paid_at') : $q->whereNull('paid_at'));
         }
 
         return Inertia::render('admin/Invoices', [
@@ -408,15 +416,34 @@ class AdminController extends Controller
                     'id' => $i->id,
                     'number' => $i->invoice_number,
                     'bookingId' => $i->booking_id,
-                    'booking' => $i->booking->booking_number,
+                    'request' => $i->booking->request->request_number,
                     'inspector' => $i->inspector->company_name ?: $i->inspector->name,
                     'offerAmount' => $i->offer_amount_cents,
                     'commissionAmount' => $i->commission_cents,
                     'dueDate' => $i->due_date->format('d.m.Y'),
                     'date' => $i->created_at->format('d.m.Y'),
+                    'paid' => $i->paid_at !== null,
+                    'paidAt' => $i->paid_at?->format('d.m.Y'),
                 ]),
-            'filters' => $request->only(['suche']),
+            'totals' => [
+                'outstanding' => Invoice::whereNull('paid_at')->sum('commission_cents'),
+                'paid' => Invoice::whereNotNull('paid_at')->sum('commission_cents'),
+            ],
+            'filters' => $request->only(['suche', 'status']),
         ]);
+    }
+
+    public function markInvoicePaid(Invoice $invoice): RedirectResponse
+    {
+        if ($invoice->paid_at) {
+            return back()->withErrors(['status' => 'Diese Rechnung ist bereits als bezahlt markiert.']);
+        }
+
+        $invoice->update(['paid_at' => now()]);
+
+        ActivityLog::record('invoice.paid', Auth::guard('admin')->user(), $invoice);
+
+        return back()->with('success', 'Rechnung als bezahlt markiert.');
     }
 
     public function downloadInvoice(Invoice $invoice)
@@ -428,7 +455,8 @@ class AdminController extends Controller
 
     public function inspectors(Request $request): Response
     {
-        $query = Inspector::withCount(['bookings', 'offers'])->with('wallet');
+        $query = Inspector::withCount(['bookings', 'offers'])
+            ->withSum(['invoices as outstanding_commission_cents' => fn ($q) => $q->whereNull('paid_at')], 'commission_cents');
 
         if ($search = $request->query('suche')) {
             $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
@@ -460,7 +488,7 @@ class AdminController extends Controller
                     'profileComplete' => $i->profile_completed_at !== null,
                     'jobs' => $i->bookings_count,
                     'offers' => $i->offers_count,
-                    'balance' => $i->wallet?->available_cents ?? 0,
+                    'outstandingCommission' => $i->outstanding_commission_cents ?? 0,
                     'imported' => $i->imported_from,
                 ]),
             'pendingCount' => Inspector::where('is_approved', false)->tap($excludeUnclaimedGuests)->count(),
@@ -470,7 +498,7 @@ class AdminController extends Controller
 
     public function inspectorDetail(Inspector $inspector): Response
     {
-        $inspector->load(['serviceAreas', 'wallet', 'serviceCategory:id,name']);
+        $inspector->load(['serviceAreas', 'serviceCategory:id,name']);
         $inspector->loadCount(['bookings', 'offers', 'reviews']);
 
         return Inertia::render('admin/InspectorDetail', [
@@ -498,10 +526,9 @@ class AdminController extends Controller
                 'offers' => $inspector->offers_count,
                 'reviews' => $inspector->reviews_count,
                 'rating' => $inspector->averageRating(),
-                'wallet' => [
-                    'available' => $inspector->wallet?->available_cents ?? 0,
-                    'pending' => $inspector->wallet?->pending_cents ?? 0,
-                    'lifetime' => $inspector->wallet?->lifetime_cents ?? 0,
+                'commissions' => [
+                    'outstanding' => $inspector->invoices()->whereNull('paid_at')->sum('commission_cents'),
+                    'paid' => $inspector->invoices()->whereNotNull('paid_at')->sum('commission_cents'),
                 ],
                 'areas' => $inspector->serviceAreas->map(fn ($a) => [
                     'id' => $a->id,
@@ -662,98 +689,6 @@ class AdminController extends Controller
         ActivityLog::record('inspectors.imported', Auth::guard('admin')->user(), null, ['count' => $created]);
 
         return redirect()->route('admin.inspectors')->with('success', "{$created} Dienstleister importiert und eingeladen.");
-    }
-
-    public function wallets(Request $request): Response
-    {
-        $query = Wallet::with('inspector:id,name,company_name,city');
-
-        if ($request->query('status') === 'pending') {
-            $query->where('pending_cents', '>', 0);
-        } elseif ($request->query('status') === 'available') {
-            $query->where('available_cents', '>', 0);
-        }
-
-        return Inertia::render('admin/Wallets', [
-            'wallets' => $query
-                ->orderByDesc('available_cents')
-                ->paginate(25)
-                ->withQueryString()
-                ->through(fn ($w) => [
-                    'inspectorId' => $w->inspector_id,
-                    'name' => $w->inspector->name,
-                    'company' => $w->inspector->company_name,
-                    'city' => $w->inspector->city,
-                    'available' => $w->available_cents,
-                    'pending' => $w->pending_cents,
-                    'lifetime' => $w->lifetime_cents,
-                ]),
-            'totals' => [
-                'available' => Wallet::sum('available_cents'),
-                'pending' => Wallet::sum('pending_cents'),
-            ],
-            'filters' => $request->only(['status']),
-        ]);
-    }
-
-    public function payouts(Request $request): Response
-    {
-        $query = PayoutRequest::with(['inspector.wallet', 'paidByAdmin:id,name']);
-
-        if ($status = $request->query('status')) {
-            $query->where('status', $status);
-        } else {
-            $query->orderByRaw("FIELD(status, 'pending') DESC");
-        }
-
-        return Inertia::render('admin/Payouts', [
-            'payouts' => $query
-                ->latest('requested_at')
-                ->paginate(20)
-                ->withQueryString()
-                ->through(fn ($p) => [
-                    'id' => $p->id,
-                    'inspector' => $p->inspector->name,
-                    'inspectorId' => $p->inspector_id,
-                    'company' => $p->inspector->company_name,
-                    'amount' => $p->amount_cents,
-                    'iban' => $p->iban,
-                    'bic' => $p->bic,
-                    'accountHolder' => $p->account_holder,
-                    'balance' => $p->inspector->wallet?->available_cents ?? 0,
-                    'status' => $p->status,
-                    'requested' => $p->requested_at->format('d.m.Y H:i'),
-                    'paid' => $p->paid_at?->format('d.m.Y H:i'),
-                    'paidBy' => $p->paidByAdmin?->name,
-                ]),
-            'filters' => $request->only(['status']),
-        ]);
-    }
-
-    public function markPayoutPaid(PayoutRequest $payout, WalletService $walletService): RedirectResponse
-    {
-        if ($payout->status !== 'pending') {
-            return back()->withErrors(['status' => 'Diese Auszahlung wurde bereits bearbeitet.']);
-        }
-
-        $walletService->debitPayout($payout);
-
-        $payout->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-            'paid_by_admin_id' => Auth::guard('admin')->id(),
-        ]);
-
-        AppNotification::notify($payout->inspector, 'payout_paid',
-            'Auszahlung überwiesen',
-            'Ihre Auszahlung über '.number_format($payout->amount_cents / 100, 2, ',', '.').' € wurde überwiesen.',
-            '/inspector');
-
-        Mail::to($payout->inspector->email)->queue(new PayoutPaidMail($payout));
-
-        ActivityLog::record('payout.paid', Auth::guard('admin')->user(), $payout, ['amount_cents' => $payout->amount_cents]);
-
-        return back()->with('success', 'Auszahlung als bezahlt markiert und Wallet belastet.');
     }
 
     public function reviews(Request $request): Response

@@ -46,7 +46,9 @@ class PublicController extends Controller
                     'jobs' => $i->bookings_count,
                     'since' => $i->member_since?->locale('de')->translatedFormat('F Y'),
                     'photo' => $portraits[$idx % count($portraits)],
-                ]);
+                    'isPlaceholder' => false,
+                ])
+                ->concat($this->placeholderProviders());
 
             $recentRequests = ServiceRequest::query()
                 ->with('serviceType:id,name')
@@ -77,7 +79,9 @@ class PublicController extends Controller
                     'rating' => $rev->rating,
                     'service' => $rev->booking?->request?->serviceType?->name,
                     'city' => $rev->inspector?->city,
-                ]);
+                    'isPlaceholder' => false,
+                ])
+                ->concat($this->placeholderReviews());
 
             $cityCounts = Inspector::query()
                 ->where('is_active', true)
@@ -232,15 +236,19 @@ class PublicController extends Controller
 
     /**
      * Unauthenticated landing point for a customer clicking an offer
-     * notification email. Guarded routes like konto.requests.offers always
-     * bounce anonymous visitors to /login regardless of whether they even
-     * have an account yet — wrong for a guest who submitted their request
-     * without registering. This decides the right next step instead: already
-     * signed in → straight to the offers; an account exists for this
-     * request's email → log in; otherwise → register, with that email
-     * pre-filled.
+     * notification email (a signed link — see the 'signed' middleware on
+     * this route — since this is the only proof a guest with no account has
+     * ever actually reached their own email). Guarded routes like
+     * konto.requests.offers always bounce anonymous visitors to /login
+     * regardless of whether they even have an account yet — wrong for a
+     * guest who submitted their request without registering. This decides
+     * the right next step instead: already signed in → straight to the
+     * offers; an account exists for this request's email → log in;
+     * otherwise → the same guest "claim" screen the wizard's own
+     * confirmation page offers right after submission, with name and email
+     * already known and only a password left to set.
      */
-    public function viewOffers(ServiceRequest $serviceRequest): RedirectResponse
+    public function viewOffers(ServiceRequest $serviceRequest, Request $request): RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('konto.requests.offers', $serviceRequest->id);
@@ -250,7 +258,9 @@ class PublicController extends Controller
             return redirect()->route('login');
         }
 
-        return redirect()->route('register', ['email' => $serviceRequest->contact_email]);
+        $request->session()->put("request_access_{$serviceRequest->id}", true);
+
+        return redirect()->route('wizard.confirmation', $serviceRequest->request_number);
     }
 
     public function comingSoon(ServiceCategory $category): Response
@@ -293,5 +303,62 @@ class PublicController extends Controller
                 'image' => $t->image_url ?? config('media.hero.inspection'),
                 'categoryId' => $t->service_category_id,
             ]);
+    }
+
+    /**
+     * Illustrative example content for launch, appended after any real
+     * reviews — clearly flagged via isPlaceholder so the frontend can label
+     * them honestly (never presented as genuine customer feedback).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function placeholderReviews(): array
+    {
+        return [
+            ['name' => 'Michael Weber', 'text' => 'Sehr professionelle Abwicklung, das Gutachten kam schnell und war verständlich erklärt.', 'rating' => 5, 'service' => 'Unfallschadengutachten', 'city' => 'Berlin', 'isPlaceholder' => true],
+            ['name' => 'Sandra Hoffmann', 'text' => 'Faire Preise und ein sehr freundlicher Gutachter vor Ort.', 'rating' => 5, 'service' => 'Fahrzeugbewertung', 'city' => 'München', 'isPlaceholder' => true],
+            ['name' => 'Thomas Schneider', 'text' => 'Der Gebrauchtwagencheck hat mir vor dem Kauf wichtige Mängel aufgezeigt.', 'rating' => 5, 'service' => 'Gebrauchtwagencheck', 'city' => 'Hamburg', 'isPlaceholder' => true],
+            ['name' => 'Julia Becker', 'text' => 'Alles lief unkompliziert, Termin schon am nächsten Tag bekommen.', 'rating' => 4, 'service' => 'Unfallschadengutachten', 'city' => 'Köln', 'isPlaceholder' => true],
+            ['name' => 'Markus Wolf', 'text' => 'Kompetente Beratung und ein gut nachvollziehbares Gutachten.', 'rating' => 5, 'service' => 'Reparaturkosten- und Totalschadengutachten', 'city' => 'Frankfurt am Main', 'isPlaceholder' => true],
+            ['name' => 'Anna Fischer', 'text' => 'Schnelle Rückmeldung und transparente Kommunikation während des gesamten Prozesses.', 'rating' => 4, 'service' => 'Wertminderungs- und Restwertgutachten', 'city' => 'Stuttgart', 'isPlaceholder' => true],
+            ['name' => 'Daniel Krüger', 'text' => 'Die Versicherung hat das Gutachten ohne Rückfragen akzeptiert.', 'rating' => 5, 'service' => 'Versicherungs- und Rechtsgutachten', 'city' => 'Düsseldorf', 'isPlaceholder' => true],
+            ['name' => 'Laura Zimmermann', 'text' => 'Sehr zufrieden mit dem Service, würde jederzeit wieder buchen.', 'rating' => 5, 'service' => 'Fahrzeugbewertung', 'city' => 'Dortmund', 'isPlaceholder' => true],
+            ['name' => 'Peter Braun', 'text' => 'Gute Erklärung der Ergebnisse und freundlicher Kontakt.', 'rating' => 4, 'service' => 'Gebrauchtwagencheck', 'city' => 'Leipzig', 'isPlaceholder' => true],
+            ['name' => 'Nicole König', 'text' => 'Zuverlässig und pünktlich, kann ich nur empfehlen.', 'rating' => 5, 'service' => 'Spezialgutachten', 'city' => 'Bremen', 'isPlaceholder' => true],
+        ];
+    }
+
+    /**
+     * Illustrative example providers for launch — never real registered
+     * accounts, so the frontend must never link these to a profile page
+     * (see isPlaceholder in ProviderCarousel.vue).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function placeholderProviders(): array
+    {
+        $names = [
+            ['Kfz-Gutachten Nord GmbH', 'Hamburg'],
+            ['Sachverständigenbüro Süd', 'München'],
+            ['AutoCheck Berlin', 'Berlin'],
+            ['Rhein Gutachter Team', 'Köln'],
+            ['Fahrzeugprüfung Frankfurt', 'Frankfurt am Main'],
+            ['KFZ Experten Stuttgart', 'Stuttgart'],
+            ['Gutachterbüro Rheinland', 'Düsseldorf'],
+            ['AutoWert Sachsen', 'Leipzig'],
+            ['Nordwest Kfz-Sachverständige', 'Bremen'],
+            ['Ruhrgebiet Fahrzeugcheck', 'Dortmund'],
+        ];
+
+        return collect($names)->map(fn ($n, $idx) => [
+            'name' => $n[0],
+            'city' => $n[1],
+            'reviews' => 12 + $idx,
+            'rating' => 4.8,
+            'jobs' => 20 + $idx * 3,
+            'since' => 'Januar 2026',
+            'photo' => null,
+            'isPlaceholder' => true,
+        ])->all();
     }
 }

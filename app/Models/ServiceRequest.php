@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\URL;
 
 class ServiceRequest extends Model
 {
@@ -85,6 +86,17 @@ class ServiceRequest extends Model
     public function offerLabel(int $offerId): string
     {
         return $this->offerLabels()[$offerId] ?? 'Anbieter';
+    }
+
+    /**
+     * A signed "view your offers" link, safe to email to a guest who has no
+     * account yet — the signature itself is what proves whoever clicks it
+     * actually reached the inbox this request's emails go to, since there's
+     * no session/login to check for someone in that position.
+     */
+    public function offersViewUrl(): string
+    {
+        return URL::temporarySignedRoute('offers.view', now()->addDays(30), ['serviceRequest' => $this->id]);
     }
 
     public static function nextRequestNumber(): string

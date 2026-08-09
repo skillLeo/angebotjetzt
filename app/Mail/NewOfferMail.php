@@ -31,7 +31,7 @@ class NewOfferMail extends BaseBrandMail
     protected function cta(): ?array
     {
         return [
-            'url' => route('offers.view', $this->serviceRequest->id),
+            'url' => $this->serviceRequest->offersViewUrl(),
             'label' => 'Angebote vergleichen',
         ];
     }

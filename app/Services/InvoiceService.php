@@ -30,7 +30,7 @@ class InvoiceService
             'due_date' => now()->addDays(14),
         ]);
 
-        $invoice->load(['booking.offer', 'inspector']);
+        $invoice->load(['booking.offer', 'booking.request', 'inspector']);
 
         $pdf = Pdf::loadView('invoices.commission', [
             'invoice' => $invoice,

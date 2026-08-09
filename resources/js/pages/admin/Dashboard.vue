@@ -8,7 +8,7 @@ import { AlertTriangle, Banknote, FileText, Package, Percent, Tag } from 'lucide
 import { computed } from 'vue';
 
 const props = defineProps<{
-    stats: { requests: number; requestsNew: number; offers: number; bookings: number; revenue: number; commission: number; pendingPayouts: number; pendingPayoutAmount: number; unmatchedRequests: number; inspectors: number };
+    stats: { requests: number; requestsNew: number; offers: number; bookings: number; revenue: number; commission: number; outstandingInvoices: number; outstandingInvoiceAmount: number; unmatchedRequests: number; inspectors: number };
     funnel: { requests: number; withOffers: number; booked: number; completed: number };
     revenueByWeek: Record<string, { total: number; commission: number }>;
     commissionPercent: number;
@@ -30,10 +30,10 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
 <template>
     <Head><title>Dashboard</title></Head>
 
-    <div v-if="stats.pendingPayouts > 0 || stats.unmatchedRequests > 0" class="mb-6 grid gap-3 sm:grid-cols-2">
-        <Link v-if="stats.pendingPayouts > 0" href="/admin/payouts" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
+    <div v-if="stats.outstandingInvoices > 0 || stats.unmatchedRequests > 0" class="mb-6 grid gap-3 sm:grid-cols-2">
+        <Link v-if="stats.outstandingInvoices > 0" href="/admin/invoices?status=outstanding" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />
-            <p class="text-sm font-semibold text-amber-800">{{ stats.pendingPayouts }} offene Auszahlungen ({{ formatEuro(stats.pendingPayoutAmount) }})</p>
+            <p class="text-sm font-semibold text-amber-800">{{ stats.outstandingInvoices }} offene Provisionsrechnungen ({{ formatEuro(stats.outstandingInvoiceAmount) }})</p>
         </Link>
         <Link v-if="stats.unmatchedRequests > 0" href="/admin/requests?status=unmatched" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />

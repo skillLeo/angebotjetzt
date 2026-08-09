@@ -78,12 +78,12 @@ class OfferAcceptanceController extends Controller
 
         AppNotification::notify($offer->inspector, 'offer_accepted',
             'Ihr Angebot wurde angenommen',
-            "Auftrag {$booking->booking_number} · {$serviceRequest->vehicle_make} {$serviceRequest->vehicle_model} in {$serviceRequest->ort}",
+            "Auftrag {$serviceRequest->request_number} · {$serviceRequest->vehicle_make} {$serviceRequest->vehicle_model} in {$serviceRequest->ort}",
             "/inspector/jobs/{$booking->id}");
 
         AppNotification::notify($booking->user, 'booking_confirmed',
             'Auftrag bestätigt',
-            "Auftrag {$booking->booking_number} bei {$offer->inspector->name}",
+            "Auftrag {$serviceRequest->request_number} bei {$offer->inspector->name}",
             "/account/bookings/{$booking->id}");
 
         SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new BookingConfirmedCustomerMail($booking)));

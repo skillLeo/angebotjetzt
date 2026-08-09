@@ -3,7 +3,7 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import StatCard from '@/components/dashboard/StatCard.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, BadgeCheck, CheckCircle2, Clock, MapPin, Package, Star, Wallet, XCircle } from 'lucide-vue-next';
+import { ArrowLeft, BadgeCheck, CheckCircle2, CircleDollarSign, Clock, MapPin, Package, Star, XCircle } from 'lucide-vue-next';
 
 const props = defineProps<{
     inspector: {
@@ -12,7 +12,7 @@ const props = defineProps<{
         active: boolean; approved: boolean; verified: boolean; emailVerified: boolean; profileComplete: boolean;
         since: string | null; imported: string | null;
         jobs: number; offers: number; reviews: number; rating: number | null;
-        wallet: { available: number; pending: number; lifetime: number };
+        commissions: { outstanding: number; paid: number };
         areas: Array<{ id: number; type: string; city: string | null; from: number | null; to: number | null }>;
     };
 }>();
@@ -87,7 +87,7 @@ function toggleVerified() {
         <StatCard label="Aufträge" :value="inspector.jobs" :icon="Package" />
         <StatCard label="Angebote" :value="inspector.offers" :icon="Package" />
         <StatCard label="Bewertung" :value="inspector.rating ? `${inspector.rating} (${inspector.reviews})` : '–'" :icon="Star" />
-        <StatCard label="Guthaben" :value="formatEuro(inspector.wallet.available)" :icon="Wallet" accent />
+        <StatCard label="Offene Provision" :value="formatEuro(inspector.commissions.outstanding)" :icon="CircleDollarSign" accent />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">

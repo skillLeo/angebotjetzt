@@ -12,7 +12,7 @@ class BookingConfirmedCustomerMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Auftrag {$this->booking->booking_number} bestätigt — Kontaktdaten Ihres Dienstleisters";
+        return "Auftrag {$this->booking->request->request_number} bestätigt — Kontaktdaten Ihres Dienstleisters";
     }
 
     protected function title(): string
@@ -27,7 +27,7 @@ class BookingConfirmedCustomerMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->user->name},",
-            "Sie haben das Angebot über <strong>{$price} €</strong> angenommen. Ihr Auftrag <strong>{$b->booking_number}</strong> ist damit verbindlich bestätigt. Der Dienstleister wird sich in Kürze bei Ihnen melden.",
+            "Sie haben das Angebot über <strong>{$price} €</strong> angenommen. Ihr Auftrag <strong>{$b->request->request_number}</strong> ist damit verbindlich bestätigt. Der Dienstleister wird sich in Kürze bei Ihnen melden.",
             "Ihr Dienstleister: <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name})<br>Telefon: {$b->inspector->phone}<br>E-Mail: {$b->inspector->email}",
             'Bitte stimmen Sie den Termin und die Bezahlung direkt mit dem Dienstleister ab — beides erfolgt außerhalb der Plattform.',
         ];

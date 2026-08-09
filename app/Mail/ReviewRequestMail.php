@@ -10,7 +10,7 @@ class ReviewRequestMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Wie war Ihr Auftrag {$this->booking->booking_number}?";
+        return "Wie war Ihr Auftrag {$this->booking->request->request_number}?";
     }
 
     protected function title(): string
@@ -22,7 +22,7 @@ class ReviewRequestMail extends BaseBrandMail
     {
         return [
             "Guten Tag {$this->booking->user->name},",
-            "Ihr Auftrag <strong>{$this->booking->booking_number}</strong> wurde abgeschlossen. Wir würden uns sehr über eine kurze Rückmeldung freuen — es dauert nur eine Minute.",
+            "Ihr Auftrag <strong>{$this->booking->request->request_number}</strong> wurde abgeschlossen. Wir würden uns sehr über eine kurze Rückmeldung freuen — es dauert nur eine Minute.",
         ];
     }
 
