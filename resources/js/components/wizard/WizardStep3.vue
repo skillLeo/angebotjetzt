@@ -29,7 +29,7 @@ function proceed() {
 <template>
     <div>
         <h2 class="font-display text-2xl font-bold text-navy-700">Ort und Wunschtermin</h2>
-        <p class="mt-1 text-ink-500">Damit wir Gutachter in Ihrer Nähe finden.</p>
+        <p class="mt-1 text-ink-500">Damit wir Dienstleister in Ihrer Nähe finden.</p>
 
         <div class="mt-6 grid gap-5 sm:grid-cols-2">
             <FormField v-model="form.plz" label="Postleitzahl" required :error="errors.plz" inputmode="numeric" :maxlength="5" placeholder="z. B. 50667" />

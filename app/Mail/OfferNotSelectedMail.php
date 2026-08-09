@@ -17,7 +17,7 @@ class OfferNotSelectedMail extends BaseBrandMail
 
     protected function title(): string
     {
-        return 'Der Kunde hat sich für einen anderen Gutachter entschieden';
+        return 'Der Kunde hat sich für einen anderen Dienstleister entschieden';
     }
 
     protected function lines(): array

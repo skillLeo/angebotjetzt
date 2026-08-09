@@ -28,7 +28,7 @@ function markPaid(id: number) {
 }
 
 const columns = [
-    { key: 'inspector', label: 'Gutachter' },
+    { key: 'inspector', label: 'Dienstleister' },
     { key: 'amount', label: 'Betrag', align: 'right' as const },
     { key: 'iban', label: 'IBAN' },
     { key: 'balance', label: 'Guthaben', align: 'right' as const },

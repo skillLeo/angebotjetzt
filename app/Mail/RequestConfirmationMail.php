@@ -23,14 +23,11 @@ class RequestConfirmationMail extends BaseBrandMail
     protected function lines(): array
     {
         $r = $this->serviceRequest;
-        $matched = $r->matched_count;
 
         return [
             "Guten Tag {$r->contact_name},",
             "vielen Dank für Ihre Anfrage <strong>{$r->request_number}</strong> ({$r->serviceType->name} für Ihren {$r->vehicle_make} {$r->vehicle_model}).",
-            $matched > 0
-                ? "Wir haben <strong>{$matched} geprüfte Gutachter</strong> in Ihrer Region ({$r->plz} {$r->ort}) benachrichtigt. Die ersten Angebote treffen in der Regel innerhalb weniger Stunden ein."
-                : 'Unser Team prüft Ihre Anfrage und meldet sich persönlich bei Ihnen, um passende Gutachter für Ihre Region zu finden.',
+            "Passende Dienstleister in Ihrer Region ({$r->plz} {$r->ort}) wurden benachrichtigt. Die ersten Angebote treffen in der Regel innerhalb weniger Stunden ein.",
             'Sie werden per E-Mail benachrichtigt, sobald ein Angebot eingeht.',
         ];
     }

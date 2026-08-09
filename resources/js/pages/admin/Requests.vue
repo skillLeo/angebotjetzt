@@ -42,7 +42,7 @@ const columns = [
                     <option value="offers_received">Angebote erhalten</option>
                     <option value="accepted">Angenommen</option>
                     <option value="completed">Abgeschlossen</option>
-                    <option value="unmatched">Kein Gutachter</option>
+                    <option value="unmatched">Kein Dienstleister</option>
                 </select>
                 <div class="relative">
                     <Search :size="16" class="absolute top-1/2 left-3 -translate-y-1/2 text-ink-300" aria-hidden="true" />

@@ -14,6 +14,7 @@ defineProps<{
         preferredDate: string | null; alternativeDate: string | null; notes: string | null; photos: string[];
     };
     ownOffer: { price: number; message: string | null; estimatedDate: string | null; status: string; editedAt: string | null } | null;
+    competingOffers: number[];
 }>();
 </script>
 
@@ -50,7 +51,18 @@ defineProps<{
             </PageCard>
         </div>
 
-        <div>
+        <div class="space-y-6">
+            <PageCard v-if="competingOffers.length" :title="'Andere Angebote für diese Anfrage'">
+                <div class="space-y-2 p-5 text-sm sm:p-6">
+                    <p class="text-ink-500">{{ `${competingOffers.length} weitere${competingOffers.length === 1 ? 's' : ''} Angebot${competingOffers.length === 1 ? '' : 'e'} bereits eingegangen:` }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="(price, i) in competingOffers" :key="i" class="rounded-pill bg-sand-100 px-3 py-1 font-semibold text-navy-700">
+                            {{ formatEuro(price) }}
+                        </span>
+                    </div>
+                </div>
+            </PageCard>
+
             <PageCard :title="'Ihr Angebot'">
                 <div class="p-6 sm:p-8">
                     <div v-if="ownOffer" class="text-center">

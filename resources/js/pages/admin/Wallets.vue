@@ -20,7 +20,7 @@ function apply() {
 }
 
 const columns = [
-    { key: 'name', label: 'Gutachter' },
+    { key: 'name', label: 'Dienstleister' },
     { key: 'city', label: 'Stadt' },
     { key: 'available', label: 'Verfügbar', align: 'right' as const },
     { key: 'pending', label: 'Ausstehend', align: 'right' as const },
@@ -32,11 +32,11 @@ const columns = [
     <Head><title>Wallets</title></Head>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-2">
-        <StatCard label="Verfügbares Guthaben (gesamt)" :value="formatEuro(totals.available)" :icon="Wallet" accent hint="Bereit zur Auszahlung an Gutachter" />
+        <StatCard label="Verfügbares Guthaben (gesamt)" :value="formatEuro(totals.available)" :icon="Wallet" accent hint="Bereit zur Auszahlung an Dienstleister" />
         <StatCard label="Ausstehendes Guthaben (gesamt)" :value="formatEuro(totals.pending)" :icon="Wallet" hint="Wird erst nach Auftragsbestätigung freigegeben" />
     </div>
 
-    <PageCard title="Alle Wallets" subtitle="Guthabenstand jedes Gutachters: Verfügbar kann ausgezahlt werden, Ausstehend wartet noch auf Ihre Bestätigung des Auftrags">
+    <PageCard title="Alle Wallets" subtitle="Guthabenstand jedes Dienstleisters: Verfügbar kann ausgezahlt werden, Ausstehend wartet noch auf Ihre Bestätigung des Auftrags">
         <template #actions>
             <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">
                 <option value="">Alle</option>

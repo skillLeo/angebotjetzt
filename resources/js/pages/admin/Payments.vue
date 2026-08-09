@@ -23,7 +23,7 @@ function apply() {
 const columns = [
     { key: 'booking', label: 'Auftrag' },
     { key: 'customer', label: 'Kunde' },
-    { key: 'inspector', label: 'Gutachter' },
+    { key: 'inspector', label: 'Dienstleister' },
     { key: 'total', label: 'Gesamt', align: 'right' as const },
     { key: 'commission', label: 'Provision', align: 'right' as const },
     { key: 'status', label: 'Status' },

@@ -14,7 +14,7 @@ const props = defineProps<{
 const categoryHref = computed(() => (props.serviceType.category?.slug === 'kfz-gutachten' ? '/vehicle-reports' : `/coming-soon/${props.serviceType.category?.slug}`));
 
 const benefits = computed(() => [
-    { icon: ShieldCheck, title: 'Geprüfte Sachverständige', text: 'Unabhängige, oft öffentlich bestellte und vereidigte Gutachter mit langjähriger Erfahrung.' },
+    { icon: ShieldCheck, title: 'Geprüfte Sachverständige', text: 'Unabhängige, oft öffentlich bestellte und vereidigte Dienstleister mit langjähriger Erfahrung.' },
     { icon: Euro, title: 'Preise vergleichen', text: 'Mehrere individuelle Angebote – Sie entscheiden, welches am besten passt.' },
     { icon: Clock, title: 'Schnelle Rückmeldung', text: 'Erste Angebote in der Regel innerhalb weniger Stunden nach Ihrer Anfrage.' },
 ]);
@@ -22,7 +22,7 @@ const benefits = computed(() => [
 
 <template>
     <Head>
-        <title>{{ serviceType.name }} – {{ 'Gutachter vergleichen' }}</title>
+        <title>{{ serviceType.name }} – {{ 'Dienstleister vergleichen' }}</title>
         <meta name="description" :content="serviceType.description" />
     </Head>
 

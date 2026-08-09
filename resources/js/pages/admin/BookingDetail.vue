@@ -37,7 +37,7 @@ function confirm() {
                 <div class="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
                     <div><p class="text-sm text-ink-500">Kunde</p><p class="font-semibold text-navy-700">{{ booking.customer.name }}</p><p class="text-sm text-ink-500">{{ booking.customer.email }}</p></div>
                     <div>
-                        <p class="text-sm text-ink-500">Gutachter</p>
+                        <p class="text-sm text-ink-500">Dienstleister</p>
                         <Link :href="`/admin/inspectors/${booking.inspector.id}`" class="font-semibold text-green-600 hover:underline">{{ booking.inspector.name }}</Link>
                         <p class="text-sm text-ink-500">{{ booking.inspector.city }}</p>
                     </div>
@@ -60,7 +60,7 @@ function confirm() {
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between"><span class="text-ink-500">Kunde bezahlt</span><span class="font-bold text-navy-700">{{ formatEuro(booking.moneyTrail.total) }}</span></div>
                     <div class="flex justify-between"><span class="text-ink-500">Plattform-Provision</span><span class="font-bold text-green-600">{{ formatEuro(booking.moneyTrail.commission) }}</span></div>
-                    <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">Gutachter-Anteil</span><span class="font-bold text-navy-700">{{ formatEuro(booking.moneyTrail.inspectorShare) }}</span></div>
+                    <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">Dienstleister-Anteil</span><span class="font-bold text-navy-700">{{ formatEuro(booking.moneyTrail.inspectorShare) }}</span></div>
                     <div class="pt-2 text-xs text-ink-500">Stripe: {{ booking.moneyTrail.stripeRef ?? '–' }}<br>Bezahlt: {{ booking.moneyTrail.paidAt ?? '–' }}</div>
                 </div>
             </PageCard>
@@ -69,8 +69,8 @@ function confirm() {
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between"><span class="text-ink-500">Auftragswert</span><span class="font-bold text-navy-700">{{ formatEuro(booking.total) }}</span></div>
                     <div class="flex justify-between"><span class="text-ink-500">Plattform-Provision</span><span class="font-bold text-green-600">{{ formatEuro(booking.commission) }}</span></div>
-                    <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">Gutachter-Anteil</span><span class="font-bold text-navy-700">{{ formatEuro(booking.inspectorShare) }}</span></div>
-                    <p class="border-t border-ink-100 pt-3 text-xs leading-relaxed text-ink-500">Zahlung erfolgt direkt zwischen Kunde und Gutachter, außerhalb der Plattform.</p>
+                    <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">Dienstleister-Anteil</span><span class="font-bold text-navy-700">{{ formatEuro(booking.inspectorShare) }}</span></div>
+                    <p class="border-t border-ink-100 pt-3 text-xs leading-relaxed text-ink-500">Zahlung erfolgt direkt zwischen Kunde und Dienstleister, außerhalb der Plattform.</p>
                 </div>
             </PageCard>
 

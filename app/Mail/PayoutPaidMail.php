@@ -32,6 +32,6 @@ class PayoutPaidMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('inspector.dashboard'), 'label' => 'Zum Gutachter-Portal'];
+        return ['url' => route('inspector.dashboard'), 'label' => 'Zum Dienstleister-Portal'];
     }
 }

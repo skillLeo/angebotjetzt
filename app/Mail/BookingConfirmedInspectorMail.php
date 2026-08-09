@@ -28,9 +28,9 @@ class BookingConfirmedInspectorMail extends BaseBrandMail
 
         return [
             "Guten Tag {$b->inspector->name},",
-            "der Kunde hat Ihr Angebot über <strong>{$price} €</strong> angenommen. Der Auftrag <strong>{$b->booking_number}</strong> ist Ihnen verbindlich zugeteilt.",
+            "der Kunde hat Ihr Angebot über <strong>{$price} €</strong> angenommen. Der Auftrag <strong>{$b->booking_number}</strong> ist Ihnen verbindlich zugeteilt. Bitte kontaktieren Sie den Kunden, um den Termin zu vereinbaren.",
             "Kunde: <strong>{$request->contact_name}</strong><br>Telefon: {$request->contact_phone}<br>E-Mail: {$request->contact_email}",
-            'Bitte stimmen Sie Termin und Bezahlung direkt mit dem Kunden ab. Die Rechnung über unsere Vermittlungsprovision erhalten Sie separat per E-Mail.',
+            "Der vereinbarte Auftragswert von <strong>{$price} €</strong> ist direkt zwischen Ihnen und dem Kunden zu begleichen, außerhalb der Plattform. Die Rechnung über unsere Vermittlungsprovision erhalten Sie separat per E-Mail.",
         ];
     }
 

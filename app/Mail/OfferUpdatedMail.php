@@ -8,7 +8,7 @@ use App\Models\ServiceRequest;
 
 class OfferUpdatedMail extends BaseBrandMail
 {
-    public function __construct(public ServiceRequest $serviceRequest, public Inspector $inspector, public Offer $offer) {}
+    public function __construct(public ServiceRequest $serviceRequest, public Inspector $inspector, public Offer $offer, public string $label) {}
 
     protected function subjectLine(): string
     {
@@ -26,7 +26,7 @@ class OfferUpdatedMail extends BaseBrandMail
 
         return [
             "Guten Tag {$this->serviceRequest->contact_name},",
-            "<strong>{$this->inspector->name}</strong> ({$this->inspector->company_name}) hat das Angebot für Ihre Anfrage <strong>{$this->serviceRequest->request_number}</strong> aktualisiert. Neuer Preis: <strong>{$price} €</strong>.",
+            "<strong>{$this->label}</strong> hat das Angebot für Ihre Anfrage <strong>{$this->serviceRequest->request_number}</strong> aktualisiert. Neuer Preis: <strong>{$price} €</strong>.",
             'Vergleichen Sie alle eingegangenen Angebote in Ihrem Konto und nehmen Sie das passende direkt online an.',
         ];
     }

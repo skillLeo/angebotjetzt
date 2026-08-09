@@ -48,7 +48,7 @@ defineProps<{
                     </div>
                 </Link>
             </div>
-            <EmptyState v-else :title="'Noch keine Anfragen'" :description="'Stellen Sie Ihre erste Anfrage und erhalten Sie Angebote von geprüften Gutachtern.'">
+            <EmptyState v-else :title="'Noch keine Anfragen'" :description="'Stellen Sie Ihre erste Anfrage und erhalten Sie Angebote von geprüften Dienstleistern.'">
                 <Link href="/request/start" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white">{{ 'Anfrage stellen' }}</Link>
             </EmptyState>
         </PageCard>

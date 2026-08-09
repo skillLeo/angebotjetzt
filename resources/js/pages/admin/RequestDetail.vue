@@ -59,14 +59,14 @@ function invite() {
         </div>
 
         <div>
-            <PageCard title="Benachrichtigte Gutachter">
+            <PageCard title="Benachrichtigte Dienstleister">
                 <div v-if="request.matches.length" class="divide-y divide-ink-100">
                     <div v-for="(m, i) in request.matches" :key="i" class="px-5 py-3 sm:px-6">
                         <p class="text-sm font-semibold text-navy-700">{{ m.inspector }}</p>
                         <p class="text-xs text-ink-500">{{ m.city }} · {{ m.viewed ? 'Gesehen' : 'Benachrichtigt' }}</p>
                     </div>
                 </div>
-                <p v-else class="px-5 py-6 text-center text-sm text-ink-500">Keine passenden Gutachter.</p>
+                <p v-else class="px-5 py-6 text-center text-sm text-ink-500">Keine passenden Dienstleister.</p>
             </PageCard>
 
             <PageCard title="Nicht registrierten Anbieter einladen" subtitle="Sendet einen Link zu dieser Anfrage per E-Mail" class="mt-6">
@@ -89,10 +89,10 @@ function invite() {
                 </form>
                 <div v-if="request.invitedProviders.length" class="border-t border-ink-100 px-5 py-4 sm:px-6">
                     <p class="mb-2 text-xs font-semibold text-ink-500">Bisher eingeladen</p>
-                    <div class="space-y-1.5">
-                        <div v-for="(inv, i) in request.invitedProviders" :key="i" class="flex items-center justify-between text-sm">
-                            <span class="text-navy-700">{{ inv.email }}</span>
-                            <span class="text-xs text-ink-500">{{ inv.date }}</span>
+                    <div class="space-y-3">
+                        <div v-for="(inv, i) in request.invitedProviders" :key="i" class="flex flex-col gap-0.5">
+                            <span class="truncate text-sm font-semibold text-navy-700">{{ inv.email }}</span>
+                            <span class="text-xs whitespace-nowrap text-ink-500">{{ inv.date }}</span>
                         </div>
                     </div>
                 </div>

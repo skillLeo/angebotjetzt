@@ -11,7 +11,7 @@ const sections = computed(() => [
             { q: 'Was kostet mich eine Anfrage?', a: 'Ihre Anfrage und der Angebotsvergleich sind vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des beauftragten Anbieters.' },
             { q: 'Wie schnell erhalte ich Angebote?', a: 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein.' },
             { q: 'Kann ich mehrere Angebote vergleichen?', a: 'Ja. Alle Angebote werden übersichtlich nebeneinander mit Preis, Anbieterprofil und Bewertung dargestellt.' },
-            { q: 'Wie bezahle ich?', a: 'Nach der verbindlichen Annahme eines Angebots vereinbaren Sie die Zahlung direkt mit dem Gutachter. Die Plattform ist an dieser Zahlung nicht beteiligt.' },
+            { q: 'Wie bezahle ich?', a: 'Nach der verbindlichen Annahme eines Angebots vereinbaren Sie die Zahlung direkt mit dem Dienstleister. Die Plattform ist an dieser Zahlung nicht beteiligt.' },
         ],
     },
     {

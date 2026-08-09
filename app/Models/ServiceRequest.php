@@ -89,8 +89,31 @@ class ServiceRequest extends Model
         $last = static::where('request_number', 'like', "AJ-{$year}-%")
             ->orderByDesc('id')
             ->value('request_number');
-        $seq = $last ? ((int) substr($last, -6)) + 1 : 1;
+        $seq = $last ? ((int) substr($last, -6)) + random_int(3, 10) : random_int(3, 10);
 
         return sprintf('AJ-%d-%06d', $year, $seq);
+    }
+
+    /**
+     * Numbers are assigned as a random +3..+10 jump from the last one, so two
+     * concurrent submissions reading the same "last" value could compute the
+     * same number. request_number carries a DB-level unique constraint, so a
+     * genuine collision surfaces as an integrity-constraint violation here —
+     * caught and retried with a freshly-drawn number rather than serializing
+     * every request submission behind a lock.
+     */
+    public static function createWithUniqueNumber(array $attributes): self
+    {
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            try {
+                return static::create([...$attributes, 'request_number' => static::nextRequestNumber()]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($attempt === 5 || $e->getCode() !== '23000') {
+                    throw $e;
+                }
+            }
+        }
+
+        throw new \RuntimeException('Could not generate a unique request number.');
     }
 }

@@ -66,6 +66,27 @@ class InspectorAreaController extends Controller
 
         return Inertia::render('inspector/CompleteProfile', [
             'profile' => $inspector->only(['birthday', 'tax_id', 'street', 'plz', 'city', 'phone']),
+            'pendingRequestId' => session('inspector_pending_request_id'),
+            'progress' => [
+                'basicsDone' => $inspector->profile_completed_at !== null,
+                'serviceAreaDone' => $inspector->serviceAreas()->exists(),
+                'detailsDone' => $inspector->bio !== null && $inspector->years_experience !== null,
+            ],
+            'serviceAreas' => $inspector->serviceAreas()->orderBy('type')->get()
+                ->map(fn ($a) => [
+                    'id' => $a->id,
+                    'type' => $a->type,
+                    'city' => $a->city_name,
+                    'from' => $a->postal_from ? str_pad((string) $a->postal_from, 5, '0', STR_PAD_LEFT) : null,
+                    'to' => $a->postal_to ? str_pad((string) $a->postal_to, 5, '0', STR_PAD_LEFT) : null,
+                ]),
+            'details' => $inspector->only(['bio', 'qualifications', 'years_experience', 'avatar_key']),
+            'serviceTypes' => ServiceType::where('service_category_id', $inspector->service_category_id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'name']),
+            'selectedServiceTypeIds' => $inspector->serviceTypes()->pluck('service_types.id'),
+            'avatarOptions' => collect(config('avatars'))->map(fn ($a, $key) => ['key' => $key, ...$a])->values(),
         ]);
     }
 
@@ -96,15 +117,15 @@ class InspectorAreaController extends Controller
 
         ActivityLog::record('inspector.profile_completed', $inspector);
 
-        // An admin-invited registration remembers which request brought them
-        // here so they land back on it once onboarding is otherwise done,
-        // instead of the generic dashboard.
-        if ($requestId = session()->pull('inspector_pending_request_id')) {
-            return redirect()->route('inspector.requests.show', $requestId)->with('success', 'Profil vervollständigt.');
-        }
-
-        return redirect()->route('inspector.dashboard')
-            ->with('success', 'Profil vervollständigt. Ihr Konto wird nun von unserem Team geprüft.');
+        // Continue the same onboarding page into its service-area and
+        // profile/qualifications steps — an admin-invited registration used
+        // to jump straight to the specific request right after this step
+        // alone, skipping those entirely, which left the provider's profile
+        // empty. session('inspector_pending_request_id') is left untouched
+        // here (still peeked, not pulled) so the onboarding page can offer a
+        // direct link back to that request once these steps are done too.
+        return redirect()->route('inspector.onboarding.profile')
+            ->with('success', 'Angaben gespeichert. Vervollständigen Sie jetzt Ihr Servicegebiet und Ihr Profil, damit Sie Anfragen erhalten können.');
     }
 
     private function sendVerificationEmail(Inspector $inspector): void
@@ -121,6 +142,12 @@ class InspectorAreaController extends Controller
     public function dashboard(): Response
     {
         $inspector = Auth::guard('inspector')->user();
+
+        // A one-time nudge (see CompleteProfile.vue) offers a direct link
+        // back to the request that brought an admin-invited provider here —
+        // once they reach the normal dashboard by any route, that's served
+        // its purpose and shouldn't keep pointing at an increasingly stale request.
+        session()->forget('inspector_pending_request_id');
 
         if (! $inspector->is_approved) {
             return Inertia::render('inspector/Dashboard', [
@@ -144,6 +171,7 @@ class InspectorAreaController extends Controller
 
         return Inertia::render('inspector/Dashboard', [
             'needsServiceArea' => ! $inspector->serviceAreas()->exists(),
+            'needsProfileDetails' => $inspector->bio === null || $inspector->years_experience === null,
             'stats' => [
                 'openRequests' => $matchedRequestIds->diff($offeredRequestIds)->count(),
                 'offers' => $totalOffers,
@@ -194,6 +222,7 @@ class InspectorAreaController extends Controller
         $serviceRequest->load(['serviceType:id,name', 'photos']);
 
         return Inertia::render('inspector/RequestDetail', [
+            'competingOffers' => $this->competingOffersFor($serviceRequest, $inspector),
             'request' => [
                 ...$this->requestRow($serviceRequest),
                 'vehicle' => [
@@ -236,6 +265,7 @@ class InspectorAreaController extends Controller
         return Inertia::render('inspector/SubmitOffer', [
             'request' => $this->requestRow($serviceRequest),
             'commissionPercent' => Setting::commissionPercent(),
+            'competingOffers' => $this->competingOffersFor($serviceRequest, $inspector),
         ]);
     }
 
@@ -267,6 +297,7 @@ class InspectorAreaController extends Controller
 
         $priceCents = (int) round($data['price'] * 100);
         $split = $commission->split($priceCents);
+        $isFirstOffer = $serviceRequest->status === 'open';
 
         $offer = Offer::create([
             'request_id' => $serviceRequest->id,
@@ -294,6 +325,10 @@ class InspectorAreaController extends Controller
         SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)
             ->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
 
+        if ($isFirstOffer) {
+            app(RequestService::class)->scheduleOfferReminders($serviceRequest);
+        }
+
         ActivityLog::record('offer.submitted', $inspector, $serviceRequest);
 
         return redirect()->route('inspector.offers')->with('success', 'Ihr Angebot wurde übermittelt. Der Kunde wurde benachrichtigt.');
@@ -316,6 +351,7 @@ class InspectorAreaController extends Controller
         return Inertia::render('inspector/EditOffer', [
             'request' => $this->requestRow($serviceRequest),
             'commissionPercent' => Setting::commissionPercent(),
+            'competingOffers' => $this->competingOffersFor($serviceRequest, $inspector),
             'offer' => [
                 'price' => number_format($offer->price_cents / 100, 2, '.', ''),
                 'estimated_date' => $offer->estimated_date?->format('Y-m-d'),
@@ -357,7 +393,9 @@ class InspectorAreaController extends Controller
 
         ActivityLog::record('offer.updated', $inspector, $offer);
 
-        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new OfferUpdatedMail($serviceRequest, $inspector, $offer)));
+        $label = $serviceRequest->offerLabel($offer->id);
+
+        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new OfferUpdatedMail($serviceRequest, $inspector, $offer, $label)));
 
         return redirect()->route('inspector.requests.show', $serviceRequest)->with('success', 'Ihr Angebot wurde aktualisiert.');
     }
@@ -474,7 +512,7 @@ class InspectorAreaController extends Controller
 
         $inspector->serviceAreas()->create([
             'type' => $data['type'],
-            'city_name' => $data['type'] === 'city' ? $data['city_name'] : null,
+            'city_name' => $data['type'] === 'city' ? trim($data['city_name']) : null,
             'postal_from' => $data['type'] === 'postal_range' ? (int) $data['postal_from'] : null,
             'postal_to' => $data['type'] === 'postal_range' ? (int) $data['postal_to'] : null,
         ]);
@@ -541,11 +579,17 @@ class InspectorAreaController extends Controller
     {
         $inspector = Auth::guard('inspector')->user();
 
+        // "sometimes" on name/company_name/phone/city: the full profile page
+        // always sends these, but the onboarding wizard's "Profile &
+        // Qualifications" step reuses this same endpoint and only sends
+        // bio/qualifications/experience/services/avatar — without
+        // "sometimes", that partial submission would fail validation
+        // (missing required name) or silently null out company/phone/city.
         $data = $httpRequest->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'company_name' => ['nullable', 'string', 'max:190'],
-            'phone' => ['nullable', 'string', 'max:40'],
-            'city' => ['nullable', 'string', 'max:120'],
+            'name' => ['sometimes', 'required', 'string', 'max:120'],
+            'company_name' => ['sometimes', 'nullable', 'string', 'max:190'],
+            'phone' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'city' => ['sometimes', 'nullable', 'string', 'max:120'],
             'bio' => ['nullable', 'string', 'max:2000'],
             'qualifications' => ['nullable', 'string', 'max:2000'],
             'years_experience' => ['nullable', 'integer', 'min:0', 'max:70'],
@@ -558,6 +602,21 @@ class InspectorAreaController extends Controller
         $inspector->serviceTypes()->sync($data['service_type_ids'] ?? []);
 
         return back()->with('success', 'Profil aktualisiert.');
+    }
+
+    /**
+     * Price/count transparency only for a competing inspector — never names,
+     * companies, or ratings that could identify who submitted a given price.
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function competingOffersFor(ServiceRequest $serviceRequest, Inspector $inspector): \Illuminate\Support\Collection
+    {
+        return Offer::where('request_id', $serviceRequest->id)
+            ->where('inspector_id', '!=', $inspector->id)
+            ->where('status', 'open')
+            ->orderBy('price_cents')
+            ->pluck('price_cents');
     }
 
     private function assertMatched(ServiceRequest $serviceRequest, Inspector $inspector): RequestMatch

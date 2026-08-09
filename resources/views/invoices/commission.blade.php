@@ -41,7 +41,11 @@
         @if($inspector->company_name)
             {{ $inspector->name }}<br>
         @endif
-        {{ $inspector->city }}
+        @if($inspector->street)
+            {{ $inspector->street }}<br>
+        @endif
+        {{ trim("{$inspector->plz} {$inspector->city}") }}<br>
+        Deutschland
     </div>
 
     <table class="items">

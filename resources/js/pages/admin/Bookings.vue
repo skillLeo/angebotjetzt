@@ -20,10 +20,10 @@ function apply() {
 const columns = [
     { key: 'number', label: 'Auftrag' },
     { key: 'customer', label: 'Kunde' },
-    { key: 'inspector', label: 'Gutachter' },
+    { key: 'inspector', label: 'Dienstleister' },
     { key: 'total', label: 'Gesamt', align: 'right' as const },
     { key: 'commission', label: 'Provision', align: 'right' as const },
-    { key: 'inspectorShare', label: 'Gutachter-Anteil', align: 'right' as const },
+    { key: 'inspectorShare', label: 'Dienstleister-Anteil', align: 'right' as const },
     { key: 'status', label: 'Status' },
     { key: 'date', label: 'Datum' },
 ];
@@ -38,7 +38,7 @@ const columns = [
                 <option value="">Alle Status</option>
                 <option value="accepted">Angenommen</option>
                 <option value="in_progress">In Bearbeitung</option>
-                <option value="completed_by_inspector">Abgeschlossen (Gutachter)</option>
+                <option value="completed_by_inspector">Abgeschlossen (Dienstleister)</option>
                 <option value="confirmed">Bestätigt</option>
                 <option value="cancelled">Storniert</option>
                 <option value="refunded">Erstattet</option>

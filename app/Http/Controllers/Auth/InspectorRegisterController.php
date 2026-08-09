@@ -24,16 +24,31 @@ class InspectorRegisterController extends Controller
     public function show(Request $request): Response
     {
         $requestId = $request->query('request');
+        $email = $request->query('email');
         $serviceCategoryId = $requestId
             ? ServiceRequest::find($requestId)?->serviceType?->service_category_id
+            : null;
+
+        // Only for this specific path: someone who already submitted a guest
+        // offer via an admin's invite link, and is now completing a full
+        // account under the same email, shouldn't have to retype what they
+        // already gave us. Any other visit to this form (no request_id, or a
+        // different/unclaimed email) gets no such lookup.
+        $placeholder = $requestId && $email
+            ? Inspector::where('email', $email)
+                ->where('imported_from', 'guest_offer')
+                ->whereNull('profile_completed_at')
+                ->first()
             : null;
 
         return Inertia::render('auth/InspectorRegister', [
             'categories' => ServiceCategory::orderBy('sort_order')->get(['id', 'name']),
             'prefill' => [
-                'email' => $request->query('email'),
+                'email' => $email,
                 'requestId' => $requestId,
                 'serviceCategoryId' => $serviceCategoryId,
+                'name' => $placeholder?->name,
+                'companyName' => $placeholder?->company_name,
             ],
         ]);
     }
@@ -61,7 +76,7 @@ class InspectorRegisterController extends Controller
             ->first();
 
         if (! $placeholder && Inspector::where('email', $data['email'])->exists()) {
-            return back()->withErrors(['email' => 'Für diese E-Mail-Adresse existiert bereits ein Gutachter-Konto.'])->withInput();
+            return back()->withErrors(['email' => 'Für diese E-Mail-Adresse existiert bereits ein Dienstleister-Konto.'])->withInput();
         }
 
         // Registering via an admin's invite link for a specific request already
@@ -76,7 +91,11 @@ class InspectorRegisterController extends Controller
             'email' => $data['email'],
             'password' => $data['password'],
             'is_active' => true,
-            'is_approved' => false,
+            // Claiming a placeholder created via the admin-invited guest-offer
+            // flow keeps whatever approval status it already had (bypassed
+            // approval, per that flow's own vetting rule) instead of
+            // resetting it — a brand-new registration still starts false.
+            'is_approved' => $placeholder?->is_approved ?? false,
             'is_verified' => false,
             'member_since' => $placeholder?->member_since ?? now(),
             'email_verified_at' => $viaInvite ? now() : null,
@@ -106,7 +125,7 @@ class InspectorRegisterController extends Controller
             }
 
             return redirect()->route('inspector.onboarding.profile')
-                ->with('success', 'Ihr Gutachter-Konto wurde erstellt.');
+                ->with('success', 'Ihr Dienstleister-Konto wurde erstellt.');
         }
 
         $signedLink = URL::temporarySignedRoute(

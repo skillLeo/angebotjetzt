@@ -22,13 +22,13 @@ function confirmImport() {
 </script>
 
 <template>
-    <Head><title>Gutachter importieren</title></Head>
+    <Head><title>Dienstleister importieren</title></Head>
 
     <Link href="/admin/inspectors" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-500 hover:text-navy-700">
         <ArrowLeft :size="16" aria-hidden="true" /> Zurück
     </Link>
 
-    <PageCard title="Gutachter per CSV importieren" subtitle="Spalten: name; company; email; phone; city; plz_von; plz_bis (Semikolon oder Komma getrennt)">
+    <PageCard title="Dienstleister per CSV importieren" subtitle="Spalten: name; company; email; phone; city; plz_von; plz_bis (Semikolon oder Komma getrennt)">
         <div class="p-6 sm:p-8">
             <label class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-ink-300 px-6 py-10 text-center transition hover:border-green-500 hover:bg-green-50">
                 <UploadCloud :size="30" class="text-ink-500" aria-hidden="true" />
@@ -49,7 +49,7 @@ function confirmImport() {
                     class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600"
                     @click="confirmImport"
                 >
-                    {{ report.filter((r) => r.ok).length }} Gutachter importieren
+                    {{ report.filter((r) => r.ok).length }} Dienstleister importieren
                 </button>
             </div>
             <div class="space-y-2">

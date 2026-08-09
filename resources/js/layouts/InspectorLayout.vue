@@ -24,11 +24,11 @@ const nav = computed(() => [
 
 <template>
     <DashboardShell
-        :title="'Gutachter-Portal'"
+        :title="'Dienstleister-Portal'"
         :nav="nav"
         logout-route="/inspector/logout"
-        :user-name="inspector?.name ?? 'Gutachter'"
-        :user-role="'Gutachter'"
+        :user-name="inspector?.name ?? 'Dienstleister'"
+        :user-role="'Dienstleister'"
         :user-avatar="inspector?.avatar"
     >
         <slot />

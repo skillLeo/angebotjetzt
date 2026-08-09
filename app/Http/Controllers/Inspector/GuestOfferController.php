@@ -12,6 +12,7 @@ use App\Models\RequestMatch;
 use App\Models\ServiceRequest;
 use App\Models\Setting;
 use App\Services\CommissionService;
+use App\Services\RequestService;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -67,6 +68,12 @@ class GuestOfferController extends Controller
             'agb.accepted' => 'Bitte akzeptieren Sie die AGB.',
         ]);
 
+        // This inspector only exists because an admin personally chose to
+        // invite this exact email address for this exact request (the only
+        // way to reach this controller — see guestEmail() below) — that
+        // manual, per-request invitation is treated as the vetting step, so
+        // unlike a self-registered or CSV-imported inspector, their offer
+        // doesn't wait on a separate admin approval to become acceptable.
         $inspector = Inspector::firstOrCreate(
             ['email' => $email],
             [
@@ -75,7 +82,7 @@ class GuestOfferController extends Controller
                 'password' => Str::random(60),
                 'service_category_id' => $serviceRequest->serviceType->service_category_id,
                 'is_active' => true,
-                'is_approved' => false,
+                'is_approved' => true,
                 'is_verified' => false,
                 'imported_from' => 'guest_offer',
                 'member_since' => now(),
@@ -93,6 +100,7 @@ class GuestOfferController extends Controller
 
         $priceCents = (int) round($data['price'] * 100);
         $split = $commission->split($priceCents);
+        $isFirstOffer = $serviceRequest->status === 'open';
 
         $offer = Offer::create([
             'request_id' => $serviceRequest->id,
@@ -118,6 +126,10 @@ class GuestOfferController extends Controller
         }
 
         SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
+
+        if ($isFirstOffer) {
+            app(RequestService::class)->scheduleOfferReminders($serviceRequest);
+        }
 
         ActivityLog::record('offer.submitted_guest', null, $serviceRequest, ['inspector_id' => $inspector->id]);
 

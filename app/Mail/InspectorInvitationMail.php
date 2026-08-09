@@ -12,7 +12,7 @@ class InspectorInvitationMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return 'Ihr Gutachter-Zugang bei AngebotJetzt';
+        return 'Ihr Dienstleister-Zugang bei AngebotJetzt';
     }
 
     protected function title(): string
@@ -24,7 +24,7 @@ class InspectorInvitationMail extends BaseBrandMail
     {
         return [
             "Guten Tag {$this->inspector->name},",
-            'für Sie wurde ein Gutachter-Konto auf AngebotJetzt angelegt. Ab sofort erhalten Sie automatisch Anfragen aus Ihrem Servicegebiet und können eigene Preisangebote abgeben.',
+            'für Sie wurde ein Dienstleister-Konto auf AngebotJetzt angelegt. Ab sofort erhalten Sie automatisch Anfragen aus Ihrem Servicegebiet und können eigene Preisangebote abgeben.',
             "E-Mail: <strong>{$this->inspector->email}</strong><br>Passwort: <strong>{$this->password}</strong>",
             'Bitte ändern Sie das Passwort nach der ersten Anmeldung.',
         ];
@@ -32,6 +32,6 @@ class InspectorInvitationMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('gutachter.login'), 'label' => 'Zum Gutachter-Portal'];
+        return ['url' => route('gutachter.login'), 'label' => 'Zum Dienstleister-Portal'];
     }
 }

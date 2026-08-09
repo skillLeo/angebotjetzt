@@ -19,7 +19,7 @@ function apply() {
 
 const columns = [
     { key: 'requestNumber', label: 'Anfrage' },
-    { key: 'inspector', label: 'Gutachter' },
+    { key: 'inspector', label: 'Dienstleister' },
     { key: 'ort', label: 'Ort' },
     { key: 'price', label: 'Preis', align: 'right' as const },
     { key: 'commission', label: 'Provision', align: 'right' as const },

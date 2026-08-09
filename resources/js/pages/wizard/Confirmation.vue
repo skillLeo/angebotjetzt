@@ -46,10 +46,10 @@ function claim() {
                     </span>
                     <div>
                         <p class="font-display font-bold text-navy-700">
-                            {{ request.matched > 0 ? `${request.matched} Gutachter benachrichtigt` : 'Gutachter benachrichtigt' }}
+                            {{ 'Dienstleister benachrichtigt' }}
                         </p>
                         <p class="mt-1 text-sm text-ink-500">
-                            Wir haben passende Gutachter in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
+                            Wir haben passende Dienstleister in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
                             informiert. Die ersten Angebote treffen meist innerhalb weniger Stunden ein.
                         </p>
                     </div>

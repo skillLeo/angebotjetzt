@@ -9,6 +9,7 @@ import { ChevronRight, Clock, Inbox, MapPin, Package, Star, Tag } from 'lucide-v
 defineProps<{
     pendingApproval?: boolean;
     needsServiceArea?: boolean;
+    needsProfileDetails?: boolean;
     stats: {
         openRequests: number; offers: number; wonJobs: number; responseRate: number | null;
         rating: number | null; reviewsCount: number;
@@ -28,7 +29,7 @@ defineProps<{
             <div>
                 <h2 class="font-display text-xl font-bold text-navy-700">{{ 'Ihr Konto wird geprüft' }}</h2>
                 <p class="mt-2 max-w-md text-ink-500">
-                    {{ 'Vielen Dank für Ihre Registrierung. Unser Team prüft Ihr Gutachter-Konto derzeit. Sobald es freigeschaltet ist, erhalten Sie passende Anfragen aus Ihrem Servicegebiet und können Angebote abgeben.' }}
+                    {{ 'Vielen Dank für Ihre Registrierung. Unser Team prüft Ihr Dienstleister-Konto derzeit. Sobald es freigeschaltet ist, erhalten Sie passende Anfragen aus Ihrem Servicegebiet und können Angebote abgeben.' }}
                 </p>
             </div>
         </div>
@@ -47,8 +48,26 @@ defineProps<{
                 <p class="text-sm text-ink-500">{{ 'Ohne Servicegebiet erhalten Sie keine passenden Anfragen.' }}</p>
             </div>
         </div>
-        <Link href="/inspector/service-areas" class="shrink-0 rounded-pill bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
+        <Link href="/inspector/complete-profile" class="shrink-0 rounded-pill bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
             {{ 'Jetzt festlegen' }}
+        </Link>
+    </div>
+
+    <div
+        v-if="!pendingApproval && !needsServiceArea && needsProfileDetails"
+        class="mb-6 flex flex-col items-start gap-4 rounded-card border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+        <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-amber-100 text-amber-700">
+                <Star :size="18" aria-hidden="true" />
+            </span>
+            <div>
+                <p class="font-display font-bold text-navy-700">{{ 'Profil noch nicht vollständig' }}</p>
+                <p class="text-sm text-ink-500">{{ 'Ergänzen Sie Ihr Profil, damit Kunden mehr über Sie erfahren.' }}</p>
+            </div>
+        </div>
+        <Link href="/inspector/complete-profile" class="shrink-0 rounded-pill bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600">
+            {{ 'Jetzt ergänzen' }}
         </Link>
     </div>
 

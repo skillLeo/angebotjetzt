@@ -102,8 +102,8 @@ watch(mobileOpen, (open) => {
 
 <template>
     <header
-        class="sticky top-0 z-50 bg-white transition-shadow duration-300"
-        :class="scrolled ? 'border-b border-ink-100 shadow-card' : ''"
+        class="z-50 bg-white transition-shadow duration-300"
+        :class="[reduced ? '' : 'sticky top-0', scrolled ? 'border-b border-ink-100 shadow-card' : '']"
     >
         <!-- Reduced (booking-flow) header: logo + trust message. A symmetric
              empty spacer column mirrors the logo's column so the message is

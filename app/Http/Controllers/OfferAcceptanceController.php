@@ -93,7 +93,7 @@ class OfferAcceptanceController extends Controller
         foreach ($losingOffers as $losingOffer) {
             AppNotification::notify($losingOffer->inspector, 'offer_not_selected',
                 'Anfrage vergeben',
-                "Auftrag {$serviceRequest->request_number} · {$serviceRequest->vehicle_make} {$serviceRequest->vehicle_model} wurde an einen anderen Gutachter vergeben.",
+                "Auftrag {$serviceRequest->request_number} · {$serviceRequest->vehicle_make} {$serviceRequest->vehicle_model} wurde an einen anderen Dienstleister vergeben.",
                 '/inspector/offers');
 
             SafeMailer::send(fn () => Mail::to($losingOffer->inspector->email)->queue(new OfferNotSelectedMail($losingOffer)));
@@ -105,6 +105,6 @@ class OfferAcceptanceController extends Controller
         ]);
 
         return redirect()->route('konto.bookings.show', $booking->id)
-            ->with('success', 'Auftrag bestätigt! Die Kontaktdaten Ihres Gutachters finden Sie unten.');
+            ->with('success', 'Auftrag bestätigt! Der Dienstleister wird sich in Kürze bei Ihnen melden. Die Kontaktdaten finden Sie unten.');
     }
 }

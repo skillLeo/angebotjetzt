@@ -9,6 +9,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     request: { id: number; number: string; service: string; vehicle: string; ort: string };
     commissionPercent: number;
+    competingOffers: number[];
     offer: { price: string; estimated_date: string | null; message: string | null };
 }>();
 
@@ -74,7 +75,18 @@ function submit() {
             </PageCard>
         </div>
 
-        <div>
+        <div class="space-y-6">
+            <PageCard v-if="competingOffers.length" :title="'Andere Angebote für diese Anfrage'">
+                <div class="space-y-2 p-5 text-sm sm:p-6">
+                    <p class="text-ink-500">{{ `${competingOffers.length} weitere${competingOffers.length === 1 ? 's' : ''} Angebot${competingOffers.length === 1 ? '' : 'e'} bereits eingegangen:` }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="(price, i) in competingOffers" :key="i" class="rounded-pill bg-sand-100 px-3 py-1 font-semibold text-navy-700">
+                            {{ formatEuro(price) }}
+                        </span>
+                    </div>
+                </div>
+            </PageCard>
+
             <PageCard :title="'Verdienst-Vorschau'">
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between">

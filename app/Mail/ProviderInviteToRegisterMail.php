@@ -31,7 +31,7 @@ class ProviderInviteToRegisterMail extends BaseBrandMail
 
         return [
             'Guten Tag,',
-            'AngebotJetzt ist eine Plattform, die Kunden mit passenden Kfz-Gutachtern und weiteren Dienstleistern in ihrer Region verbindet.',
+            'AngebotJetzt ist eine Plattform, die Kunden mit passenden Kfz-Dienstleistern und weiteren Dienstleistern in ihrer Region verbindet.',
             'Ein Kunde sucht aktuell einen passenden Anbieter für folgende Anfrage:',
             $details,
             'Sie sind noch nicht bei AngebotJetzt registriert. Über den Link unten können Sie die Anfrage ansehen und sich anschließend registrieren, um ein Angebot abzugeben.',

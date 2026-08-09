@@ -20,7 +20,7 @@ function apply() {
 const columns = [
     { key: 'number', label: 'Rechnungsnummer' },
     { key: 'booking', label: 'Auftrag' },
-    { key: 'inspector', label: 'Gutachter' },
+    { key: 'inspector', label: 'Dienstleister' },
     { key: 'offerAmount', label: 'Auftragswert', align: 'right' as const },
     { key: 'commissionAmount', label: 'Provision', align: 'right' as const },
     { key: 'dueDate', label: 'Fällig am' },
@@ -32,14 +32,14 @@ const columns = [
 <template>
     <Head><title>Rechnungen</title></Head>
 
-    <PageCard title="Provisionsrechnungen" subtitle="Alle an Gutachter gestellten Provisionsrechnungen (10% je angenommenem Angebot)">
+    <PageCard title="Provisionsrechnungen" subtitle="Alle an Dienstleister gestellten Provisionsrechnungen (10% je angenommenem Angebot)">
         <template #actions>
             <div class="relative">
                 <Search :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" aria-hidden="true" />
                 <input
                     v-model="search"
                     type="text"
-                    placeholder="Rechnung oder Gutachter suchen…"
+                    placeholder="Rechnung oder Dienstleister suchen…"
                     class="rounded-pill border border-ink-300 py-2 pl-9 pr-3 text-sm"
                     @keyup.enter="apply"
                 />

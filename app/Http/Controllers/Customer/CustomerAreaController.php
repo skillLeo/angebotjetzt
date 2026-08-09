@@ -218,6 +218,7 @@ class CustomerAreaController extends Controller
                 'company' => $revealed ? $inspector->company_name : null,
                 'city' => $inspector->city,
                 'bio' => $inspector->bio,
+                'qualifications' => $inspector->qualifications,
                 'verified' => $inspector->is_verified,
                 'experience' => $inspector->years_experience,
                 'rating' => $detailed && $inspector->reviews_avg_rating ? round((float) $inspector->reviews_avg_rating, 1) : null,

@@ -6,13 +6,16 @@ import { ChevronDown, UserPlus } from 'lucide-vue-next';
 
 const props = defineProps<{
     categories: Array<{ id: number; name: string }>;
-    prefill: { email: string | null; requestId: string | null; serviceCategoryId: number | null };
+    prefill: {
+        email: string | null; requestId: string | null; serviceCategoryId: number | null;
+        name: string | null; companyName: string | null;
+    };
 }>();
 
 const form = useForm({
     service_category_id: props.prefill.serviceCategoryId ? String(props.prefill.serviceCategoryId) : '',
-    company_name: '',
-    name: '',
+    company_name: props.prefill.companyName ?? '',
+    name: props.prefill.name ?? '',
     email: props.prefill.email ?? '',
     password: '',
     password_confirmation: '',

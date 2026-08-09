@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendOfferReminderJob;
 use App\Mail\NewRequestNotificationMail;
 use App\Mail\RequestConfirmationMail;
 use App\Mail\RequestMatchedMail;
@@ -147,15 +148,29 @@ class RequestService
     }
 
     /**
+     * Schedule the two automatic no-decision-yet reminders — 24h and 48h
+     * after the first offer a request receives. Call this only at the
+     * moment a request's very first offer arrives (its status is still
+     * "open" right before that offer flips it to "offers_received") so the
+     * schedule is set once per request, not once per offer. Each job
+     * independently re-checks the request's status right before sending, so
+     * accepting an offer before a reminder fires silently cancels it.
+     */
+    public function scheduleOfferReminders(ServiceRequest $request): void
+    {
+        SendOfferReminderJob::dispatch($request->id, false)->delay(now()->addHours(24));
+        SendOfferReminderJob::dispatch($request->id, true)->delay(now()->addHours(48));
+    }
+
+    /**
      * Persist a submitted request, match inspectors, and queue all notifications.
      */
     public function submit(?User $user, array $data, array $photoPaths = []): ServiceRequest
     {
         $request = DB::transaction(function () use ($user, $data, $photoPaths) {
-            $request = ServiceRequest::create([
+            $request = ServiceRequest::createWithUniqueNumber([
                 ...$data,
                 'user_id' => $user?->id,
-                'request_number' => ServiceRequest::nextRequestNumber(),
                 'status' => 'open',
                 'expires_at' => now()->addDays(14),
             ]);

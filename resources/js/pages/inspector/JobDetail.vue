@@ -35,6 +35,9 @@ function complete() {
         <div class="space-y-6 lg:col-span-2">
             <PageCard :title="`${job.vehicle.make} ${job.vehicle.model}`" :subtitle="`${job.service} · ${job.number}`">
                 <template #actions><StatusBadge :status="job.status" /></template>
+                <p v-if="job.status === 'accepted'" class="mx-5 mt-5 rounded-card bg-green-50 p-3 text-sm font-semibold text-green-700 sm:mx-6 sm:mt-6">
+                    {{ 'Bitte kontaktieren Sie den Kunden, um den Termin zu vereinbaren.' }}
+                </p>
                 <div class="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
                     <div><p class="text-sm text-ink-500">{{ 'Erstzulassung' }}</p><p class="font-semibold text-navy-700">{{ job.vehicle.firstRegistration ?? '–' }}</p></div>
                     <div><p class="text-sm text-ink-500">{{ 'Kilometerstand' }}</p><p class="font-semibold text-navy-700">{{ job.vehicle.mileage ? job.vehicle.mileage.toLocaleString('de-DE') + ' km' : '–' }}</p></div>
@@ -71,6 +74,9 @@ function complete() {
                     <div class="flex justify-between"><span class="text-ink-500">{{ 'Auftragswert' }}</span><span class="font-bold text-navy-700">{{ formatEuro(job.price) }}</span></div>
                     <div class="flex justify-between"><span class="text-ink-500">{{ 'Provision (Rechnung folgt separat)' }}</span><span class="font-bold text-navy-700">{{ formatEuro(job.price - job.net) }}</span></div>
                     <div class="flex justify-between border-t border-ink-100 pt-3"><span class="text-ink-500">{{ 'Ihr Anteil' }}</span><span class="font-display text-lg font-extrabold text-green-600">{{ formatEuro(job.net) }}</span></div>
+                    <p class="border-t border-ink-100 pt-3 text-xs leading-relaxed text-ink-500">
+                        {{ `Der Auftragswert von ${formatEuro(job.price)} ist direkt zwischen Ihnen und dem Kunden zu begleichen, außerhalb der Plattform.` }}
+                    </p>
                     <button
                         v-if="['accepted', 'paid', 'in_progress'].includes(job.status)"
                         type="button"

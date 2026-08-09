@@ -203,7 +203,7 @@ class AdminController extends Controller
         ActivityLog::record('request.provider_invited', Auth::guard('admin')->user(), $serviceRequest, ['email' => $data['email']]);
 
         return back()->with('success', $inspector
-            ? 'Gutachter wurde zur Anfrage eingeladen.'
+            ? 'Dienstleister wurde zur Anfrage eingeladen.'
             : 'Einladung wurde per E-Mail versendet.');
     }
 
@@ -308,7 +308,7 @@ class AdminController extends Controller
     public function confirmBooking(Booking $booking, WalletService $walletService, RequestService $requestService): RedirectResponse
     {
         if ($booking->status !== 'completed_by_inspector') {
-            return back()->withErrors(['status' => 'Nur vom Gutachter abgeschlossene Aufträge können bestätigt werden.']);
+            return back()->withErrors(['status' => 'Nur vom Dienstleister abgeschlossene Aufträge können bestätigt werden.']);
         }
 
         $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
@@ -521,7 +521,7 @@ class AdminController extends Controller
         ActivityLog::record($inspector->is_active ? 'inspector.activated' : 'inspector.deactivated',
             Auth::guard('admin')->user(), $inspector);
 
-        $message = $inspector->is_active ? 'Gutachter aktiviert.' : 'Gutachter deaktiviert.';
+        $message = $inspector->is_active ? 'Dienstleister aktiviert.' : 'Dienstleister deaktiviert.';
 
         if ($inspector->is_active) {
             $rematched = $requestService->rematchUnmatchedRequestsFor($inspector);
@@ -536,11 +536,11 @@ class AdminController extends Controller
     public function approveInspector(Inspector $inspector, RequestService $requestService): RedirectResponse
     {
         if ($inspector->is_approved) {
-            return back()->withErrors(['status' => 'Dieser Gutachter ist bereits freigeschaltet.']);
+            return back()->withErrors(['status' => 'Dieser Dienstleister ist bereits freigeschaltet.']);
         }
 
         if (! $inspector->profile_completed_at) {
-            return back()->withErrors(['status' => 'Dieser Gutachter hat sein Profil noch nicht vervollständigt und kann noch nicht freigeschaltet werden.']);
+            return back()->withErrors(['status' => 'Dieser Dienstleister hat sein Profil noch nicht vervollständigt und kann noch nicht freigeschaltet werden.']);
         }
 
         $inspector->update(['is_approved' => true]);
@@ -556,7 +556,7 @@ class AdminController extends Controller
 
         $rematched = $requestService->rematchUnmatchedRequestsFor($inspector, onlyRecent: true);
 
-        $message = 'Gutachter freigeschaltet.';
+        $message = 'Dienstleister freigeschaltet.';
         if ($rematched > 0) {
             $message .= " {$rematched} zuvor unbeantwortete Anfrage(n) wurden ihm zugeordnet.";
         }
@@ -571,7 +571,7 @@ class AdminController extends Controller
         ActivityLog::record($inspector->is_verified ? 'inspector.verified' : 'inspector.unverified',
             Auth::guard('admin')->user(), $inspector);
 
-        return back()->with('success', $inspector->is_verified ? 'Gutachter als geprüft markiert.' : 'Prüf-Status entfernt.');
+        return back()->with('success', $inspector->is_verified ? 'Dienstleister als geprüft markiert.' : 'Prüf-Status entfernt.');
     }
 
     public function importForm(): Response
@@ -654,7 +654,7 @@ class AdminController extends Controller
         session()->forget('inspector_import_rows');
         ActivityLog::record('inspectors.imported', Auth::guard('admin')->user(), null, ['count' => $created]);
 
-        return redirect()->route('admin.inspectors')->with('success', "{$created} Gutachter importiert und eingeladen.");
+        return redirect()->route('admin.inspectors')->with('success', "{$created} Dienstleister importiert und eingeladen.");
     }
 
     public function wallets(Request $request): Response

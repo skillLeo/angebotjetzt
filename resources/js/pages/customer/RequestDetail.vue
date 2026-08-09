@@ -51,13 +51,14 @@ defineProps<{
                             <span class="font-display text-lg font-extrabold text-navy-700">{{ formatEuro(o.price) }}</span>
                         </div>
                         <p class="text-sm text-ink-500">{{ o.inspector.city }}</p>
+                        <p v-if="o.message" class="mt-2 rounded-card bg-sand-50 p-2.5 text-sm leading-relaxed text-ink-700">„{{ o.message }}"</p>
                     </div>
                     <Link :href="`/account/requests/${request.id}/offers`" class="mt-2 block rounded-pill bg-green-500 py-3 text-center text-sm font-bold text-white transition hover:bg-green-600">
                         {{ 'Angebote vergleichen' }}
                     </Link>
                 </div>
                 <p v-else class="px-5 py-8 text-center text-sm text-ink-500">
-                    {{ `Noch keine Angebote. Wir haben ${request.matched} Gutachter benachrichtigt.` }}
+                    {{ 'Noch keine Angebote. Wir haben passende Dienstleister benachrichtigt.' }}
                 </p>
             </PageCard>
         </div>

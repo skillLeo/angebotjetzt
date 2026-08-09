@@ -30,7 +30,7 @@ const serviceName = computed(() => props.serviceTypes.find((t) => t.id === props
 <template>
     <div>
         <h2 class="font-display text-2xl font-bold text-navy-700">Ihre Kontaktdaten</h2>
-        <p class="mt-1 text-ink-500">Damit die Gutachter Ihnen Angebote senden können.</p>
+        <p class="mt-1 text-ink-500">Damit die Dienstleister Ihnen Angebote senden können.</p>
 
         <div class="mt-6 grid gap-5">
             <FormField v-model="form.contact_name" label="Name" required :error="form.errors.contact_name" />

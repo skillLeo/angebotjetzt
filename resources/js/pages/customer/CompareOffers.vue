@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { avatarIcons } from '@/lib/avatars';
 import { formatEuro } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, BadgeCheck, CalendarClock, Check, UserRound } from 'lucide-vue-next';
+import { ArrowLeft, BadgeCheck, CalendarClock, Check, Info, UserRound } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 
@@ -14,7 +14,7 @@ const props = defineProps<{
         id: number; price: number; message: string | null; estimatedDate: string | null; status: string; editedAt: string | null;
         inspector: {
             label: string; name: string | null; company: string | null; city: string | null; bio: string | null;
-            verified: boolean; experience: number | null; rating: number | null; reviews: number | null;
+            qualifications: string | null; verified: boolean; experience: number | null; rating: number | null; reviews: number | null;
             pendingVerification: boolean; avatar: { key: string; icon: string; color: string } | null;
         };
     }>;
@@ -29,6 +29,14 @@ const pendingOffer = ref<(typeof props.offers)[number] | null>(null);
 function openConfirm(offer: (typeof props.offers)[number]) {
     pendingOffer.value = offer;
     confirmDialogOpen.value = true;
+}
+
+const detailsDialogOpen = ref(false);
+const detailsOffer = ref<(typeof props.offers)[number] | null>(null);
+
+function openDetails(offer: (typeof props.offers)[number]) {
+    detailsOffer.value = offer;
+    detailsDialogOpen.value = true;
 }
 
 function confirmAccept() {
@@ -90,16 +98,24 @@ function confirmAccept() {
                 </span>
             </div>
 
-            <p v-if="o.inspector.bio" class="mt-3 text-sm leading-relaxed text-ink-500">{{ o.inspector.bio }}</p>
+            <button
+                v-if="o.inspector.bio || o.inspector.qualifications || o.inspector.experience"
+                type="button"
+                class="mt-3 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-navy-700 underline decoration-ink-300 underline-offset-2 hover:text-green-600"
+                @click="openDetails(o)"
+            >
+                <Info :size="14" aria-hidden="true" /> {{ 'Anbieterdetails ansehen' }}
+            </button>
 
             <p class="mt-5 font-display text-3xl font-extrabold text-navy-700">{{ formatEuro(o.price) }}</p>
 
             <p v-if="o.estimatedDate" class="mt-2 flex items-center gap-1.5 text-sm text-ink-500">
                 <CalendarClock :size="15" aria-hidden="true" /> {{ `Fertig bis ${o.estimatedDate}` }}
             </p>
-            <p v-if="o.message" class="mt-3 flex-1 rounded-card bg-sand-50 p-3 text-sm leading-relaxed text-ink-700">
+            <div v-if="o.message" class="mt-3 flex-1 rounded-card bg-sand-50 p-3 text-sm leading-relaxed text-ink-700">
+                <p class="mb-1 text-xs font-bold tracking-wide text-ink-500 uppercase">{{ 'Nachricht des Anbieters' }}</p>
                 „{{ o.message }}"
-            </p>
+            </div>
             <div v-else class="flex-1" />
             <p v-if="o.editedAt" class="mt-2 text-xs text-ink-500">{{ 'Bearbeitet am' }} {{ o.editedAt }}</p>
 
@@ -129,10 +145,10 @@ function confirmAccept() {
                 <DialogTitle>{{ 'Angebot verbindlich annehmen?' }}</DialogTitle>
                 <DialogDescription class="space-y-3 pt-2 text-left">
                     <span class="block">
-                        {{ `Mit der Annahme des Angebots von ${pendingOffer.inspector.name ?? pendingOffer.inspector.label} über ${formatEuro(pendingOffer.price)} schließen Sie eine verbindliche Vereinbarung direkt mit diesem Gutachter ab.` }}
+                        {{ `Mit der Annahme des Angebots von ${pendingOffer.inspector.name ?? pendingOffer.inspector.label} über ${formatEuro(pendingOffer.price)} schließen Sie eine verbindliche Vereinbarung direkt mit diesem Dienstleister ab.` }}
                     </span>
                     <span class="block">
-                        {{ 'Die Zahlung für den Auftrag erfolgt direkt zwischen Ihnen und dem Gutachter, außerhalb der Plattform. AngebotJetzt ist an dieser Zahlung nicht beteiligt.' }}
+                        {{ 'Die Zahlung für den Auftrag erfolgt direkt zwischen Ihnen und dem Dienstleister, außerhalb der Plattform. AngebotJetzt ist an dieser Zahlung nicht beteiligt.' }}
                     </span>
                     <span class="block">
                         {{ 'Nach der Bestätigung werden die Kontaktdaten beider Seiten freigeschaltet und alle anderen Angebote für diese Anfrage automatisch abgelehnt.' }}
@@ -153,6 +169,37 @@ function confirmAccept() {
                     @click="confirmAccept"
                 >
                     {{ 'Verbindlich annehmen' }}
+                </button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+
+    <Dialog v-model:open="detailsDialogOpen">
+        <DialogContent v-if="detailsOffer">
+            <DialogHeader>
+                <DialogTitle>{{ detailsOffer.inspector.name ?? detailsOffer.inspector.label }}</DialogTitle>
+                <DialogDescription class="space-y-4 pt-2 text-left">
+                    <div v-if="detailsOffer.inspector.bio">
+                        <p class="mb-1 text-xs font-bold tracking-wide text-ink-500 uppercase">{{ 'Über mich' }}</p>
+                        <p class="text-ink-700">{{ detailsOffer.inspector.bio }}</p>
+                    </div>
+                    <div v-if="detailsOffer.inspector.qualifications">
+                        <p class="mb-1 text-xs font-bold tracking-wide text-ink-500 uppercase">{{ 'Qualifikationen & Zertifikate' }}</p>
+                        <p class="text-ink-700">{{ detailsOffer.inspector.qualifications }}</p>
+                    </div>
+                    <div v-if="detailsOffer.inspector.experience">
+                        <p class="mb-1 text-xs font-bold tracking-wide text-ink-500 uppercase">{{ 'Jahre Erfahrung' }}</p>
+                        <p class="text-ink-700">{{ detailsOffer.inspector.experience }}</p>
+                    </div>
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                <button
+                    type="button"
+                    class="rounded-pill border border-ink-300 px-6 py-2.5 text-sm font-bold text-navy-700 transition hover:border-navy-700"
+                    @click="detailsDialogOpen = false"
+                >
+                    {{ 'Schließen' }}
                 </button>
             </DialogFooter>
         </DialogContent>

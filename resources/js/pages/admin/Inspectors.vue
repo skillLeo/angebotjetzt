@@ -35,9 +35,9 @@ function approve(id: number) {
 </script>
 
 <template>
-    <Head><title>Gutachter</title></Head>
+    <Head><title>Dienstleister</title></Head>
 
-    <PageCard title="Gutachterverwaltung" :subtitle="pendingCount > 0 ? `${pendingCount} Gutachter warten auf Freischaltung` : undefined">
+    <PageCard title="Dienstleisterverwaltung" :subtitle="pendingCount > 0 ? `${pendingCount} Dienstleister warten auf Freischaltung` : undefined">
         <template #actions>
             <div class="flex items-center gap-2">
                 <select v-model="status" class="rounded-pill border border-ink-300 px-3 py-2 text-sm" @change="apply">

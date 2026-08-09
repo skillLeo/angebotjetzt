@@ -8,7 +8,7 @@ const customerPoints = computed(() => [
     'Anfrage stellen – kostenlos',
     'Mehrere Angebote vergleichen',
     'Keine versteckten Gebühren',
-    'Zahlung direkt an den Gutachter',
+    'Zahlung direkt an den Dienstleister',
     'Nur der Anbieterpreis fällt an',
 ]);
 const inspectorPoints = computed(() => [

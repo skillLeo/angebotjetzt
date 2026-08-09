@@ -37,7 +37,7 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
         </Link>
         <Link v-if="stats.unmatchedRequests > 0" href="/admin/requests?status=unmatched" class="flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 px-5 py-4">
             <AlertTriangle :size="22" class="text-amber-600" aria-hidden="true" />
-            <p class="text-sm font-semibold text-amber-800">{{ stats.unmatchedRequests }} Anfragen ohne passenden Gutachter</p>
+            <p class="text-sm font-semibold text-amber-800">{{ stats.unmatchedRequests }} Anfragen ohne passenden Dienstleister</p>
         </Link>
     </div>
 
@@ -74,7 +74,7 @@ const funnelMax = computed(() => Math.max(1, props.funnel.requests));
     </div>
 
     <div class="mt-6">
-        <PageCard title="Top-Gutachter" subtitle="Die 5 Gutachter mit den meisten abgeschlossenen Aufträgen">
+        <PageCard title="Top-Dienstleister" subtitle="Die 5 Dienstleister mit den meisten abgeschlossenen Aufträgen">
             <div class="divide-y divide-ink-100">
                 <Link v-for="i in topInspectors" :key="i.id" :href="`/admin/inspectors/${i.id}`" class="flex items-center justify-between px-5 py-3.5 transition hover:bg-sand-50 sm:px-6">
                     <div>

@@ -42,7 +42,7 @@ const offers = [
                 <p class="text-eyebrow mb-3 text-green-400">Der Marktplatz für Kfz-Gutachten</p>
                 <h2 class="font-display text-[28px] leading-tight font-extrabold text-white">
                     Von der Anfrage<br />
-                    <span class="text-green-400">zum passenden Gutachter.</span>
+                    <span class="text-green-400">zum passenden Dienstleister.</span>
                 </h2>
 
                 <!-- Product mockup: mirrors the homepage's offer-comparison visual -->
@@ -89,7 +89,7 @@ const offers = [
                 :transition="{ duration: 0.5, delay: 0.4 }"
             >
                 <span>© {{ new Date().getFullYear() }} AngebotJetzt</span>
-                <span class="inline-flex items-center gap-1.5"><ShieldCheck :size="14" class="text-green-400" aria-hidden="true" /> Geprüfte Gutachter</span>
+                <span class="inline-flex items-center gap-1.5"><ShieldCheck :size="14" class="text-green-400" aria-hidden="true" /> Geprüfte Dienstleister</span>
             </Motion>
         </div>
 

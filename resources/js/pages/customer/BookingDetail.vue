@@ -44,7 +44,10 @@ function submitReview() {
             <PageCard :title="`${booking.vehicle} · ${booking.service}`" :subtitle="booking.number">
                 <template #actions><StatusBadge :status="booking.status" /></template>
                 <div class="p-6 sm:p-8">
-                    <p class="text-sm text-ink-500">{{ 'Ihr Gutachter' }}</p>
+                    <p v-if="booking.status === 'accepted'" class="mb-5 rounded-card bg-green-50 p-3 text-sm font-semibold text-green-700">
+                        {{ 'Der Dienstleister wird sich in Kürze bei Ihnen melden.' }}
+                    </p>
+                    <p class="text-sm text-ink-500">{{ 'Ihr Dienstleister' }}</p>
                     <p class="font-display text-lg font-bold text-navy-700">{{ booking.inspector }}</p>
                     <p v-if="booking.inspectorCompany" class="text-sm text-ink-500">{{ booking.inspectorCompany }}, {{ booking.city }}</p>
 
@@ -89,7 +92,7 @@ function submitReview() {
                 <div class="space-y-3 p-5 text-sm sm:p-6">
                     <div class="flex justify-between"><span class="text-ink-500">{{ 'Auftragswert' }}</span><span class="font-bold text-navy-700">{{ formatEuro(booking.price) }}</span></div>
                     <p class="border-t border-ink-100 pt-3 text-xs leading-relaxed text-ink-500">
-                        {{ 'Die Zahlung für diesen Auftrag erfolgt direkt zwischen Ihnen und dem Gutachter, außerhalb der Plattform.' }}
+                        {{ 'Die Zahlung für diesen Auftrag erfolgt direkt zwischen Ihnen und dem Dienstleister, außerhalb der Plattform.' }}
                     </p>
                 </div>
             </PageCard>
