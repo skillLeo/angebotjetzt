@@ -122,8 +122,9 @@ class RequestService
     /**
      * Send the post-completion review survey — called from both places a
      * booking can be marked complete (admin confirmation and the customer's
-     * own in-app star review) so neither path can miss it. A no-op if a
-     * review already exists for this booking, from either channel.
+     * own completion confirmation) so neither path can miss it. Only the
+     * emailed 1-10 survey ever creates a Review now, so the guard below is
+     * just protection against sending this twice for the same booking.
      */
     public function sendReviewRequest(Booking $booking): void
     {

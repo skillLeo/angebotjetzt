@@ -180,7 +180,7 @@ class InspectorAreaController extends Controller
                     ? round($totalOffers / $matchedRequestIds->count() * 100)
                     : null,
                 'rating' => $inspector->averageRating(),
-                'reviewsCount' => $inspector->reviews()->where('is_published', true)->count(),
+                'reviewsCount' => $inspector->reviews()->count(),
             ],
             'newRequests' => $openMatches->map(fn ($r) => $this->requestRow($r)),
         ]);

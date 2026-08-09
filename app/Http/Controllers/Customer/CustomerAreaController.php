@@ -7,7 +7,6 @@ use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
 use App\Models\Payment;
-use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Services\RequestService;
 use App\Services\WalletService;
@@ -82,7 +81,10 @@ class CustomerAreaController extends Controller
     {
         abort_unless($serviceRequest->user_id === Auth::id(), 403);
 
-        $serviceRequest->load(['serviceType:id,name', 'offers' => fn ($q) => $q->with(['inspector' => fn ($i) => $i->withCount(['reviews' => fn ($r) => $r->where('is_published', true)])->withAvg(['reviews' => fn ($r) => $r->where('is_published', true)], 'rating')])->orderBy('price_cents')]);
+        // Not filtered by is_published: that flag only gates whether a
+        // review's text is shown publicly as a testimonial, not whether the
+        // rating counts — see Inspector::averageRating().
+        $serviceRequest->load(['serviceType:id,name', 'offers' => fn ($q) => $q->with(['inspector' => fn ($i) => $i->withCount('reviews')->withAvg('reviews', 'rating')])->orderBy('price_cents')]);
         $labels = $serviceRequest->offerLabels();
 
         return Inertia::render('customer/CompareOffers', [
@@ -95,7 +97,7 @@ class CustomerAreaController extends Controller
     {
         return Inertia::render('customer/Bookings', [
             'bookings' => Auth::user()->bookings()
-                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name', 'review:id,booking_id'])
+                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name'])
                 ->latest()
                 ->paginate(10)
                 ->through(fn ($b) => $this->bookingSummary($b)),
@@ -106,7 +108,7 @@ class CustomerAreaController extends Controller
     {
         abort_unless($booking->user_id === Auth::id(), 403);
 
-        $booking->load(['inspector', 'offer', 'request.serviceType:id,name', 'review']);
+        $booking->load(['inspector', 'offer', 'request.serviceType:id,name']);
 
         return Inertia::render('customer/BookingDetail', [
             'booking' => [
@@ -114,58 +116,43 @@ class CustomerAreaController extends Controller
                 'inspectorPhone' => $booking->inspector->phone,
                 'inspectorEmail' => $booking->inspector->email,
                 'message' => $booking->offer->message,
-                'hasReview' => $booking->review !== null,
             ],
         ]);
     }
 
-    public function storeReview(Request $request, Booking $booking, WalletService $walletService, RequestService $requestService): RedirectResponse
+    /**
+     * The customer's own way of confirming a job is done — no rating is
+     * collected here anymore. Every rating now comes exclusively through
+     * the emailed 1-10 survey (sendReviewRequest() below), regardless of
+     * whether admin or the customer is the one who confirms completion, so
+     * there's exactly one review path instead of two.
+     */
+    public function confirmCompletion(Booking $booking, WalletService $walletService, RequestService $requestService): RedirectResponse
     {
         abort_unless($booking->user_id === Auth::id(), 403);
-        abort_unless(in_array($booking->status, ['completed_by_inspector', 'confirmed'], true), 403);
+        abort_unless($booking->status === 'completed_by_inspector', 403);
 
-        $data = $request->validate([
-            'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'comment' => ['nullable', 'string', 'max:3000'],
-        ]);
+        $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
+        $booking->request->update(['status' => 'completed']);
 
-        Review::updateOrCreate(
-            ['booking_id' => $booking->id],
-            [
-                'user_id' => Auth::id(),
-                'inspector_id' => $booking->inspector_id,
-                'rating' => $data['rating'],
-                'comment' => $data['comment'] ?? null,
-            ]
-        );
+        // Under the direct-agreement model there's no platform-held balance
+        // to release (the customer paid the provider directly); that only
+        // still applies to legacy bookings carrying a Payment from the old
+        // Stripe/wallet flow.
+        if ($booking->payment) {
+            $walletService->releasePending($booking);
 
-        // A customer rating is their confirmation the job was done — this is
-        // what finalizes the booking. Under the direct-agreement model there's
-        // no platform-held balance to release (the customer paid the provider
-        // directly); that only still applies to legacy bookings carrying a
-        // Payment from the old Stripe/wallet flow.
-        if ($booking->status === 'completed_by_inspector') {
-            $booking->update(['status' => 'confirmed', 'confirmed_at' => now()]);
-            $booking->request->update(['status' => 'completed']);
-
-            if ($booking->payment) {
-                $walletService->releasePending($booking);
-
-                AppNotification::notify($booking->inspector, 'balance_released',
-                    'Guthaben freigegeben',
-                    "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
-                    '/inspector');
-            }
-
-            ActivityLog::record('booking.confirmed', Auth::user(), $booking);
+            AppNotification::notify($booking->inspector, 'balance_released',
+                'Guthaben freigegeben',
+                "Ihr Anteil für Auftrag {$booking->booking_number} ist jetzt verfügbar.",
+                '/inspector');
         }
 
-        // Always a no-op here in practice (the review created just above
-        // already satisfies it) — called anyway so this completion path
-        // can't silently skip it if that ever changes.
+        ActivityLog::record('booking.confirmed', Auth::user(), $booking);
+
         $requestService->sendReviewRequest($booking);
 
-        return back()->with('success', 'Vielen Dank für Ihre Bewertung!');
+        return back()->with('success', 'Auftrag bestätigt! Wir haben Ihnen eine E-Mail zur Bewertung Ihrer Erfahrung gesendet.');
     }
 
     public function payments(): Response
@@ -242,7 +229,6 @@ class CustomerAreaController extends Controller
             'price' => $b->offer->price_cents,
             'status' => $b->status,
             'date' => $b->created_at->format('d.m.Y'),
-            'hasReview' => isset($b->review),
         ];
     }
 }

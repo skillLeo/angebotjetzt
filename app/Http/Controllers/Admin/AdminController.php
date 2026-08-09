@@ -769,6 +769,7 @@ class AdminController extends Controller
                 ->through(fn ($r) => [
                     'id' => $r->id,
                     'rating' => $r->rating,
+                    'rawRating' => $r->raw_rating,
                     'comment' => $r->comment,
                     'published' => $r->is_published,
                     'customer' => $r->user?->name,

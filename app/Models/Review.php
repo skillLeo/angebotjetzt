@@ -10,7 +10,7 @@ class Review extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['booking_id', 'user_id', 'inspector_id', 'rating', 'comment', 'is_published'];
+    protected $fillable = ['booking_id', 'user_id', 'inspector_id', 'rating', 'raw_rating', 'comment', 'is_published'];
 
     protected function casts(): array
     {

@@ -50,6 +50,7 @@ const columns = [
                 <span class="inline-flex items-center gap-1 font-bold text-navy-700">
                     <Star :size="14" class="text-amber-400" aria-hidden="true" /> {{ row.rating }}/5
                 </span>
+                <span v-if="row.rawRating" class="block text-xs text-ink-500">{{ `${row.rawRating}/10 in der Umfrage` }}</span>
             </template>
             <template #comment="{ row }">
                 <p class="max-w-xs text-ink-700">{{ row.comment ?? '—' }}</p>

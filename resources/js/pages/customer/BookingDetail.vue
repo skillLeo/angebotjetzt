@@ -2,32 +2,26 @@
 import PageCard from '@/components/dashboard/PageCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Mail, Phone, Star } from 'lucide-vue-next';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ArrowLeft, Check, Mail, Phone } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { toast } from 'vue-sonner';
 
 
 const props = defineProps<{
     booking: {
         id: number; number: string; service: string; vehicle: string; inspector: string; inspectorCompany: string | null;
         city: string | null; price: number; status: string; date: string;
-        inspectorPhone: string | null; inspectorEmail: string | null; message: string | null; hasReview: boolean;
+        inspectorPhone: string | null; inspectorEmail: string | null; message: string | null;
     };
 }>();
 
-const showReview = ref(false);
-const rating = ref(5);
-const reviewForm = useForm({ rating: 5, comment: '' });
+const confirming = ref(false);
 
-function submitReview() {
-    reviewForm.rating = rating.value;
-    reviewForm.post(`/account/bookings/${props.booking.id}/review`, {
+function confirmCompletion() {
+    confirming.value = true;
+    router.post(`/account/bookings/${props.booking.id}/confirm`, {}, {
         preserveScroll: true,
-        onSuccess: () => {
-            showReview.value = false;
-            toast.success('Vielen Dank für Ihre Bewertung!');
-        },
+        onFinish: () => (confirming.value = false),
     });
 }
 </script>
@@ -66,23 +60,19 @@ function submitReview() {
                 </div>
             </PageCard>
 
-            <PageCard v-if="['completed_by_inspector', 'confirmed'].includes(booking.status) && !booking.hasReview" :title="'Bewerten Sie diesen Auftrag'">
+            <PageCard v-if="booking.status === 'completed_by_inspector'" :title="'Auftrag abschließen'">
                 <div class="p-6 sm:p-8">
-                    <button v-if="!showReview" type="button" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600" @click="showReview = true">
-                        {{ 'Jetzt bewerten' }}
+                    <p class="mb-4 text-sm text-ink-500">
+                        {{ 'Der Dienstleister hat diesen Auftrag als abgeschlossen markiert. Bitte bestätigen Sie den Abschluss — im Anschluss erhalten Sie eine E-Mail, um Ihre Erfahrung zu bewerten.' }}
+                    </p>
+                    <button
+                        type="button"
+                        :disabled="confirming"
+                        class="inline-flex items-center justify-center gap-2 rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
+                        @click="confirmCompletion"
+                    >
+                        <Check :size="16" aria-hidden="true" /> {{ 'Auftrag als abgeschlossen bestätigen' }}
                     </button>
-                    <div v-else>
-                        <div class="flex items-center gap-2">
-                            <button v-for="i in 5" :key="i" type="button" @click="rating = i" :aria-label="`${i} Sterne`">
-                                <Star :size="26" class="pointer-events-none" :class="i <= rating ? 'fill-amber-400 text-amber-400' : 'fill-ink-100 text-ink-100'" />
-                            </button>
-                        </div>
-                        <textarea v-model="reviewForm.comment" rows="4" :placeholder="'Wie war Ihre Erfahrung? (optional)'" class="mt-4 w-full rounded-card border border-ink-300 px-4 py-3 text-[15px] focus:border-green-500 focus:outline-none" />
-                        <div class="mt-4 flex gap-3">
-                            <button type="button" :disabled="reviewForm.processing" class="rounded-pill bg-green-500 px-6 py-2.5 text-sm font-bold text-white disabled:opacity-60" @click="submitReview">{{ 'Bewertung senden' }}</button>
-                            <button type="button" class="rounded-pill px-6 py-2.5 text-sm font-bold text-ink-500" @click="showReview = false">{{ 'Abbrechen' }}</button>
-                        </div>
-                    </div>
                 </div>
             </PageCard>
         </div>

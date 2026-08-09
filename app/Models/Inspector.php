@@ -95,9 +95,17 @@ class Inspector extends Authenticatable
             ->where('notifiable_type', self::class);
     }
 
+    /**
+     * Every review counts toward the average regardless of is_published —
+     * that flag only controls whether a review's written text is shown
+     * publicly as a testimonial quote, not whether the rating itself is
+     * genuine. Since the post-completion survey always creates unpublished
+     * rows, excluding them here would mean no review ever moves a
+     * provider's average again.
+     */
     public function averageRating(): ?float
     {
-        $avg = $this->reviews()->where('is_published', true)->avg('rating');
+        $avg = $this->reviews()->avg('rating');
 
         return $avg === null ? null : round((float) $avg, 1);
     }

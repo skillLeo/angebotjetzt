@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LowRatingFeedbackMail;
 use App\Models\Booking;
 use App\Models\Review;
+use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,9 +17,11 @@ use Inertia\Response;
  * link (no login required — the signature itself proves the recipient).
  * A high rating (8-10) routes to Trustpilot to leave a public review; a
  * lower one is kept as private internal feedback for the team, never as a
- * public testimonial (Review.rating is a live 1-5 star scale elsewhere on
- * the site, so the raw 1-10 answer is mapped down, and rows from this path
- * are always unpublished).
+ * public testimonial. The raw 1-10 value is what drives that branching and
+ * is kept in `raw_rating`; `rating` stores the 1-5 star equivalent used for
+ * display and the provider's average (see mapToStars()) — rows from this
+ * path are always unpublished, so they never appear as a public testimonial
+ * quote, but still count toward the average (see Inspector::averageRating()).
  */
 class ReviewSurveyController extends Controller
 {
@@ -44,21 +49,47 @@ class ReviewSurveyController extends Controller
             'comment' => ['nullable', 'string', 'max:3000'],
         ]);
 
-        Review::firstOrCreate(
+        $review = Review::firstOrCreate(
             ['booking_id' => $booking->id],
             [
                 'user_id' => $booking->user_id,
                 'inspector_id' => $booking->inspector_id,
-                'rating' => (int) ceil($data['rating'] / 2),
+                'rating' => $this->mapToStars($data['rating']),
+                'raw_rating' => $data['rating'],
                 'comment' => $data['comment'] ?? null,
                 'is_published' => false,
             ]
         );
+
+        // Only for a genuinely new submission — firstOrCreate() means a
+        // revisit of an already-answered survey (the show() guard above
+        // normally prevents this, but the POST itself has no such guard)
+        // would otherwise re-notify admin about feedback they've already seen.
+        if ($review->wasRecentlyCreated && $data['rating'] <= 7) {
+            $booking->loadMissing(['inspector', 'user']);
+            SafeMailer::send(fn () => Mail::to(config('mail.from.address'))
+                ->queue(new LowRatingFeedbackMail($booking, $data['rating'], $data['comment'] ?? null)));
+        }
 
         if ($data['rating'] >= 8) {
             return redirect()->away(config('services.trustpilot.review_url'));
         }
 
         return redirect()->route('reviews.survey.thanks');
+    }
+
+    /**
+     * 1-10 customer rating -> 1-5 star equivalent used for display/averages.
+     * Exact bands as specified: 8-10=5, 6-7=4, 4-5=3, 2-3=2, 0-1=1.
+     */
+    private function mapToStars(int $raw): int
+    {
+        return match (true) {
+            $raw >= 8 => 5,
+            $raw >= 6 => 4,
+            $raw >= 4 => 3,
+            $raw >= 2 => 2,
+            default => 1,
+        };
     }
 }

@@ -31,8 +31,8 @@ class PublicController extends Controller
             $providers = Inspector::query()
                 ->where('is_active', true)
                 ->where('is_verified', true)
-                ->withCount(['reviews' => fn ($q) => $q->where('is_published', true)])
-                ->withAvg(['reviews' => fn ($q) => $q->where('is_published', true)], 'rating')
+                ->withCount('reviews')
+                ->withAvg('reviews', 'rating')
                 ->withCount(['bookings' => fn ($q) => $q->whereIn('status', ['confirmed', 'completed_by_inspector'])])
                 ->orderByDesc('reviews_count')
                 ->take(9)
@@ -96,7 +96,7 @@ class PublicController extends Controller
                 'recentRequests' => $recentRequests,
                 'reviews' => $reviews,
                 'cityCounts' => $cityCounts,
-                'totalReviews' => Review::where('is_published', true)->count(),
+                'totalReviews' => Review::count(),
             ];
         })();
 

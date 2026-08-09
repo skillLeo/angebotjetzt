@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified'])->prefix('account')->name('konto.')->grou
     Route::get('/requests/{serviceRequest}/offers', [CustomerAreaController::class, 'compareOffers'])->name('requests.offers');
     Route::get('/bookings', [CustomerAreaController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/{booking}', [CustomerAreaController::class, 'bookingDetail'])->name('bookings.show');
-    Route::post('/bookings/{booking}/review', [CustomerAreaController::class, 'storeReview'])->name('bookings.review');
+    Route::post('/bookings/{booking}/confirm', [CustomerAreaController::class, 'confirmCompletion'])->name('bookings.confirm');
     Route::get('/payments', [CustomerAreaController::class, 'payments'])->name('payments');
 
     Route::post('/offers/{offer}/accept', [OfferAcceptanceController::class, 'accept'])->name('offers.accept');
