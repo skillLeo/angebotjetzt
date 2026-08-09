@@ -91,7 +91,7 @@ function claim() {
                         </p>
                     </div>
                 </div>
-                <form class="mt-5 grid gap-4" @submit.prevent="claim">
+                <form class="mt-5 flex flex-col gap-4" @submit.prevent="claim">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label class="mb-1.5 block text-sm font-semibold text-navy-700">Name</label>
@@ -111,7 +111,7 @@ function claim() {
                         />
                         <FormField v-model="claimForm.password_confirmation" label="Passwort bestätigen" type="password" />
                     </div>
-                    <div class="sm:col-span-2">
+                    <div>
                         <button
                             type="submit"
                             :disabled="claimForm.processing || !claimForm.password"
