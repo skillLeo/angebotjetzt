@@ -128,7 +128,7 @@ class GuestOfferController extends Controller
         SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
 
         if ($isFirstOffer) {
-            app(RequestService::class)->scheduleOfferReminders($serviceRequest);
+            app(RequestService::class)->recordFirstOffer($serviceRequest);
         }
 
         ActivityLog::record('offer.submitted_guest', null, $serviceRequest, ['inspector_id' => $inspector->id]);

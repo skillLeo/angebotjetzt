@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Jobs\SendOfferReminderJob;
 use App\Mail\NewRequestNotificationMail;
 use App\Mail\RequestConfirmationMail;
 use App\Mail\RequestMatchedMail;
@@ -148,18 +147,22 @@ class RequestService
     }
 
     /**
-     * Schedule the two automatic no-decision-yet reminders — 24h and 48h
-     * after the first offer a request receives. Call this only at the
-     * moment a request's very first offer arrives (its status is still
-     * "open" right before that offer flips it to "offers_received") so the
-     * schedule is set once per request, not once per offer. Each job
-     * independently re-checks the request's status right before sending, so
-     * accepting an offer before a reminder fires silently cancels it.
+     * Record when a request's very first offer arrived, so the scheduled
+     * `offers:send-reminders` command (see app/Console/Commands) knows when
+     * its 24h/48h reminder windows open. Call this only at the moment a
+     * request's first offer arrives (its status is still "open" right
+     * before that offer flips it to "offers_received") so this is set once
+     * per request, not once per offer.
+     *
+     * This deliberately does NOT use a delayed queued job: this app's queue
+     * connection is "sync" in production, which runs jobs immediately and
+     * silently ignores ->delay() — a delayed dispatch here would send both
+     * reminders instantly instead of 24h/48h later. A polled command driven
+     * by Laravel's scheduler works the same regardless of queue driver.
      */
-    public function scheduleOfferReminders(ServiceRequest $request): void
+    public function recordFirstOffer(ServiceRequest $request): void
     {
-        SendOfferReminderJob::dispatch($request->id, false)->delay(now()->addHours(24));
-        SendOfferReminderJob::dispatch($request->id, true)->delay(now()->addHours(48));
+        $request->update(['first_offer_at' => now()]);
     }
 
     /**

@@ -19,6 +19,7 @@ class ServiceRequest extends Model
         'first_registration', 'mileage', 'vin', 'fuel_type', 'transmission',
         'plz', 'ort', 'strasse', 'preferred_date', 'alternative_date', 'notes', 'answers',
         'contact_name', 'contact_email', 'contact_phone', 'status', 'matched_count', 'expires_at',
+        'first_offer_at', 'offer_reminder_sent_at', 'offer_final_reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -27,6 +28,9 @@ class ServiceRequest extends Model
             'preferred_date' => 'date',
             'alternative_date' => 'date',
             'expires_at' => 'datetime',
+            'first_offer_at' => 'datetime',
+            'offer_reminder_sent_at' => 'datetime',
+            'offer_final_reminder_sent_at' => 'datetime',
             'answers' => 'array',
         ];
     }

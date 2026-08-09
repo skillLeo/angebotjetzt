@@ -326,7 +326,7 @@ class InspectorAreaController extends Controller
             ->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
 
         if ($isFirstOffer) {
-            app(RequestService::class)->scheduleOfferReminders($serviceRequest);
+            app(RequestService::class)->recordFirstOffer($serviceRequest);
         }
 
         ActivityLog::record('offer.submitted', $inspector, $serviceRequest);
