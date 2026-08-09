@@ -547,10 +547,17 @@ class AdminController extends Controller
 
         SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new InspectorApprovedMail($inspector)));
 
+        // Service area is normally set up during onboarding now, so only
+        // whoever skipped that step via "Später fortsetzen" still needs the
+        // "go set this up" nudge — telling someone who already did it to
+        // "do it now" would read as a broken notification.
+        $hasServiceArea = $inspector->serviceAreas()->exists();
         AppNotification::notify($inspector, 'account_approved',
             'Konto freigeschaltet',
-            'Legen Sie jetzt Ihr Servicegebiet fest, um passende Anfragen zu erhalten.',
-            '/inspector/service-areas');
+            $hasServiceArea
+                ? 'Sie erhalten ab sofort passende Anfragen aus Ihrem Servicegebiet.'
+                : 'Legen Sie jetzt Ihr Servicegebiet fest, um passende Anfragen zu erhalten.',
+            $hasServiceArea ? '/inspector' : '/inspector/service-areas');
 
         ActivityLog::record('inspector.approved', Auth::guard('admin')->user(), $inspector);
 
