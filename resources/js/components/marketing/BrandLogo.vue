@@ -13,7 +13,7 @@ withDefaults(
         <span class="notranslate inline-flex items-center" translate="no">
             <img
                 v-if="inverted"
-                src="/images/logo-light-wordmark.png"
+                src="/images/logo_two_transparentt.png"
                 alt="AngebotJetzt"
                 class="block h-8 w-auto md:h-9"
             />
