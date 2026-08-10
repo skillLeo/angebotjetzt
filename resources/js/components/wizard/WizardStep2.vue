@@ -88,7 +88,7 @@ function proceed() {
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-navy-700">Kraftstoff</label>
-                    <Select v-model="form.fuel_type">
+                    <Select v-model="form.fuel_type" autocomplete="off">
                         <SelectTrigger class="h-12 w-full rounded-card border-ink-300 px-4 py-3 text-[15px] focus-visible:border-green-500">
                             <SelectValue :placeholder="'–'" />
                         </SelectTrigger>
@@ -102,7 +102,7 @@ function proceed() {
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-navy-700">Getriebe</label>
-                    <Select v-model="form.transmission">
+                    <Select v-model="form.transmission" autocomplete="off">
                         <SelectTrigger class="h-12 w-full rounded-card border-ink-300 px-4 py-3 text-[15px] focus-visible:border-green-500">
                             <SelectValue :placeholder="'–'" />
                         </SelectTrigger>
