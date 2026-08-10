@@ -11,6 +11,7 @@ use App\Models\Review;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
+use App\Models\ServiceTypeRedirect;
 use App\Support\GuestAccountRedirect;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
@@ -126,8 +127,21 @@ class PublicController extends Controller
         ]);
     }
 
-    public function serviceType(ServiceType $serviceType): Response
+    public function serviceType(string $slug): Response|RedirectResponse
     {
+        $serviceType = ServiceType::where('slug', $slug)->first();
+
+        if (! $serviceType) {
+            // Not a current slug — but it may be a retired one from a past
+            // rename that's still indexed, emailed, or bookmarked. Send
+            // those to the current URL instead of a dead end; only a slug
+            // that was never real at all actually 404s.
+            $redirect = ServiceTypeRedirect::where('old_slug', $slug)->first();
+            abort_unless($redirect, 404);
+
+            return redirect()->route('service-type', $redirect->serviceType->slug, 301);
+        }
+
         $serviceType->loadMissing('category:id,name,slug');
 
         return Inertia::render('public/ServiceType', [

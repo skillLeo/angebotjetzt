@@ -21,6 +21,7 @@ use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\ServiceTypeField;
+use App\Models\ServiceTypeRedirect;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Wallet;
@@ -827,11 +828,7 @@ class AdminController extends Controller
             'photo' => ['nullable', 'file', 'image', 'max:4096'],
         ]);
 
-        $slug = Str::slug($data['name']);
-        $suffix = 2;
-        while (ServiceType::where('slug', $slug)->exists()) {
-            $slug = Str::slug($data['name']).'-'.$suffix++;
-        }
+        $slug = ServiceType::generateUniqueSlug($data['name']);
 
         $serviceType = $category->serviceTypes()->create([
             'name' => $data['name'],
@@ -855,16 +852,42 @@ class AdminController extends Controller
             'photo' => ['nullable', 'file', 'image', 'max:4096'],
         ]);
 
+        $oldSlug = $serviceType->slug;
+        $nameChanged = $data['name'] !== $serviceType->name;
+
         $serviceType->fill([
             'name' => $data['name'],
             'description' => $data['description'],
         ]);
+
+        // Keep the URL in sync with the name automatically, and leave a
+        // trail so the old URL redirects instead of 404ing — it may already
+        // be indexed, linked in a sent email, or bookmarked by a customer.
+        if ($nameChanged) {
+            $newSlug = ServiceType::generateUniqueSlug($data['name'], $serviceType->id);
+            if ($newSlug !== $oldSlug) {
+                $serviceType->slug = $newSlug;
+            }
+        }
 
         if ($request->hasFile('photo')) {
             $serviceType->image_url = '/storage/'.$request->file('photo')->store('service-photos', 'public');
         }
 
         $serviceType->save();
+
+        if ($nameChanged && $serviceType->slug !== $oldSlug) {
+            ServiceTypeRedirect::updateOrCreate(
+                ['old_slug' => $oldSlug],
+                ['service_type_id' => $serviceType->id]
+            );
+            // If this rename happens to reclaim an old slug that used to
+            // belong to a DIFFERENT rename chain, drop that stale redirect
+            // rather than let it keep pointing away from its new owner.
+            ServiceTypeRedirect::where('old_slug', $serviceType->slug)
+                ->where('service_type_id', '!=', $serviceType->id)
+                ->delete();
+        }
 
         $this->forgetServiceCaches();
         ActivityLog::record('service_type.updated', Auth::guard('admin')->user(), $serviceType, ['name' => $data['name']]);

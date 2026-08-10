@@ -32,7 +32,7 @@ Route::get('/reviews/survey/thanks', fn () => Inertia::render('public/ReviewThan
 */
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/vehicle-reports', [PublicController::class, 'category'])->name('category');
-Route::get('/vehicle-reports/{serviceType:slug}', [PublicController::class, 'serviceType'])->name('service-type');
+Route::get('/vehicle-reports/{slug}', [PublicController::class, 'serviceType'])->name('service-type');
 Route::get('/how-it-works', [PublicController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/for-inspectors', [PublicController::class, 'forInspectors'])->name('for-inspectors');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
