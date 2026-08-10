@@ -81,10 +81,11 @@ function complete() {
                         v-if="['accepted', 'paid', 'in_progress'].includes(job.status)"
                         type="button"
                         :disabled="completing"
-                        class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-pill bg-green-500 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
+                        class="mt-3 inline-flex w-full items-start justify-center gap-2 rounded-pill bg-green-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:opacity-60"
                         @click="complete"
                     >
-                        <Check :size="18" aria-hidden="true" /> {{ 'Auftrag als abgeschlossen markieren' }}
+                        <Check :size="18" class="mt-0.5 shrink-0" aria-hidden="true" />
+                        <span class="text-left">{{ 'Auftrag als abgeschlossen markieren' }}</span>
                     </button>
                     <p v-else-if="job.status === 'completed_by_inspector'" class="mt-3 rounded-card bg-green-50 p-3 text-center text-xs text-green-700">
                         {{ 'Als abgeschlossen markiert. Warte auf Bestätigung durch den Kunden bzw. die Plattform.' }}
