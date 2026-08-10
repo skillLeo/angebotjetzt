@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\AppNotification;
 use App\Models\ServiceCategory;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -12,6 +13,25 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
+
+    /**
+     * Force both the full-page HTML shell and the JSON (X-Inertia) variant
+     * of every response to be non-cacheable. Without this, `no-cache` alone
+     * relies on caches respecting the `Vary: X-Inertia` header to keep the
+     * two variants separate — if any intermediary (e.g. a hosting CDN)
+     * drops that Vary value, a browser can end up serving a stale JSON
+     * response for what should be a full page load (seen in practice as a
+     * raw JSON dump instead of the page, e.g. after reopening the browser).
+     * `no-store` sidesteps that entirely by never letting either variant be
+     * stored in the first place.
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        $response = parent::handle($request, $next);
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
+        return $response;
+    }
 
     public function version(Request $request): ?string
     {
