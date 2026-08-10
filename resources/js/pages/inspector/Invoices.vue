@@ -10,7 +10,7 @@ import { Download, Receipt } from 'lucide-vue-next';
 defineProps<{
     invoices: {
         data: Array<{
-            id: number; number: string; booking: string; offerAmount: number;
+            id: number; number: string; offerAmount: number;
             commissionPercent: number; commissionAmount: number; dueDate: string; date: string;
         }>;
         links: Array<{ url: string | null; label: string; active: boolean }>;
@@ -26,7 +26,7 @@ defineProps<{
             <div v-for="i in invoices.data" :key="i.id" class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div class="min-w-0">
                     <p class="truncate font-semibold text-navy-700">{{ i.number }}</p>
-                    <p class="text-sm text-ink-500">{{ 'Auftrag' }} {{ i.booking }} · {{ 'Fällig am' }} {{ i.dueDate }}</p>
+                    <p class="text-sm text-ink-500">{{ 'Fällig am' }} {{ i.dueDate }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-4">
                     <div class="text-right">

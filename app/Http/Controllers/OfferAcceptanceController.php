@@ -74,7 +74,7 @@ class OfferAcceptanceController extends Controller
             return [$booking, $invoice];
         });
 
-        $booking->load(['offer', 'inspector', 'user', 'request']);
+        $booking->load(['offer', 'inspector', 'user', 'request.serviceType']);
 
         AppNotification::notify($offer->inspector, 'offer_accepted',
             'Ihr Angebot wurde angenommen',

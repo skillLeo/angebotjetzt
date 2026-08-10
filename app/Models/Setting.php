@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class Setting extends Model
 {
@@ -25,5 +26,18 @@ class Setting extends Model
     public static function commissionPercent(): float
     {
         return (float) static::get('commission_percent', 10);
+    }
+
+    /**
+     * The admin-uploaded logo's public URL, or null if none has been
+     * uploaded yet — every place the logo appears (header, auth pages,
+     * dashboards, wizard, emails) falls back to the built-in default file
+     * when this is null, so a fresh install always has a working logo.
+     */
+    public static function logoUrl(): ?string
+    {
+        $path = static::get('logo_path');
+
+        return $path ? Storage::disk('public')->url($path) : null;
     }
 }

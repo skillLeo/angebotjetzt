@@ -106,6 +106,8 @@ Route::prefix('inspector')->name('gutachter.')->group(function () {
 
 Route::get('/offers/{serviceRequest}/view', [PublicController::class, 'viewOffers'])
     ->middleware('signed')->name('offers.view');
+Route::get('/requests/{serviceRequest}/view', [PublicController::class, 'viewMyRequests'])
+    ->middleware('signed')->name('requests.view');
 
 Route::get('/inspector/register', [InspectorRegisterController::class, 'show'])->name('gutachter.register');
 Route::post('/inspector/register', [InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
@@ -148,6 +150,7 @@ Route::middleware(['auth:inspector', EnsureInspectorOnboardingComplete::class])-
     Route::delete('/service-areas/{area}', [InspectorAreaController::class, 'deleteServiceArea'])->name('service-areas.delete');
     Route::get('/invoices', [InspectorAreaController::class, 'invoices'])->name('invoices');
     Route::get('/invoices/{invoice}/download', [InspectorAreaController::class, 'downloadInvoice'])->name('invoices.download');
+    Route::get('/reviews', [InspectorAreaController::class, 'reviews'])->name('reviews');
     Route::get('/profile', [InspectorAreaController::class, 'profile'])->name('profile');
     Route::post('/profile', [InspectorAreaController::class, 'updateProfile'])->name('profile.update');
 });
@@ -199,6 +202,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::delete('/service-types/{serviceType}/fields/{field}', [AdminController::class, 'destroyServiceTypeField'])->name('service-types.fields.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/settings/logo', [AdminController::class, 'uploadLogo'])->name('settings.logo.upload');
+    Route::delete('/settings/logo', [AdminController::class, 'removeLogo'])->name('settings.logo.remove');
     Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
 });
 

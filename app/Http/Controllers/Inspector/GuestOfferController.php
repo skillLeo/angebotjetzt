@@ -125,7 +125,7 @@ class GuestOfferController extends Controller
                 "/account/requests/{$serviceRequest->id}/offers");
         }
 
-        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
+        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)->queue(new NewOfferMail($serviceRequest, $inspector, $label, $offer)));
 
         if ($isFirstOffer) {
             app(RequestService::class)->recordFirstOffer($serviceRequest);

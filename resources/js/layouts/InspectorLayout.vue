@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DashboardShell from '@/components/dashboard/DashboardShell.vue';
 import { usePage } from '@inertiajs/vue3';
-import { FileText, Inbox, LayoutDashboard, MapPin, Package, Receipt, Tag, User } from 'lucide-vue-next';
+import { FileText, Inbox, LayoutDashboard, MapPin, Package, Receipt, Star, Tag, User } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 
@@ -18,6 +18,7 @@ const nav = computed(() => [
     { label: 'Aufträge', href: '/inspector/jobs', icon: Package, active: url.value.startsWith('/inspector/jobs') },
     { label: 'Servicegebiet', href: '/inspector/service-areas', icon: MapPin, active: url.value.startsWith('/inspector/service-areas') },
     { label: 'Rechnungen', href: '/inspector/invoices', icon: Receipt, active: url.value.startsWith('/inspector/invoices') },
+    { label: 'Bewertungen', href: '/inspector/reviews', icon: Star, active: url.value.startsWith('/inspector/reviews') },
     { label: 'Profil', href: '/inspector/profile', icon: User, active: url.value.startsWith('/inspector/profile') },
 ]);
 </script>

@@ -99,15 +99,36 @@ class ServiceRequest extends Model
         return URL::temporarySignedRoute('offers.view', now()->addDays(30), ['serviceRequest' => $this->id]);
     }
 
+    /**
+     * Same reasoning as offersViewUrl() — a signed "view my requests" link
+     * for the initial confirmation email, safe to send before any account
+     * exists.
+     */
+    public function myRequestsViewUrl(): string
+    {
+        return URL::temporarySignedRoute('requests.view', now()->addDays(30), ['serviceRequest' => $this->id]);
+    }
+
+    /**
+     * AJ + 2-digit year + 2-digit month + 4-digit sequence (e.g. AJ26080005
+     * for August 2026) — replaces the old AJ-YYYY-NNNNNN format for every
+     * new request going forward. Existing records keep their old-format
+     * number untouched; this only affects numbers generated from here on.
+     * The sequence resets each month: the LIKE match is scoped to the
+     * current prefix, so a new month always starts from a fresh random
+     * jump rather than continuing the previous month's count, and the old
+     * hyphenated format never matches this prefix so the two can't collide
+     * or cross-contaminate the "last" lookup.
+     */
     public static function nextRequestNumber(): string
     {
-        $year = now()->year;
-        $last = static::where('request_number', 'like', "AJ-{$year}-%")
+        $prefix = 'AJ'.now()->format('ym');
+        $last = static::where('request_number', 'like', "{$prefix}%")
             ->orderByDesc('id')
             ->value('request_number');
-        $seq = $last ? ((int) substr($last, -6)) + random_int(3, 10) : random_int(3, 10);
+        $seq = $last ? ((int) substr($last, -4)) + random_int(3, 10) : random_int(3, 10);
 
-        return sprintf('AJ-%d-%06d', $year, $seq);
+        return sprintf('%s%04d', $prefix, $seq);
     }
 
     /**

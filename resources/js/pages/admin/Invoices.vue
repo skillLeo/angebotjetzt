@@ -27,7 +27,6 @@ function markPaid(id: number) {
 }
 
 const columns = [
-    { key: 'number', label: 'Rechnungsnummer' },
     { key: 'request', label: 'Anfrage' },
     { key: 'inspector', label: 'Dienstleister' },
     { key: 'offerAmount', label: 'Auftragswert', align: 'right' as const },
@@ -59,7 +58,7 @@ const columns = [
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Rechnung oder Dienstleister suchen…"
+                        placeholder="Anfrage-Nr. oder Dienstleister suchen…"
                         class="rounded-pill border border-ink-300 py-2 pl-9 pr-3 text-sm"
                         @keyup.enter="apply"
                     />

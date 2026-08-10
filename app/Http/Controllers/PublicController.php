@@ -11,11 +11,10 @@ use App\Models\Review;
 use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
-use App\Models\User;
+use App\Support\GuestAccountRedirect;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -248,19 +247,22 @@ class PublicController extends Controller
      * confirmation page offers right after submission, with name and email
      * already known and only a password left to set.
      */
-    public function viewOffers(ServiceRequest $serviceRequest, Request $request): RedirectResponse
+    public function viewOffers(ServiceRequest $serviceRequest): RedirectResponse
     {
-        if (Auth::check()) {
-            return redirect()->route('konto.requests.offers', $serviceRequest->id);
-        }
+        return GuestAccountRedirect::to(
+            $serviceRequest->contact_name,
+            $serviceRequest->contact_email,
+            route('konto.requests.offers', $serviceRequest->id)
+        );
+    }
 
-        if (User::where('email', $serviceRequest->contact_email)->exists()) {
-            return redirect()->route('login');
-        }
-
-        $request->session()->put("request_access_{$serviceRequest->id}", true);
-
-        return redirect()->route('wizard.confirmation', $serviceRequest->request_number);
+    public function viewMyRequests(ServiceRequest $serviceRequest): RedirectResponse
+    {
+        return GuestAccountRedirect::to(
+            $serviceRequest->contact_name,
+            $serviceRequest->contact_email,
+            route('konto.requests')
+        );
     }
 
     public function comingSoon(ServiceCategory $category): Response

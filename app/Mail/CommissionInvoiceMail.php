@@ -14,7 +14,7 @@ class CommissionInvoiceMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Rechnung {$this->invoice->invoice_number} — Vermittlungsprovision";
+        return "Rechnung {$this->invoice->referenceNumber()} — Vermittlungsprovision";
     }
 
     protected function title(): string
@@ -30,7 +30,7 @@ class CommissionInvoiceMail extends BaseBrandMail
         return [
             "Guten Tag {$i->inspector->name},",
             "herzlichen Glückwunsch — Sie haben den Auftrag {$i->booking->request->request_number} erhalten. Anbei finden Sie die Rechnung über unsere Vermittlungsprovision in Höhe von <strong>{$amount} €</strong>.",
-            "Bitte begleichen Sie den Betrag bis zum <strong>{$i->due_date->format('d.m.Y')}</strong> unter Angabe der Rechnungsnummer {$i->invoice_number}.",
+            "Bitte begleichen Sie den Betrag bis zum <strong>{$i->due_date->format('d.m.Y')}</strong> unter Angabe der Rechnungsnummer {$i->referenceNumber()}.",
         ];
     }
 
@@ -44,7 +44,7 @@ class CommissionInvoiceMail extends BaseBrandMail
     {
         return [
             Attachment::fromStorageDisk('local', $this->invoice->pdf_path)
-                ->as("{$this->invoice->invoice_number}.pdf")
+                ->as("{$this->invoice->referenceNumber()}.pdf")
                 ->withMime('application/pdf'),
         ];
     }

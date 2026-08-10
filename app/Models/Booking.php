@@ -56,6 +56,18 @@ class Booking extends Model
         return $this->hasOne(Review::class);
     }
 
+    /**
+     * The number to show a human anywhere this booking is referenced —
+     * always the original request number, never `booking_number`. That
+     * column only exists as an internal record identifier; use this method
+     * (not the column) in every view and email so the visible reference
+     * can never silently diverge again.
+     */
+    public function referenceNumber(): string
+    {
+        return $this->request->request_number;
+    }
+
     public static function nextBookingNumber(): string
     {
         $year = now()->year;

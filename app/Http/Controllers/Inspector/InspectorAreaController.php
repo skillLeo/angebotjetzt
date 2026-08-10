@@ -14,6 +14,7 @@ use App\Models\InspectorServiceArea;
 use App\Models\Invoice;
 use App\Models\Offer;
 use App\Models\RequestMatch;
+use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\Setting;
@@ -323,7 +324,7 @@ class InspectorAreaController extends Controller
         }
 
         SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)
-            ->queue(new NewOfferMail($serviceRequest, $inspector, $label)));
+            ->queue(new NewOfferMail($serviceRequest, $inspector, $label, $offer)));
 
         if ($isFirstOffer) {
             app(RequestService::class)->recordFirstOffer($serviceRequest);
@@ -541,8 +542,7 @@ class InspectorAreaController extends Controller
                 ->paginate(15)
                 ->through(fn ($i) => [
                     'id' => $i->id,
-                    'number' => $i->invoice_number,
-                    'booking' => $i->booking->request->request_number,
+                    'number' => $i->booking->request->request_number,
                     'offerAmount' => $i->offer_amount_cents,
                     'commissionPercent' => $i->commission_percent,
                     'commissionAmount' => $i->commission_cents,
@@ -556,8 +556,32 @@ class InspectorAreaController extends Controller
     {
         abort_unless($invoice->inspector_id === Auth::guard('inspector')->id(), 403);
         abort_unless($invoice->pdf_path, 404);
+        $invoice->loadMissing('booking.request');
 
-        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
+        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->referenceNumber()}.pdf");
+    }
+
+    public function reviews(): Response
+    {
+        $inspector = Auth::guard('inspector')->user();
+
+        return Inertia::render('inspector/Reviews', [
+            'averageRating' => $inspector->averageRating(),
+            'reviewsCount' => $inspector->reviews()->count(),
+            'reviews' => $inspector->reviews()
+                ->with('booking.request:id,request_number,service_type_id', 'booking.request.serviceType:id,name')
+                ->latest()
+                ->paginate(15)
+                ->through(fn (Review $r) => [
+                    'id' => $r->id,
+                    'rating' => $r->rating,
+                    'rawRating' => $r->raw_rating,
+                    'comment' => $r->comment,
+                    'service' => $r->booking?->request?->serviceType?->name,
+                    'requestNumber' => $r->booking?->request?->request_number,
+                    'date' => $r->created_at->format('d.m.Y'),
+                ]),
+        ]);
     }
 
     public function profile(): Response

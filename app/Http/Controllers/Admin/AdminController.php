@@ -243,7 +243,7 @@ class AdminController extends Controller
             'bookings' => $query->latest()->paginate(20)->withQueryString()
                 ->through(fn ($b) => [
                     'id' => $b->id,
-                    'number' => $b->booking_number,
+                    'number' => $b->request->request_number,
                     'customer' => $b->user->name,
                     'inspector' => $b->inspector->name,
                     'service' => $b->request->serviceType->name,
@@ -264,7 +264,7 @@ class AdminController extends Controller
         return Inertia::render('admin/BookingDetail', [
             'booking' => [
                 'id' => $booking->id,
-                'number' => $booking->booking_number,
+                'number' => $booking->request->request_number,
                 'status' => $booking->status,
                 'customer' => $booking->user->only(['name', 'email', 'phone']),
                 'inspector' => $booking->inspector->only(['id', 'name', 'company_name', 'city', 'email']),
@@ -286,7 +286,7 @@ class AdminController extends Controller
                 ] : null,
                 'invoice' => $booking->invoice ? [
                     'id' => $booking->invoice->id,
-                    'number' => $booking->invoice->invoice_number,
+                    'number' => $booking->invoice->referenceNumber(),
                     'commissionAmount' => $booking->invoice->commission_cents,
                     'dueDate' => $booking->invoice->due_date->format('d.m.Y'),
                 ] : null,
@@ -337,7 +337,7 @@ class AdminController extends Controller
 
     public function payments(Request $request): Response
     {
-        $query = Payment::with('booking:id,booking_number,user_id,inspector_id', 'booking.user:id,name', 'booking.inspector:id,name');
+        $query = Payment::with('booking:id,request_id,user_id,inspector_id', 'booking.request:id,request_number', 'booking.user:id,name', 'booking.inspector:id,name');
 
         if ($status = $request->query('status')) {
             $query->where('status', $status);
@@ -348,7 +348,7 @@ class AdminController extends Controller
                 ->through(fn ($p) => [
                     'id' => $p->id,
                     'bookingId' => $p->booking->id,
-                    'booking' => $p->booking->booking_number,
+                    'booking' => $p->booking->request->request_number,
                     'customer' => $p->booking->user->name,
                     'inspector' => $p->booking->inspector->name,
                     'total' => $p->total_cents,
@@ -402,7 +402,7 @@ class AdminController extends Controller
         $query = Invoice::with(['inspector:id,name,company_name', 'booking.request:id,request_number']);
 
         if ($search = $request->query('suche')) {
-            $query->where(fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")
+            $query->where(fn ($q) => $q->whereHas('booking.request', fn ($r) => $r->where('request_number', 'like', "%{$search}%"))
                 ->orWhereHas('inspector', fn ($i) => $i->where('name', 'like', "%{$search}%")->orWhere('company_name', 'like', "%{$search}%")));
         }
 
@@ -414,7 +414,6 @@ class AdminController extends Controller
             'invoices' => $query->latest()->paginate(20)->withQueryString()
                 ->through(fn ($i) => [
                     'id' => $i->id,
-                    'number' => $i->invoice_number,
                     'bookingId' => $i->booking_id,
                     'request' => $i->booking->request->request_number,
                     'inspector' => $i->inspector->company_name ?: $i->inspector->name,
@@ -449,8 +448,9 @@ class AdminController extends Controller
     public function downloadInvoice(Invoice $invoice)
     {
         abort_unless($invoice->pdf_path, 404);
+        $invoice->loadMissing('booking.request');
 
-        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
+        return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->referenceNumber()}.pdf");
     }
 
     public function inspectors(Request $request): Response
@@ -693,7 +693,7 @@ class AdminController extends Controller
 
     public function reviews(Request $request): Response
     {
-        $query = Review::with(['user:id,name', 'inspector:id,name,company_name', 'booking:id,booking_number']);
+        $query = Review::with(['user:id,name', 'inspector:id,name,company_name', 'booking:id,request_id', 'booking.request:id,request_number']);
 
         if ($request->query('status') === 'unpublished') {
             $query->where('is_published', false);
@@ -710,7 +710,7 @@ class AdminController extends Controller
                     'customer' => $r->user?->name,
                     'inspector' => $r->inspector?->name,
                     'inspectorCompany' => $r->inspector?->company_name,
-                    'booking' => $r->booking?->booking_number,
+                    'booking' => $r->booking?->request?->request_number,
                     'date' => $r->created_at->format('d.m.Y H:i'),
                 ]),
             'unpublishedCount' => Review::where('is_published', false)->count(),
@@ -772,10 +772,10 @@ class AdminController extends Controller
                         'status' => $r->status,
                         'date' => $r->created_at->format('d.m.Y'),
                     ]),
-                'bookings' => $customer->bookings()->with('inspector:id,name')->latest()->take(20)->get()
+                'bookings' => $customer->bookings()->with('inspector:id,name', 'request:id,request_number')->latest()->take(20)->get()
                     ->map(fn ($b) => [
                         'id' => $b->id,
-                        'number' => $b->booking_number,
+                        'number' => $b->request->request_number,
                         'inspector' => $b->inspector->name,
                         'status' => $b->status,
                         'date' => $b->created_at->format('d.m.Y'),
@@ -952,6 +952,7 @@ class AdminController extends Controller
             'settings' => [
                 'commission_percent' => Setting::get('commission_percent', 10),
                 'stripe_configured' => (bool) (config('cashier.secret') ?: env('STRIPE_SECRET')),
+                'logoUrl' => Setting::logoUrl(),
             ],
         ]);
     }
@@ -966,6 +967,40 @@ class AdminController extends Controller
         ActivityLog::record('settings.updated', Auth::guard('admin')->user(), null, $data);
 
         return back()->with('success', 'Einstellungen gespeichert.');
+    }
+
+    public function uploadLogo(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'logo' => ['required', 'file', 'mimes:png,svg,webp', 'max:2048'],
+        ]);
+
+        $path = $data['logo']->store('branding', 'public');
+
+        $previous = Setting::get('logo_path');
+        Setting::set('logo_path', $path);
+
+        if ($previous && $previous !== $path) {
+            Storage::disk('public')->delete($previous);
+        }
+
+        ActivityLog::record('settings.logo_uploaded', Auth::guard('admin')->user());
+
+        return back()->with('success', 'Logo gespeichert.');
+    }
+
+    public function removeLogo(): RedirectResponse
+    {
+        $previous = Setting::get('logo_path');
+
+        if ($previous) {
+            Storage::disk('public')->delete($previous);
+        }
+
+        Setting::set('logo_path', '');
+        ActivityLog::record('settings.logo_removed', Auth::guard('admin')->user());
+
+        return back()->with('success', 'Logo auf Standard zurückgesetzt.');
     }
 
     public function logs(): Response

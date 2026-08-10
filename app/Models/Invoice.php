@@ -30,6 +30,18 @@ class Invoice extends Model
         return $this->belongsTo(Inspector::class);
     }
 
+    /**
+     * The number to show a human anywhere this invoice is referenced —
+     * always the original request number, never `invoice_number`. That
+     * column only exists for internal sequential record-keeping; use this
+     * method (not the column) in every view, email, and PDF so the visible
+     * reference can never silently diverge again.
+     */
+    public function referenceNumber(): string
+    {
+        return $this->booking->request->request_number;
+    }
+
     public static function nextInvoiceNumber(): string
     {
         $year = now()->year;

@@ -76,7 +76,10 @@ it('rejects an unsigned or tampered offers.view link', function () {
     $this->get("/offers/{$request->id}/view")->assertForbidden();
 });
 
-it('lets a guest with a validly signed offers.view link land on the pre-filled claim screen', function () {
+it('lets a guest with a validly signed offers.view link land on pre-filled registration', function () {
+    // Superseded by the smart-redirect round: guests with no account now go
+    // straight to /register (pre-filled), not the wizard's claim screen —
+    // see SmartGuestRedirectTest.php for the full branching coverage.
     $type = checklistServiceType();
     $request = ServiceRequest::create([
         'request_number' => 'AJ-2026-CL0002', 'service_type_id' => $type->id,
@@ -87,14 +90,7 @@ it('lets a guest with a validly signed offers.view link land on the pre-filled c
 
     $signed = URL::temporarySignedRoute('offers.view', now()->addDays(30), ['serviceRequest' => $request->id]);
     $response = $this->get($signed);
-    $response->assertRedirect(route('wizard.confirmation', $request->request_number));
-
-    $confirmation = $this->get($response->headers->get('Location'));
-    $confirmation->assertOk();
-    $confirmation->assertInertia(fn ($page) => $page
-        ->where('canClaim', true)
-        ->where('contactEmail', 'guest2@example.de')
-        ->where('contactName', 'Guest Customer'));
+    $response->assertRedirect(route('register', ['name' => 'Guest Customer', 'email' => 'guest2@example.de']));
 });
 
 // --- Part 2: request number must never change format after acceptance ---

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\AppNotification;
 use App\Models\ServiceCategory;
+use App\Models\Setting;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'branding' => fn () => ['logoUrl' => Setting::logoUrl()],
         ];
     }
 

@@ -12,7 +12,7 @@
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
                     <tr>
                         <td style="padding:0 8px 24px;">
-                            <img src="{{ config('app.url') }}/images/logo-wordmark.png" alt="AngebotJetzt" height="32" style="height:32px;width:auto;display:block;">
+                            <img src="{{ \App\Models\Setting::logoUrl() ?? (config('app.url').'/images/logo-wordmark.png') }}" alt="AngebotJetzt" height="32" style="height:32px;width:auto;display:block;">
                         </td>
                     </tr>
                     <tr>

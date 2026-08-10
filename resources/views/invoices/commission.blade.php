@@ -28,10 +28,9 @@
         </div>
         <div class="meta">
             <h1>Rechnung</h1>
-            <div class="muted">Rechnungsnummer: {{ $invoice->invoice_number }}</div>
+            <div class="muted">Rechnungsnummer: {{ $invoice->referenceNumber() }}</div>
             <div class="muted">Rechnungsdatum: {{ $invoice->created_at->format('d.m.Y') }}</div>
             <div class="muted">Fällig am: {{ $invoice->due_date->format('d.m.Y') }}</div>
-            <div class="muted">Auftrag: {{ $booking->booking_number }}</div>
         </div>
     </div>
 
@@ -58,7 +57,7 @@
         <tbody>
             <tr>
                 <td>
-                    Vermittlungsprovision für Auftrag {{ $booking->booking_number }}<br>
+                    Vermittlungsprovision für Auftrag {{ $booking->request->request_number }}<br>
                     <span class="muted">Angebotssumme: {{ number_format($invoice->offer_amount_cents / 100, 2, ',', '.') }} €</span>
                 </td>
                 <td class="amount">{{ number_format($invoice->offer_amount_cents / 100, 2, ',', '.') }} €</td>
@@ -76,7 +75,7 @@
 
     <div class="footer">
         AngebotJetzt GmbH · Musterstraße 1 · 10115 Berlin<br>
-        Bitte überweisen Sie den Gesamtbetrag bis zum {{ $invoice->due_date->format('d.m.Y') }} unter Angabe der Rechnungsnummer {{ $invoice->invoice_number }}.
+        Bitte überweisen Sie den Gesamtbetrag bis zum {{ $invoice->due_date->format('d.m.Y') }} unter Angabe der Rechnungsnummer {{ $invoice->referenceNumber() }}.
     </div>
 </body>
 </html>

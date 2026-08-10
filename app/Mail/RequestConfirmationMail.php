@@ -34,6 +34,6 @@ class RequestConfirmationMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => route('konto.requests'), 'label' => 'Meine Anfragen ansehen'];
+        return ['url' => $this->serviceRequest->myRequestsViewUrl(), 'label' => 'Meine Anfragen ansehen'];
     }
 }

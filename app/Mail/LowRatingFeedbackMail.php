@@ -10,7 +10,7 @@ class LowRatingFeedbackMail extends BaseBrandMail
 
     protected function subjectLine(): string
     {
-        return "Interne Rückmeldung ({$this->rawRating}/10) – Auftrag {$this->booking->booking_number}";
+        return "Interne Rückmeldung ({$this->rawRating}/10) – Auftrag {$this->booking->request->request_number}";
     }
 
     protected function title(): string
@@ -23,7 +23,7 @@ class LowRatingFeedbackMail extends BaseBrandMail
         $inspector = $this->booking->inspector;
 
         return [
-            "Ein Kunde hat für Auftrag <strong>{$this->booking->booking_number}</strong> eine Bewertung von <strong>{$this->rawRating}/10</strong> abgegeben und wurde zur internen Rückmeldung statt zu Trustpilot weitergeleitet.",
+            "Ein Kunde hat für Auftrag <strong>{$this->booking->request->request_number}</strong> eine Bewertung von <strong>{$this->rawRating}/10</strong> abgegeben und wurde zur internen Rückmeldung statt zu Trustpilot weitergeleitet.",
             "Kunde: <strong>{$this->booking->user->name}</strong> ({$this->booking->user->email})",
             "Dienstleister: <strong>{$inspector->name}</strong>".($inspector->company_name ? " ({$inspector->company_name})" : ''),
             'Rückmeldung des Kunden:<br>'.($this->comment ? nl2br(e($this->comment)) : '<em>Kein zusätzlicher Kommentar.</em>'),

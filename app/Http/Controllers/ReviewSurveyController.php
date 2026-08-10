@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
  * Post-completion 1-10 satisfaction survey, reached via a signed emailed
@@ -36,13 +37,13 @@ class ReviewSurveyController extends Controller
         return Inertia::render('public/ReviewSurvey', [
             'booking' => [
                 'id' => $booking->id,
-                'number' => $booking->booking_number,
+                'number' => $booking->request->request_number,
                 'service' => $booking->request->serviceType->name,
             ],
         ]);
     }
 
-    public function store(Request $request, Booking $booking): RedirectResponse
+    public function store(Request $request, Booking $booking): RedirectResponse|SymfonyResponse
     {
         $data = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:10'],
@@ -66,13 +67,18 @@ class ReviewSurveyController extends Controller
         // normally prevents this, but the POST itself has no such guard)
         // would otherwise re-notify admin about feedback they've already seen.
         if ($review->wasRecentlyCreated && $data['rating'] <= 7) {
-            $booking->loadMissing(['inspector', 'user']);
+            $booking->loadMissing(['inspector', 'user', 'request']);
             SafeMailer::send(fn () => Mail::to(config('mail.from.address'))
                 ->queue(new LowRatingFeedbackMail($booking, $data['rating'], $data['comment'] ?? null)));
         }
 
         if ($data['rating'] >= 8) {
-            return redirect()->away(config('services.trustpilot.review_url'));
+            // A plain redirect()->away() returns its 302 to Inertia's own
+            // XHR request, which the browser follows internally and then
+            // blocks on CORS (Trustpilot doesn't allow cross-origin reads)
+            // — the user never leaves the page. Inertia::location() instead
+            // tells the client to do a real top-level navigation.
+            return Inertia::location(config('services.trustpilot.review_url'));
         }
 
         return redirect()->route('reviews.survey.thanks');
