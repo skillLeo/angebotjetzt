@@ -261,6 +261,16 @@
     }
 }
 
+/* Scrollable areas that should still scroll but never show the native bar —
+   the dark sidebar in particular, where the OS bar reads as a light seam. */
+@utility no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 /* ============================================================
    Motion helpers
    ============================================================ */

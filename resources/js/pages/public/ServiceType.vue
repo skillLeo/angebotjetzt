@@ -2,12 +2,16 @@
 import Reveal from '@/components/marketing/Reveal.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowRight, CheckCircle2, ShieldCheck, Clock, Euro } from 'lucide-vue-next';
+import { ArrowRight, CheckCircle2, ExternalLink, ShieldCheck, Clock, Euro } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 
 const props = defineProps<{
-    serviceType: { name: string; slug: string; description: string; image: string | null; category: { name: string; slug: string } | null };
+    serviceType: {
+        name: string; slug: string; description: string; image: string | null;
+        category: { name: string; slug: string } | null;
+        isExternal: boolean; externalUrl: string | null;
+    };
     others: Array<{ id: number; name: string; slug: string; description: string; image: string | null }>;
 }>();
 
@@ -42,7 +46,32 @@ const benefits = computed(() => [
                 <p v-if="serviceType.category" class="text-eyebrow mb-4 text-green-600">{{ serviceType.category.name }}</p>
                 <h1 class="text-hero text-navy-700 break-words">{{ serviceType.name }}</h1>
                 <p class="text-lead mt-6 text-ink-700">{{ serviceType.description }}</p>
-                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <!-- Partner-fulfilled service: hand off instead of opening the wizard. -->
+                <div v-if="serviceType.isExternal" class="mt-8">
+                    <a
+                        v-if="serviceType.externalUrl"
+                        :href="serviceType.externalUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-7 py-3.5 text-[15px] font-bold text-white transition hover:bg-green-600"
+                    >
+                        {{ 'Zum Gebrauchtwagen-Check von CarSpector' }}
+                        <ExternalLink :size="18" aria-hidden="true" />
+                    </a>
+                    <span
+                        v-else
+                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-pill bg-ink-300 px-7 py-3.5 text-[15px] font-bold text-white"
+                        aria-disabled="true"
+                    >
+                        {{ 'Zum Gebrauchtwagen-Check von CarSpector' }}
+                        <ExternalLink :size="18" aria-hidden="true" />
+                    </span>
+                    <p v-if="!serviceType.externalUrl" class="mt-3 text-sm text-ink-500">
+                        {{ 'Der Link zum Partnerangebot wird in Kürze freigeschaltet.' }}
+                    </p>
+                </div>
+
+                <div v-else class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Link
                         :href="`/request?service=${serviceType.slug}`"
                         class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
@@ -69,7 +98,49 @@ const benefits = computed(() => [
         </div>
     </section>
 
-    <section class="bg-sand-50 py-16 lg:py-24">
+    <!-- Partner-fulfilled services (Gebrauchtwagen-Check): client-supplied copy. -->
+    <section v-if="serviceType.isExternal" class="bg-sand-50 py-16 lg:py-24">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="rounded-panel border border-ink-100 bg-white p-8 shadow-card sm:p-10">
+                <p class="text-eyebrow text-green-600">{{ 'In Kooperation mit CarSpector' }}</p>
+                <h2 class="text-section mt-3 text-navy-700">{{ 'Der Gebrauchtwagen-Check' }}</h2>
+
+                <div class="mt-6 text-[15px] leading-relaxed text-ink-700">
+                    <p>
+                        Für professionelle Gebrauchtwagenchecks arbeiten wir mit Carspector zusammen. Dort können Sie
+                        Ihr Wunschfahrzeug unabhängig prüfen lassen und erhalten anschließend einen ausführlichen
+                        Zustandsbericht.
+                    </p>
+                </div>
+
+                <div class="mt-8">
+                    <a
+                        v-if="serviceType.externalUrl"
+                        :href="serviceType.externalUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-7 py-3.5 text-[15px] font-bold text-white transition hover:bg-green-600"
+                    >
+                        {{ 'Jetzt bei CarSpector buchen' }}
+                        <ExternalLink :size="18" aria-hidden="true" />
+                    </a>
+                    <span
+                        v-else
+                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-pill bg-ink-300 px-7 py-3.5 text-[15px] font-bold text-white"
+                        aria-disabled="true"
+                    >
+                        {{ 'Jetzt bei CarSpector buchen' }}
+                        <ExternalLink :size="18" aria-hidden="true" />
+                    </span>
+                    <p v-if="!serviceType.externalUrl" class="mt-3 text-sm text-ink-500">
+                        {{ 'Der Link zum Partnerangebot wird in Kürze freigeschaltet.' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section v-if="!serviceType.isExternal" class="bg-sand-50 py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-5 md:grid-cols-3">
                 <Reveal v-for="(b, i) in benefits" :key="i" :delay="i * 0.08">
@@ -104,7 +175,7 @@ const benefits = computed(() => [
         </div>
     </section>
 
-    <section class="bg-navy-900 py-16 lg:py-24">
+    <section v-if="!serviceType.isExternal" class="bg-navy-900 py-16 lg:py-24">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
             <h2 class="text-section text-white">{{ 'Bereit für Ihr' }} <span class="text-green-400">{{ serviceType.name }}</span>{{ '?' }}</h2>
             <p class="text-lead mx-auto mt-5 max-w-xl text-navy-100">

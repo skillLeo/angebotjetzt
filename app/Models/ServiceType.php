@@ -12,11 +12,32 @@ class ServiceType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['service_category_id', 'name', 'slug', 'description', 'image_url', 'sort_order', 'is_active'];
+    protected $fillable = ['service_category_id', 'name', 'slug', 'description', 'image_url', 'sort_order', 'is_active', 'flow_mode', 'external_url'];
 
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];
+    }
+
+    /**
+     * The provider accepts the request outright instead of quoting a price,
+     * because the fee only follows from the damage established on inspection.
+     */
+    public function isDirectAccept(): bool
+    {
+        return $this->flow_mode === 'direct_accept';
+    }
+
+    /** Handled by a partner off-platform; no request may be submitted here. */
+    public function isExternal(): bool
+    {
+        return $this->flow_mode === 'external';
+    }
+
+    /** The standard price-comparison booking flow every other service uses. */
+    public function usesOfferFlow(): bool
+    {
+        return ! $this->isDirectAccept() && ! $this->isExternal();
     }
 
     public function category(): BelongsTo

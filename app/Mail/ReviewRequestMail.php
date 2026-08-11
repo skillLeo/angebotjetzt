@@ -21,7 +21,7 @@ class ReviewRequestMail extends BaseBrandMail
     protected function lines(): array
     {
         return [
-            "Guten Tag {$this->booking->user->name},",
+            "Guten Tag {$this->booking->customerName()},",
             "Ihr Auftrag <strong>{$this->booking->request->request_number}</strong> wurde abgeschlossen. Wir würden uns sehr über eine kurze Rückmeldung freuen — es dauert nur eine Minute.",
         ];
     }

@@ -86,7 +86,7 @@ class OfferAcceptanceController extends Controller
             "Auftrag {$serviceRequest->request_number} bei {$offer->inspector->name}",
             "/account/bookings/{$booking->id}");
 
-        SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new BookingConfirmedCustomerMail($booking)));
+        SafeMailer::send(fn () => Mail::to($booking->customerEmail())->queue(new BookingConfirmedCustomerMail($booking)));
         SafeMailer::send(fn () => Mail::to($offer->inspector->email)->queue(new BookingConfirmedInspectorMail($booking)));
         SafeMailer::send(fn () => Mail::to($offer->inspector->email)->queue(new CommissionInvoiceMail($invoice)));
 

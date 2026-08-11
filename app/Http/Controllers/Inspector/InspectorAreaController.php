@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Inspector;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CommissionInvoiceMail;
+use App\Mail\DirectAcceptCustomerMail;
 use App\Mail\InspectorVerifyEmailMail;
 use App\Mail\NewOfferMail;
 use App\Mail\OfferUpdatedMail;
@@ -19,11 +21,13 @@ use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\Setting;
 use App\Services\CommissionService;
+use App\Services\InvoiceService;
 use App\Services\RequestService;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -163,7 +167,7 @@ class InspectorAreaController extends Controller
 
         $openMatches = ServiceRequest::whereIn('id', $matchedRequestIds->diff($offeredRequestIds))
             ->whereIn('status', ['open', 'offers_received'])
-            ->with('serviceType:id,name')
+            ->with('serviceType:id,name,flow_mode')
             ->latest()
             ->take(6)
             ->get();
@@ -193,7 +197,7 @@ class InspectorAreaController extends Controller
 
         $query = ServiceRequest::whereIn('id', $inspector->matches()->pluck('request_id'))
             ->whereIn('status', ['open', 'offers_received'])
-            ->with('serviceType:id,name')
+            ->with('serviceType:id,name,flow_mode')
             ->withCount('offers');
 
         if ($type = $httpRequest->query('service')) {
@@ -220,10 +224,11 @@ class InspectorAreaController extends Controller
         $match->update(['viewed_at' => $match->viewed_at ?? now()]);
 
         $ownOffer = $inspector->offers()->where('request_id', $serviceRequest->id)->first();
-        $serviceRequest->load(['serviceType:id,name', 'photos']);
+        $serviceRequest->load(['serviceType:id,name,flow_mode', 'photos']);
 
         return Inertia::render('inspector/RequestDetail', [
             'competingOffers' => $this->competingOffersFor($serviceRequest, $inspector),
+            'commissionPercent' => Setting::commissionPercent(),
             'request' => [
                 ...$this->requestRow($serviceRequest),
                 'vehicle' => [
@@ -261,7 +266,13 @@ class InspectorAreaController extends Controller
                 ->with('error', 'Ihr Konto wird noch von unserem Team geprüft. Sobald Sie freigeschaltet sind, können Sie Angebote abgeben.');
         }
 
-        $serviceRequest->load('serviceType:id,name');
+        $serviceRequest->load('serviceType:id,name,flow_mode');
+
+        // A direct-accept service has no price to quote, so the offer form
+        // must never open for it — send them to the accept action instead.
+        if ($serviceRequest->serviceType->isDirectAccept()) {
+            return redirect()->route('inspector.requests.show', $serviceRequest);
+        }
 
         return Inertia::render('inspector/SubmitOffer', [
             'request' => $this->requestRow($serviceRequest),
@@ -279,6 +290,12 @@ class InspectorAreaController extends Controller
             return redirect()->route('inspector.dashboard')
                 ->with('error', 'Ihr Konto wird noch von unserem Team geprüft. Sobald Sie freigeschaltet sind, können Sie Angebote abgeben.');
         }
+
+        $serviceRequest->loadMissing('serviceType:id,name,flow_mode');
+
+        // Same guard on the write path: no price may ever be recorded for a
+        // direct-accept service, however the request was crafted.
+        abort_if($serviceRequest->serviceType->isDirectAccept(), 404);
 
         if (! in_array($serviceRequest->status, ['open', 'offers_received'], true)) {
             return back()->withErrors(['price' => 'Für diese Anfrage können keine Angebote mehr abgegeben werden.']);
@@ -335,6 +352,95 @@ class InspectorAreaController extends Controller
         return redirect()->route('inspector.offers')->with('success', 'Ihr Angebot wurde übermittelt. Der Kunde wurde benachrichtigt.');
     }
 
+    /**
+     * Direct-accept services (Unfallschadengutachten) carry no price: the fee
+     * follows from the damage established on inspection, so the provider
+     * accepts the request outright and that acceptance IS the assignment.
+     * There is no customer-side comparison or acceptance step afterwards.
+     *
+     * No commission invoice is raised here. The existing InvoiceService bills
+     * a percentage of the accepted offer price, and that price does not exist
+     * for this service — see the handover notes; billing this order is an open
+     * decision rather than something guessed at in code.
+     */
+    public function acceptRequest(ServiceRequest $serviceRequest): RedirectResponse
+    {
+        $inspector = Auth::guard('inspector')->user();
+        $this->assertMatched($serviceRequest, $inspector);
+
+        $serviceRequest->load('serviceType:id,name,flow_mode');
+
+        abort_unless($serviceRequest->serviceType->isDirectAccept(), 404);
+
+        if (! $inspector->is_approved) {
+            return redirect()->route('inspector.dashboard')
+                ->with('error', 'Ihr Konto wird noch von unserem Team geprüft. Sobald Sie freigeschaltet sind, können Sie Anfragen annehmen.');
+        }
+
+        if (! in_array($serviceRequest->status, ['open', 'offers_received'], true)) {
+            return back()->with('error', 'Diese Anfrage wurde bereits vergeben.');
+        }
+
+        $booking = DB::transaction(function () use ($serviceRequest, $inspector) {
+            // Re-check inside the transaction: two providers can open the same
+            // request and hit accept at the same moment, and only one may win.
+            $fresh = ServiceRequest::whereKey($serviceRequest->id)->lockForUpdate()->first();
+
+            if (! in_array($fresh->status, ['open', 'offers_received'], true)) {
+                return null;
+            }
+
+            // The offer row is the platform's record of the assignment. Its
+            // price columns stay NULL, which is what "no fixed price agreed"
+            // means here and keeps price aggregates from counting it.
+            $offer = Offer::updateOrCreate(
+                ['request_id' => $serviceRequest->id, 'inspector_id' => $inspector->id],
+                [
+                    'price_cents' => null,
+                    'commission_cents' => null,
+                    'inspector_cents' => null,
+                    'status' => 'accepted',
+                    'expires_at' => $serviceRequest->expires_at,
+                ]
+            );
+
+            Offer::where('request_id', $serviceRequest->id)
+                ->where('id', '!=', $offer->id)
+                ->where('status', 'open')
+                ->update(['status' => 'rejected']);
+
+            $fresh->update(['status' => 'accepted']);
+
+            return Booking::create([
+                'booking_number' => Booking::nextBookingNumber(),
+                'request_id' => $serviceRequest->id,
+                'offer_id' => $offer->id,
+                'user_id' => $serviceRequest->user_id,
+                'inspector_id' => $inspector->id,
+                'status' => 'accepted',
+            ]);
+        });
+
+        if (! $booking) {
+            return back()->with('error', 'Diese Anfrage wurde soeben von einem anderen Dienstleister angenommen.');
+        }
+
+        if ($serviceRequest->user) {
+            AppNotification::notify($serviceRequest->user, 'booking_confirmed',
+                'Ihre Anfrage wurde angenommen',
+                "{$inspector->name} übernimmt Ihre Anfrage {$serviceRequest->request_number} und meldet sich direkt bei Ihnen.",
+                "/account/bookings/{$booking->id}");
+        }
+
+        SafeMailer::send(fn () => Mail::to($serviceRequest->contact_email)
+            ->queue(new DirectAcceptCustomerMail($serviceRequest, $inspector)));
+
+        ActivityLog::record('request.direct_accepted', $inspector, $serviceRequest);
+
+        return redirect()->route('inspector.jobs.show', $booking->id)
+            ->with('success', 'Sie haben die Anfrage verbindlich angenommen. Die Kontaktdaten des Kunden finden Sie unten.');
+    }
+
     public function editOfferForm(ServiceRequest $serviceRequest): Response|RedirectResponse
     {
         $inspector = Auth::guard('inspector')->user();
@@ -347,7 +453,7 @@ class InspectorAreaController extends Controller
                 ->with('error', 'Dieses Angebot wurde bereits entschieden und kann nicht mehr bearbeitet werden.');
         }
 
-        $serviceRequest->load('serviceType:id,name');
+        $serviceRequest->load('serviceType:id,name,flow_mode');
 
         return Inertia::render('inspector/EditOffer', [
             'request' => $this->requestRow($serviceRequest),
@@ -405,7 +511,7 @@ class InspectorAreaController extends Controller
     {
         return Inertia::render('inspector/Offers', [
             'offers' => Auth::guard('inspector')->user()->offers()
-                ->with('request.serviceType:id,name')
+                ->with('request.serviceType:id,name,flow_mode')
                 ->latest()
                 ->paginate(12)
                 ->through(fn ($o) => [
@@ -427,7 +533,7 @@ class InspectorAreaController extends Controller
     {
         return Inertia::render('inspector/Jobs', [
             'jobs' => Auth::guard('inspector')->user()->bookings()
-                ->with(['request.serviceType:id,name', 'offer', 'payment'])
+                ->with(['request.serviceType:id,name,flow_mode', 'offer', 'payment'])
                 ->latest()
                 ->paginate(12)
                 ->through(fn ($b) => $this->jobRow($b)),
@@ -439,9 +545,10 @@ class InspectorAreaController extends Controller
         $inspector = Auth::guard('inspector')->user();
         abort_unless($booking->inspector_id === $inspector->id, 403);
 
-        $booking->load(['request.serviceType:id,name', 'request.photos', 'offer', 'payment', 'user:id,name,email,phone']);
+        $booking->load(['request.serviceType:id,name,flow_mode', 'request.photos', 'offer', 'payment', 'user:id,name,email,phone']);
 
         return Inertia::render('inspector/JobDetail', [
+            'commissionPercent' => Setting::commissionPercent(),
             'job' => [
                 ...$this->jobRow($booking),
                 // Full customer contact data is revealed only after the job is awarded.
@@ -466,8 +573,12 @@ class InspectorAreaController extends Controller
         ]);
     }
 
-    public function completeJob(Booking $booking): RedirectResponse
-    {
+    public function completeJob(
+        Request $httpRequest,
+        Booking $booking,
+        CommissionService $commission,
+        InvoiceService $invoices
+    ): RedirectResponse {
         $inspector = Auth::guard('inspector')->user();
         abort_unless($booking->inspector_id === $inspector->id, 403);
 
@@ -475,11 +586,62 @@ class InspectorAreaController extends Controller
             return back()->withErrors(['status' => 'Dieser Auftrag kann nicht abgeschlossen werden.']);
         }
 
-        $booking->update(['status' => 'completed_by_inspector', 'completed_at' => now()]);
+        $booking->loadMissing(['offer', 'request.serviceType:id,name,flow_mode']);
+        $isDirectAccept = $booking->request->serviceType->isDirectAccept();
 
-        ActivityLog::record('booking.completed_by_inspector', $inspector, $booking);
+        // Only a direct-accept job arrives here without a price: its fee could
+        // not be known until the damage was assessed. Every other service was
+        // already priced by the accepted offer and is completed unchanged.
+        $data = $isDirectAccept
+            ? $httpRequest->validate([
+                'final_fee' => ['required', 'numeric', 'min:1', 'max:100000'],
+            ], [
+                'final_fee.required' => 'Bitte geben Sie das tatsächlich berechnete Honorar an.',
+                'final_fee.numeric' => 'Bitte geben Sie einen gültigen Betrag ein.',
+                'final_fee.min' => 'Das Honorar muss mindestens 1 € betragen.',
+                'final_fee.max' => 'Das Honorar darf höchstens 100.000 € betragen.',
+            ])
+            : [];
 
-        return back()->with('success', 'Auftrag als abgeschlossen markiert. Der Kunde wird nun um Bestätigung gebeten.');
+        $invoice = DB::transaction(function () use ($booking, $isDirectAccept, $data, $commission, $invoices) {
+            if ($isDirectAccept) {
+                // Fill in the offer that was deliberately left priceless at
+                // acceptance. From here the booking looks exactly like any
+                // other to the invoice system, so commission numbering, PDF,
+                // e-mail and admin views all come from the one existing path.
+                $feeCents = (int) round($data['final_fee'] * 100);
+                $split = $commission->split($feeCents);
+
+                $booking->offer->update([
+                    'price_cents' => $feeCents,
+                    'commission_cents' => $split['commission'],
+                    'inspector_cents' => $split['inspector'],
+                ]);
+
+                $booking->setRelation('offer', $booking->offer->fresh());
+            }
+
+            $booking->update(['status' => 'completed_by_inspector', 'completed_at' => now()]);
+
+            // Guard against a second invoice if this job is somehow completed
+            // twice; the standard flow already invoiced at acceptance time.
+            return $isDirectAccept && ! $booking->invoice
+                ? $invoices->generateFor($booking)
+                : null;
+        });
+
+        if ($invoice) {
+            SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new CommissionInvoiceMail($invoice)));
+        }
+
+        ActivityLog::record('booking.completed_by_inspector', $inspector, $booking, $isDirectAccept ? [
+            'final_fee_cents' => $booking->offer->price_cents,
+            'commission_cents' => $booking->offer->commission_cents,
+        ] : []);
+
+        return back()->with('success', $invoice
+            ? 'Auftrag abgeschlossen. Ihre Provisionsrechnung '.$invoice->invoice_number.' wurde erstellt und per E-Mail versendet.'
+            : 'Auftrag als abgeschlossen markiert. Der Kunde wird nun um Bestätigung gebeten.');
     }
 
     public function serviceAreas(): Response
@@ -569,7 +731,7 @@ class InspectorAreaController extends Controller
             'averageRating' => $inspector->averageRating(),
             'reviewsCount' => $inspector->reviews()->count(),
             'reviews' => $inspector->reviews()
-                ->with('booking.request:id,request_number,service_type_id', 'booking.request.serviceType:id,name')
+                ->with('booking.request:id,request_number,service_type_id', 'booking.request.serviceType:id,name,flow_mode')
                 ->latest()
                 ->paginate(15)
                 ->through(fn (Review $r) => [
@@ -639,6 +801,9 @@ class InspectorAreaController extends Controller
         return Offer::where('request_id', $serviceRequest->id)
             ->where('inspector_id', '!=', $inspector->id)
             ->where('status', 'open')
+            // Direct-accept rows carry no price and must never surface as a
+            // competing quote.
+            ->whereNotNull('price_cents')
             ->orderBy('price_cents')
             ->pluck('price_cents');
     }
@@ -664,6 +829,11 @@ class InspectorAreaController extends Controller
             'ort' => $r->ort,
             'status' => $r->status,
             'date' => $r->created_at->format('d.m.Y'),
+            // Present only for direct-accept services; the provider sees the
+            // accident answers everywhere the request is listed or opened.
+            'directAccept' => $r->serviceType->isDirectAccept(),
+            'accidentRole' => $r->accidentRoleLabel(),
+            'hasLawyer' => $r->lawyerLabel(),
         ];
     }
 
@@ -681,6 +851,9 @@ class InspectorAreaController extends Controller
             'net' => $b->offer->inspector_cents,
             'status' => $b->status,
             'date' => $b->created_at->format('d.m.Y'),
+            // No price was agreed up front for these; the provider states the
+            // fee actually charged when completing the job.
+            'directAccept' => $b->request->serviceType->isDirectAccept(),
         ];
     }
 }

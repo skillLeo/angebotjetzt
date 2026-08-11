@@ -8,7 +8,7 @@ import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     categories: Array<{ id: number; name: string; slug: string; icon: string; is_active: boolean }>;
-    serviceTypes: Array<{ id: number; name: string; slug: string; categoryId: number }>;
+    serviceTypes: Array<{ id: number; name: string; slug: string; categoryId: number; flowMode: string }>;
     heroImage: string;
 }>();
 
@@ -18,7 +18,7 @@ const service = ref('');
 const location = ref('');
 
 const servicesForCategory = computed(() =>
-    props.serviceTypes.filter((t) => String(t.categoryId) === category.value),
+    props.serviceTypes.filter((t) => String(t.categoryId) === category.value && t.flowMode !== 'external'),
 );
 
 watch(category, () => (service.value = ''));

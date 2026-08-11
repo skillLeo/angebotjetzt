@@ -43,7 +43,7 @@ function markAllRead() {
                     <BrandLogo inverted />
                 </Link>
             </div>
-            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" :aria-label="'Portal-Navigation'">
+            <nav class="no-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-5" :aria-label="'Portal-Navigation'">
                 <Link
                     v-for="item in nav"
                     :key="item.href"
@@ -87,7 +87,7 @@ function markAllRead() {
                             <X :size="24" class="text-white" aria-hidden="true" />
                         </button>
                     </div>
-                    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5">
+                    <nav class="no-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-5">
                         <Link
                             v-for="item in nav"
                             :key="item.href"

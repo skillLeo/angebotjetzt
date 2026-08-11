@@ -11,7 +11,7 @@ defineProps<{
         rating: number;
         service: string | null;
         city: string | null;
-        isPlaceholder: boolean;
+        photo?: string | null;
     }>;
     personImage: string;
 }>();
@@ -66,14 +66,6 @@ function scroll(dir: number) {
                             class="flex w-[320px] shrink-0 snap-start flex-col rounded-panel bg-white p-7 shadow-lift"
                         >
                             <span
-                                v-if="rev.isPlaceholder"
-                                class="w-fit rounded-pill bg-ink-100 px-3 py-1 text-xs font-bold tracking-wide text-ink-500 uppercase"
-                                :title="'Illustratives Beispiel, keine echte Kundenbewertung'"
-                            >
-                                {{ 'Beispielbewertung' }}
-                            </span>
-                            <span
-                                v-else
                                 class="w-fit rounded-pill bg-green-50 px-3 py-1 text-xs font-bold tracking-wide text-green-700 uppercase"
                             >
                                 {{ 'Positiv' }}
@@ -82,7 +74,18 @@ function scroll(dir: number) {
                                 „{{ rev.text }}"
                             </p>
                             <div class="mt-6 flex items-center gap-3">
+                                <img
+                                    v-if="rev.photo"
+                                    :src="rev.photo"
+                                    width="44"
+                                    height="44"
+                                    loading="lazy"
+                                    decoding="async"
+                                    :alt="rev.name"
+                                    class="h-11 w-11 shrink-0 rounded-pill object-cover"
+                                />
                                 <span
+                                    v-else
                                     class="flex h-11 w-11 items-center justify-center rounded-pill bg-navy-700 font-display text-base font-bold text-white"
                                 >
                                     {{ rev.name.charAt(0) }}

@@ -32,7 +32,7 @@ class ReviewSurveyController extends Controller
             return redirect('/')->with('success', 'Sie haben für diesen Auftrag bereits eine Bewertung abgegeben. Vielen Dank!');
         }
 
-        $booking->load('request.serviceType:id,name');
+        $booking->load('request.serviceType:id,name,flow_mode');
 
         return Inertia::render('public/ReviewSurvey', [
             'booking' => [

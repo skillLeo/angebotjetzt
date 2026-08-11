@@ -26,7 +26,7 @@ class BookingConfirmedCustomerMail extends BaseBrandMail
         $price = number_format($b->offer->price_cents / 100, 2, ',', '.');
 
         return [
-            "Guten Tag {$b->user->name},",
+            "Guten Tag {$b->customerName()},",
             "Sie haben das Angebot über <strong>{$price} €</strong> angenommen. Ihr Auftrag <strong>{$b->request->request_number}</strong> ist damit verbindlich bestätigt. Der Dienstleister wird sich in Kürze bei Ihnen melden.",
             "Ihr Dienstleister: <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name})<br>Telefon: {$b->inspector->phone}<br>E-Mail: {$b->inspector->email}",
             'Bitte stimmen Sie den Termin und die Bezahlung direkt mit dem Dienstleister ab — beides erfolgt außerhalb der Plattform.',

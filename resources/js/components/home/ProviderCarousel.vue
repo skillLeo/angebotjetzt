@@ -13,7 +13,6 @@ defineProps<{
         jobs: number;
         since: string | null;
         photo: string | null;
-        isPlaceholder: boolean;
     }>;
 }>();
 
@@ -74,14 +73,6 @@ function scroll(dir: number) {
                 </div>
 
                 <span
-                    v-if="p.isPlaceholder"
-                    class="mt-4 inline-flex w-fit items-center gap-1.5 rounded-pill bg-ink-100 px-3 py-1 text-sm font-bold text-ink-500"
-                    :title="'Illustratives Beispiel, kein echter registrierter Anbieter'"
-                >
-                    {{ 'Beispiel' }}
-                </span>
-                <span
-                    v-else
                     class="mt-4 inline-flex w-fit items-center gap-1.5 rounded-pill bg-green-50 px-3 py-1 text-sm font-bold text-green-700"
                 >
                     <BadgeCheck :size="15" aria-hidden="true" /> {{ 'Von AngebotJetzt geprüft' }}
@@ -110,7 +101,6 @@ function scroll(dir: number) {
                 </div>
 
                 <button
-                    v-if="!p.isPlaceholder"
                     type="button"
                     class="mt-5 rounded-pill border border-ink-300 py-2.5 text-sm font-bold text-navy-700 transition hover:border-navy-700 hover:bg-navy-50"
                 >

@@ -36,6 +36,29 @@ class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
+    /*
+     * A booking created by a provider accepting a direct-accept request can
+     * belong to a guest who never opened an account. These read the customer
+     * from the account when there is one and fall back to the contact details
+     * captured on the request when there isn't, so callers never touch a null
+     * user.
+     */
+
+    public function customerName(): string
+    {
+        return $this->user?->name ?? $this->request->contact_name;
+    }
+
+    public function customerEmail(): string
+    {
+        return $this->user?->email ?? $this->request->contact_email;
+    }
+
+    public function customerPhone(): ?string
+    {
+        return $this->user?->phone ?? $this->request->contact_phone;
+    }
+
     public function inspector(): BelongsTo
     {
         return $this->belongsTo(Inspector::class);

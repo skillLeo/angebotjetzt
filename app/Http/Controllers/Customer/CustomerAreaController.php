@@ -28,7 +28,7 @@ class CustomerAreaController extends Controller
                 'bookings' => $user->bookings()->count(),
             ],
             'recentRequests' => $user->requests()
-                ->with('serviceType:id,name')
+                ->with('serviceType:id,name,flow_mode')
                 ->withCount(['offers' => fn ($q) => $q->where('status', 'open')])
                 ->latest()
                 ->take(5)
@@ -41,7 +41,7 @@ class CustomerAreaController extends Controller
     {
         return Inertia::render('customer/Requests', [
             'requests' => Auth::user()->requests()
-                ->with('serviceType:id,name')
+                ->with('serviceType:id,name,flow_mode')
                 ->withCount(['offers' => fn ($q) => $q->where('status', 'open')])
                 ->latest()
                 ->paginate(10)
@@ -53,7 +53,7 @@ class CustomerAreaController extends Controller
     {
         abort_unless($serviceRequest->user_id === Auth::id(), 403);
 
-        $serviceRequest->load(['serviceType:id,name', 'photos', 'offers' => fn ($q) => $q->with('inspector')->latest()]);
+        $serviceRequest->load(['serviceType:id,name,flow_mode', 'photos', 'offers' => fn ($q) => $q->with('inspector')->latest()]);
         $labels = $serviceRequest->offerLabels();
 
         return Inertia::render('customer/RequestDetail', [
@@ -71,19 +71,32 @@ class CustomerAreaController extends Controller
                 'notes' => $serviceRequest->notes,
                 'matched' => $serviceRequest->matched_count,
                 'photos' => $serviceRequest->photos->map(fn ($p) => '/storage/'.$p->path),
+                // Drives the no-fixed-price explanation instead of the
+                // offer-comparison UI for direct-accept services.
+                'directAccept' => $serviceRequest->serviceType->isDirectAccept(),
             ],
-            'offers' => $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o, $labels[$o->id])),
+            // Offers for a direct-accept service hold no price and are never
+            // compared by the customer, so none are handed to the view.
+            'offers' => $serviceRequest->serviceType->isDirectAccept()
+                ? []
+                : $serviceRequest->offers->map(fn ($o) => $this->offerSummary($o, $labels[$o->id])),
         ]);
     }
 
-    public function compareOffers(ServiceRequest $serviceRequest): Response
+    public function compareOffers(ServiceRequest $serviceRequest): Response|RedirectResponse
     {
         abort_unless($serviceRequest->user_id === Auth::id(), 403);
+
+        // There is nothing to compare for a direct-accept service; the
+        // provider's acceptance is the assignment.
+        if ($serviceRequest->serviceType->isDirectAccept()) {
+            return redirect()->route('konto.requests.show', $serviceRequest->id);
+        }
 
         // Not filtered by is_published: that flag only gates whether a
         // review's text is shown publicly as a testimonial, not whether the
         // rating counts — see Inspector::averageRating().
-        $serviceRequest->load(['serviceType:id,name', 'offers' => fn ($q) => $q->with(['inspector' => fn ($i) => $i->withCount('reviews')->withAvg('reviews', 'rating')])->orderBy('price_cents')]);
+        $serviceRequest->load(['serviceType:id,name,flow_mode', 'offers' => fn ($q) => $q->with(['inspector' => fn ($i) => $i->withCount('reviews')->withAvg('reviews', 'rating')])->orderBy('price_cents')]);
         $labels = $serviceRequest->offerLabels();
 
         return Inertia::render('customer/CompareOffers', [
@@ -96,7 +109,7 @@ class CustomerAreaController extends Controller
     {
         return Inertia::render('customer/Bookings', [
             'bookings' => Auth::user()->bookings()
-                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name'])
+                ->with(['inspector:id,name,company_name,city', 'offer', 'request.serviceType:id,name,flow_mode'])
                 ->latest()
                 ->paginate(10)
                 ->through(fn ($b) => $this->bookingSummary($b)),
@@ -107,7 +120,7 @@ class CustomerAreaController extends Controller
     {
         abort_unless($booking->user_id === Auth::id(), 403);
 
-        $booking->load(['inspector', 'offer', 'request.serviceType:id,name']);
+        $booking->load(['inspector', 'offer', 'request.serviceType:id,name,flow_mode']);
 
         return Inertia::render('customer/BookingDetail', [
             'booking' => [

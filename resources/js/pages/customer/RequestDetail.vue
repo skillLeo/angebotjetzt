@@ -3,7 +3,7 @@ import PageCard from '@/components/dashboard/PageCard.vue';
 import StatusBadge from '@/components/dashboard/StatusBadge.vue';
 import { formatEuro } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, Info, PhoneCall, Send } from 'lucide-vue-next';
 
 
 defineProps<{
@@ -12,6 +12,7 @@ defineProps<{
         status: string; matched: number; notes: string | null;
         vehicle: { make: string; model: string; firstRegistration: string | null; mileage: number | null; fuel: string | null; transmission: string | null };
         photos: string[];
+        directAccept: boolean;
     };
     offers: Array<{ id: number; price: number; message: string | null; estimatedDate: string | null; status: string; inspector: { label: string; name: string | null; company: string | null; city: string | null; verified: boolean; experience: number | null } }>;
 }>();
@@ -43,7 +44,31 @@ defineProps<{
         </div>
 
         <div>
-            <PageCard :title="'Angebote'">
+            <!-- No fixed price exists for this service, so no comparison is shown. -->
+            <PageCard v-if="request.directAccept" :title="'Wie es weitergeht'">
+                <div class="space-y-4 p-5 text-sm sm:p-6">
+                    <div class="flex items-start gap-3">
+                        <Send :size="17" class="mt-0.5 shrink-0 text-green-600" aria-hidden="true" />
+                        <p class="text-ink-700">
+                            {{ 'Ihre Anfrage wurde an passende Sachverständige in Ihrer Region gesendet.' }}
+                        </p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <PhoneCall :size="17" class="mt-0.5 shrink-0 text-green-600" aria-hidden="true" />
+                        <p class="text-ink-700">
+                            {{ 'Sobald ein Sachverständiger Ihre Anfrage annimmt, meldet er sich direkt bei Ihnen.' }}
+                        </p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <Info :size="17" class="mt-0.5 shrink-0 text-green-600" aria-hidden="true" />
+                        <p class="text-ink-700">
+                            {{ 'Für diese Leistung gibt es vorab keinen Festpreis: Das Honorar des Sachverständigen richtet sich nach der tatsächlich festgestellten Schadenhöhe.' }}
+                        </p>
+                    </div>
+                </div>
+            </PageCard>
+
+            <PageCard v-else :title="'Angebote'">
                 <div v-if="offers.length" class="space-y-3 p-5">
                     <div v-for="o in offers" :key="o.id" class="rounded-card border border-ink-100 p-4">
                         <div class="flex items-center justify-between">

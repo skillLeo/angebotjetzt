@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import WizardAccidentStep from '@/components/wizard/WizardAccidentStep.vue';
 import WizardDynamicStep, { type WizardFieldDef } from '@/components/wizard/WizardDynamicStep.vue';
 import WizardStep1 from '@/components/wizard/WizardStep1.vue';
 import WizardStep2 from '@/components/wizard/WizardStep2.vue';
@@ -9,7 +10,7 @@ import { Check } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
-    serviceTypes: Array<{ id: number; name: string; slug: string; description: string }>;
+    serviceTypes: Array<{ id: number; name: string; slug: string; description: string; flowMode: string }>;
     serviceTypeFields: Record<number, WizardFieldDef[]>;
     preselected: string | null;
 }>();
@@ -44,6 +45,8 @@ const form = useForm({
     privacy: false as boolean,
     photos: [] as File[],
     answers: {} as Record<string, string | number | File | null>,
+    accident_role: '' as string,
+    has_lawyer: null as boolean | null,
 });
 
 // Kfz-Gutachten (and any other service with nothing defined yet) has zero
@@ -51,6 +54,32 @@ const form = useForm({
 // hardcoded vehicle-appraisal form exactly as before — only a service type an
 // admin has actually configured fields for switches to the dynamic renderer.
 const activeFields = computed(() => props.serviceTypeFields[form.service_type_id ?? -1] ?? []);
+
+const activeType = computed(() => props.serviceTypes.find((t) => t.id === form.service_type_id) ?? null);
+
+// Unfallschadengutachten inserts an extra questions step between choosing the
+// service and entering vehicle details. Every other service keeps exactly the
+// four steps it has always had.
+const isDirectAccept = computed(() => activeType.value?.flowMode === 'direct_accept');
+
+const stepKeys = computed(() => [
+    'service',
+    ...(isDirectAccept.value ? ['accident'] : []),
+    'vehicle',
+    'location',
+    'contact',
+]);
+
+const stepLabels: Record<string, string> = {
+    service: 'Leistung',
+    accident: 'Unfall',
+    vehicle: 'Fahrzeug',
+    location: 'Ort & Termin',
+    contact: 'Kontakt',
+};
+
+const steps = computed(() => stepKeys.value.map((k) => stepLabels[k]));
+const currentKey = computed(() => stepKeys.value[step.value - 1] ?? 'contact');
 
 // The dropdown fields in this wizard sit close to the sticky top bar on a
 // page short enough to barely need scrolling. Closing one of those
@@ -98,10 +127,8 @@ watch(
     { deep: true },
 );
 
-const steps = ['Leistung', 'Fahrzeug', 'Ort & Termin', 'Kontakt'];
-
 function next() {
-    if (step.value < 4) step.value++;
+    if (step.value < stepKeys.value.length) step.value++;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function back() {
@@ -114,6 +141,10 @@ function submit() {
     form.transform((data) => ({
         ...data,
         mileage: data.mileage === '' ? null : data.mileage,
+        // Switching away from Unfallschadengutachten mid-wizard can leave
+        // stale answers behind; only send them where they're actually asked.
+        accident_role: isDirectAccept.value ? data.accident_role : null,
+        has_lawyer: isDirectAccept.value ? data.has_lawyer : null,
     })).post('/request', {
         forceFormData: true,
         onSuccess: () => localStorage.removeItem(DRAFT_KEY),
@@ -154,10 +185,11 @@ function submit() {
             </ol>
 
             <div class="rounded-panel border border-ink-100 bg-white p-6 shadow-card sm:p-8">
-                <WizardStep1 v-if="step === 1" :form="form" :service-types="serviceTypes" @next="next" />
-                <WizardStep2 v-else-if="step === 2 && !activeFields.length" :form="form" v-model:photos="photos" @next="next" @back="back" />
-                <WizardDynamicStep v-else-if="step === 2" :form="form" :fields="activeFields" @next="next" @back="back" />
-                <WizardStep3 v-else-if="step === 3" :form="form" @next="next" @back="back" />
+                <WizardStep1 v-if="currentKey === 'service'" :form="form" :service-types="serviceTypes" @next="next" />
+                <WizardAccidentStep v-else-if="currentKey === 'accident'" :form="form" @next="next" @back="back" />
+                <WizardStep2 v-else-if="currentKey === 'vehicle' && !activeFields.length" :form="form" v-model:photos="photos" @next="next" @back="back" />
+                <WizardDynamicStep v-else-if="currentKey === 'vehicle'" :form="form" :fields="activeFields" @next="next" @back="back" />
+                <WizardStep3 v-else-if="currentKey === 'location'" :form="form" @next="next" @back="back" />
                 <WizardStep4 v-else :form="form" :service-types="serviceTypes" :is-guest="isGuest" @back="back" @submit="submit" />
             </div>
         </div>

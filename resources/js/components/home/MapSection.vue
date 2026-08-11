@@ -6,7 +6,7 @@ import { computed } from 'vue';
 
 
 defineProps<{
-    cityCounts: Record<string, number>;
+    coverage: Array<{ name: string; lat: number; lng: number; covered: boolean; count: number }>;
 }>();
 
 const activity = computed(() => [
@@ -25,7 +25,7 @@ const activity = computed(() => [
             <SectionHeading :eyebrow="'Bundesweit'" :line1="'Geprüfte Anbieter'" :line2="'in ganz Deutschland'" />
 
             <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-                <GermanyMap :city-counts="cityCounts" />
+                <GermanyMap :coverage="coverage" />
 
                 <div class="rounded-panel border border-ink-100 bg-white p-6 shadow-card">
                     <div class="flex items-center gap-2">

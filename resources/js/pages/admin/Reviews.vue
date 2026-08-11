@@ -3,7 +3,7 @@ import AdminTable from '@/components/dashboard/AdminTable.vue';
 import PageCard from '@/components/dashboard/PageCard.vue';
 import Pagination from '@/components/dashboard/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Star } from 'lucide-vue-next';
+import { Star, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -21,6 +21,12 @@ function toggle(id: number) {
     router.post(`/admin/reviews/${id}/published`, {}, { preserveScroll: true });
 }
 
+function remove(row: Record<string, unknown>) {
+    if (!confirm(`Bewertung von „${row.customer}" endgültig löschen?`)) return;
+
+    router.delete(`/admin/reviews/${row.id}`, { preserveScroll: true });
+}
+
 const columns = [
     { key: 'rating', label: 'Bewertung' },
     { key: 'comment', label: 'Kommentar' },
@@ -28,6 +34,7 @@ const columns = [
     { key: 'customer', label: 'Kunde' },
     { key: 'published', label: 'Status', align: 'center' as const },
     { key: 'date', label: 'Datum' },
+    { key: 'actions', label: 'Aktion', align: 'center' as const },
 ];
 </script>
 
@@ -67,6 +74,16 @@ const columns = [
                     @click="toggle(row.id as number)"
                 >
                     {{ row.published ? 'Veröffentlicht' : 'Unveröffentlicht' }}
+                </button>
+            </template>
+            <template #actions="{ row }">
+                <button
+                    type="button"
+                    class="rounded-pill p-1.5 text-ink-400 transition hover:bg-red-50 hover:text-red-600"
+                    :aria-label="'Bewertung löschen'"
+                    @click="remove(row)"
+                >
+                    <Trash2 :size="16" aria-hidden="true" />
                 </button>
             </template>
         </AdminTable>

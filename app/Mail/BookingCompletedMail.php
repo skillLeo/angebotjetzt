@@ -25,7 +25,7 @@ class BookingCompletedMail extends BaseBrandMail
         $b = $this->booking;
 
         return [
-            "Guten Tag {$b->user->name},",
+            "Guten Tag {$b->customerName()},",
             "Ihr Auftrag <strong>{$b->request->request_number}</strong> bei <strong>{$b->inspector->name}</strong> ({$b->inspector->company_name}) wurde als abgeschlossen bestätigt.",
             'Wir würden uns freuen, wenn Sie Ihre Erfahrung mit einer kurzen Bewertung teilen.',
         ];

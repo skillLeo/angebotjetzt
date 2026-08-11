@@ -12,7 +12,10 @@ use App\Models\ActivityLog;
 use App\Models\AppNotification;
 use App\Models\Booking;
 use App\Models\Inspector;
+use App\Models\HomepagePartner;
+use App\Models\HomepageReview;
 use App\Models\Invoice;
+use App\Models\MapLocation;
 use App\Models\Offer;
 use App\Models\Payment;
 use App\Models\RequestMatch;
@@ -25,10 +28,12 @@ use App\Models\ServiceTypeRedirect;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\GeocodingService;
 use App\Services\RequestService;
 use App\Services\WalletService;
 use App\Support\SafeMailer;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +94,7 @@ class AdminController extends Controller
 
     public function requests(Request $request): Response
     {
-        $query = ServiceRequest::with(['serviceType:id,name', 'user:id,name'])->withCount('offers');
+        $query = ServiceRequest::with(['serviceType:id,name,flow_mode', 'user:id,name'])->withCount('offers');
 
         if ($status = $request->query('status')) {
             $query->where('status', $status);
@@ -120,7 +125,7 @@ class AdminController extends Controller
 
     public function requestDetail(ServiceRequest $serviceRequest): Response
     {
-        $serviceRequest->load(['serviceType:id,name', 'user:id,name,email,phone', 'photos',
+        $serviceRequest->load(['serviceType:id,name,flow_mode', 'user:id,name,email,phone', 'photos',
             'matches.inspector:id,name,company_name,city',
             'offers.inspector:id,name,company_name,city', 'booking.payment']);
 
@@ -234,7 +239,7 @@ class AdminController extends Controller
 
     public function bookings(Request $request): Response
     {
-        $query = Booking::with(['request.serviceType:id,name', 'user:id,name', 'inspector:id,name', 'offer', 'payment']);
+        $query = Booking::with(['request.serviceType:id,name,flow_mode', 'user:id,name', 'inspector:id,name', 'offer', 'payment']);
 
         if ($status = $request->query('status')) {
             $query->where('status', $status);
@@ -245,7 +250,7 @@ class AdminController extends Controller
                 ->through(fn ($b) => [
                     'id' => $b->id,
                     'number' => $b->request->request_number,
-                    'customer' => $b->user->name,
+                    'customer' => $b->customerName(),
                     'inspector' => $b->inspector->name,
                     'service' => $b->request->serviceType->name,
                     'total' => $b->offer->price_cents,
@@ -260,14 +265,18 @@ class AdminController extends Controller
 
     public function bookingDetail(Booking $booking): Response
     {
-        $booking->load(['request.serviceType:id,name', 'user:id,name,email,phone', 'inspector', 'offer', 'payment', 'invoice', 'review']);
+        $booking->load(['request.serviceType:id,name,flow_mode', 'user:id,name,email,phone', 'inspector', 'offer', 'payment', 'invoice', 'review']);
 
         return Inertia::render('admin/BookingDetail', [
             'booking' => [
                 'id' => $booking->id,
                 'number' => $booking->request->request_number,
                 'status' => $booking->status,
-                'customer' => $booking->user->only(['name', 'email', 'phone']),
+                'customer' => [
+                    'name' => $booking->customerName(),
+                    'email' => $booking->customerEmail(),
+                    'phone' => $booking->customerPhone(),
+                ],
                 'inspector' => $booking->inspector->only(['id', 'name', 'company_name', 'city', 'email']),
                 'service' => $booking->request->serviceType->name,
                 'vehicle' => $booking->request->vehicle_make.' '.$booking->request->vehicle_model,
@@ -323,11 +332,16 @@ class AdminController extends Controller
             SafeMailer::send(fn () => Mail::to($booking->inspector->email)->queue(new BalanceReleasedMail($booking)));
         }
 
-        AppNotification::notify($booking->user, 'booking_completed',
-            'Auftrag abgeschlossen',
-            "Auftrag {$booking->request->request_number} wurde als abgeschlossen bestätigt.",
-            "/account/bookings/{$booking->id}");
-        SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new BookingCompletedMail($booking)));
+        // A guest booking has no account to notify in-app; the e-mail still goes
+        // to the contact address captured on the request.
+        if ($booking->user) {
+            AppNotification::notify($booking->user, 'booking_completed',
+                'Auftrag abgeschlossen',
+                "Auftrag {$booking->request->request_number} wurde als abgeschlossen bestätigt.",
+                "/account/bookings/{$booking->id}");
+        }
+
+        SafeMailer::send(fn () => Mail::to($booking->customerEmail())->queue(new BookingCompletedMail($booking)));
 
         $requestService->sendReviewRequest($booking);
 
@@ -350,7 +364,7 @@ class AdminController extends Controller
                     'id' => $p->id,
                     'bookingId' => $p->booking->id,
                     'booking' => $p->booking->request->request_number,
-                    'customer' => $p->booking->user->name,
+                    'customer' => $p->booking->customerName(),
                     'inspector' => $p->booking->inspector->name,
                     'total' => $p->total_cents,
                     'commission' => $p->commission_cents,
@@ -728,6 +742,22 @@ class AdminController extends Controller
         return back()->with('success', $review->is_published ? 'Bewertung veröffentlicht.' : 'Bewertung ausgeblendet.');
     }
 
+    /**
+     * Moderation only — for pulling spam or abuse. These rows are genuine
+     * customer feedback tied to a real booking and they feed the provider's
+     * public rating, so there is deliberately no create/edit here; authored
+     * homepage content belongs in HomepageReview instead.
+     */
+    public function destroyReview(Review $review): RedirectResponse
+    {
+        $customer = $review->user?->name;
+        $review->delete();
+
+        ActivityLog::record('review.deleted', Auth::guard('admin')->user(), null, ['customer' => $customer]);
+
+        return back()->with('success', 'Bewertung gelöscht.');
+    }
+
     public function customers(Request $request): Response
     {
         $query = User::withCount(['requests', 'bookings']);
@@ -764,7 +794,7 @@ class AdminController extends Controller
                 'since' => $customer->created_at->format('d.m.Y'),
                 'requestsCount' => $customer->requests_count,
                 'bookingsCount' => $customer->bookings_count,
-                'requests' => $customer->requests()->with('serviceType:id,name')->latest()->take(20)->get()
+                'requests' => $customer->requests()->with('serviceType:id,name,flow_mode')->latest()->take(20)->get()
                     ->map(fn ($r) => [
                         'id' => $r->id,
                         'number' => $r->request_number,
@@ -908,6 +938,318 @@ class AdminController extends Controller
         ActivityLog::record('service_type.deleted', Auth::guard('admin')->user(), null, ['name' => $name]);
 
         return back()->with('success', 'Leistung „'.$name.'“ entfernt.');
+    }
+
+    public function mapLocations(): Response
+    {
+        $counts = Inspector::query()
+            ->where('is_active', true)
+            ->where('is_verified', true)
+            ->selectRaw('city, COUNT(*) as count')
+            ->groupBy('city')
+            ->pluck('count', 'city');
+
+        return Inertia::render('admin/MapLocations', [
+            'locations' => MapLocation::orderBy('name')->get()->map(fn ($l) => [
+                'id' => $l->id,
+                'name' => $l->name,
+                'latitude' => $l->latitude,
+                'longitude' => $l->longitude,
+                'isManual' => $l->is_manual,
+                'isCovered' => $l->is_covered,
+                'providers' => (int) ($counts[$l->name] ?? 0),
+            ]),
+        ]);
+    }
+
+    public function toggleMapLocation(MapLocation $mapLocation): RedirectResponse
+    {
+        $mapLocation->update(['is_covered' => ! $mapLocation->is_covered]);
+
+        ActivityLog::record(
+            $mapLocation->is_covered ? 'map_location.verified' : 'map_location.unverified',
+            Auth::guard('admin')->user(),
+            $mapLocation,
+            ['name' => $mapLocation->name]
+        );
+
+        return back()->with('success', $mapLocation->is_covered
+            ? $mapLocation->name.' wird jetzt grün auf der Karte angezeigt.'
+            : $mapLocation->name.' wird nicht mehr grün angezeigt.');
+    }
+
+    public function bulkMapLocations(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'covered' => ['required', 'boolean'],
+        ]);
+
+        MapLocation::query()->update(['is_covered' => $data['covered']]);
+
+        ActivityLog::record(
+            $data['covered'] ? 'map_location.verified_all' : 'map_location.unverified_all',
+            Auth::guard('admin')->user()
+        );
+
+        return back()->with('success', $data['covered']
+            ? 'Alle Standorte werden jetzt grün angezeigt.'
+            : 'Alle Standorte wurden abgewählt.');
+    }
+
+    /**
+     * Returns the place name for a point the admin clicked on the picker map,
+     * so the name field can prefill itself instead of them guessing a label.
+     */
+    public function reverseGeocode(Request $request, GeocodingService $geocoder): JsonResponse
+    {
+        $data = $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        return response()->json(['name' => $geocoder->nameFor((float) $data['lat'], (float) $data['lng'])]);
+    }
+
+    public function storeMapLocation(Request $request, GeocodingService $geocoder): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120', 'unique:map_locations,name'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        // Coordinates arrive already set when the admin picked the spot on the
+        // map; only fall back to looking the name up when they typed it.
+        if (isset($data['latitude'], $data['longitude'])) {
+            $coords = ['lat' => (float) $data['latitude'], 'lng' => (float) $data['longitude']];
+        } else {
+            $coords = $geocoder->locate($data['name']);
+        }
+
+        if (! $coords) {
+            return back()->withErrors(['name' => 'Für „'.$data['name'].'“ konnten keine Koordinaten gefunden werden. Bitte prüfen Sie die Schreibweise oder wählen Sie den Punkt direkt auf der Karte.']);
+        }
+
+        $location = MapLocation::create([
+            'name' => $data['name'],
+            'latitude' => $coords['lat'],
+            'longitude' => $coords['lng'],
+            'is_manual' => true,
+            'is_covered' => true,
+        ]);
+
+        ActivityLog::record('map_location.created', Auth::guard('admin')->user(), $location, ['name' => $location->name]);
+
+        return back()->with('success', $location->name.' wurde zur Karte hinzugefügt.');
+    }
+
+    public function updateMapLocation(Request $request, MapLocation $mapLocation, GeocodingService $geocoder): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120', 'unique:map_locations,name,'.$mapLocation->id],
+        ]);
+
+        $attributes = ['name' => $data['name']];
+
+        if ($data['name'] !== $mapLocation->name) {
+            $coords = $geocoder->locate($data['name']);
+
+            if (! $coords) {
+                return back()->withErrors(['name' => 'Für „'.$data['name'].'“ konnten keine Koordinaten gefunden werden. Bitte prüfen Sie die Schreibweise.']);
+            }
+
+            $attributes['latitude'] = $coords['lat'];
+            $attributes['longitude'] = $coords['lng'];
+        }
+
+        $mapLocation->update($attributes);
+
+        ActivityLog::record('map_location.updated', Auth::guard('admin')->user(), $mapLocation, ['name' => $mapLocation->name]);
+
+        return back()->with('success', 'Standort aktualisiert.');
+    }
+
+    public function destroyMapLocation(MapLocation $mapLocation): RedirectResponse
+    {
+        $name = $mapLocation->name;
+        $mapLocation->delete();
+
+        ActivityLog::record('map_location.deleted', Auth::guard('admin')->user(), null, ['name' => $name]);
+
+        return back()->with('success', $name.' wurde von der Karte entfernt.');
+    }
+
+    public function homepageReviews(): Response
+    {
+        return Inertia::render('admin/HomepageReviews', [
+            'reviews' => HomepageReview::orderBy('sort_order')->orderBy('id')->get()->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'rating' => $r->rating,
+                'comment' => $r->comment,
+                'service' => $r->service,
+                'city' => $r->city,
+                'photo' => $r->photoUrl(),
+                'sortOrder' => $r->sort_order,
+            ]),
+        ]);
+    }
+
+    public function storeHomepageReview(Request $request): RedirectResponse
+    {
+        $data = $this->validateHomepageReview($request);
+        $data['photo_path'] = $this->storeUploadedPhoto($request, 'reviews');
+
+        $review = HomepageReview::create($data);
+
+        ActivityLog::record('homepage_review.created', Auth::guard('admin')->user(), $review, ['name' => $review->name]);
+
+        return back()->with('success', 'Bewertung hinzugefügt.');
+    }
+
+    public function updateHomepageReview(Request $request, HomepageReview $homepageReview): RedirectResponse
+    {
+        $data = $this->validateHomepageReview($request);
+
+        if ($photo = $this->storeUploadedPhoto($request, 'reviews')) {
+            if ($homepageReview->photo_path) {
+                Storage::disk('public')->delete($homepageReview->photo_path);
+            }
+
+            $data['photo_path'] = $photo;
+        }
+
+        $homepageReview->update($data);
+
+        ActivityLog::record('homepage_review.updated', Auth::guard('admin')->user(), $homepageReview, ['name' => $homepageReview->name]);
+
+        return back()->with('success', 'Bewertung aktualisiert.');
+    }
+
+    public function destroyHomepageReview(HomepageReview $homepageReview): RedirectResponse
+    {
+        $name = $homepageReview->name;
+
+        if ($homepageReview->photo_path) {
+            Storage::disk('public')->delete($homepageReview->photo_path);
+        }
+
+        $homepageReview->delete();
+
+        ActivityLog::record('homepage_review.deleted', Auth::guard('admin')->user(), null, ['name' => $name]);
+
+        return back()->with('success', 'Bewertung entfernt.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateHomepageReview(Request $request): array
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['required', 'string', 'max:1000'],
+            'service' => ['nullable', 'string', 'max:190'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+            'photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        unset($data['photo']);
+
+        return $data;
+    }
+
+    public function homepagePartners(): Response
+    {
+        return Inertia::render('admin/HomepagePartners', [
+            'partners' => HomepagePartner::orderBy('sort_order')->orderBy('id')->get()->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'city' => $p->city,
+                'reviewsCount' => $p->reviews_count,
+                'rating' => $p->rating,
+                'jobsCount' => $p->jobs_count,
+                'memberSince' => $p->member_since,
+                'photo' => $p->photoUrl(),
+                'sortOrder' => $p->sort_order,
+            ]),
+        ]);
+    }
+
+    public function storeHomepagePartner(Request $request): RedirectResponse
+    {
+        $data = $this->validateHomepagePartner($request);
+        $data['photo_path'] = $this->storeUploadedPhoto($request, 'partners');
+
+        $partner = HomepagePartner::create($data);
+
+        ActivityLog::record('homepage_partner.created', Auth::guard('admin')->user(), $partner, ['name' => $partner->name]);
+
+        return back()->with('success', 'Partner hinzugefügt.');
+    }
+
+    public function updateHomepagePartner(Request $request, HomepagePartner $homepagePartner): RedirectResponse
+    {
+        $data = $this->validateHomepagePartner($request);
+
+        if ($photo = $this->storeUploadedPhoto($request, 'partners')) {
+            if ($homepagePartner->photo_path) {
+                Storage::disk('public')->delete($homepagePartner->photo_path);
+            }
+
+            $data['photo_path'] = $photo;
+        }
+
+        $homepagePartner->update($data);
+
+        ActivityLog::record('homepage_partner.updated', Auth::guard('admin')->user(), $homepagePartner, ['name' => $homepagePartner->name]);
+
+        return back()->with('success', 'Partner aktualisiert.');
+    }
+
+    public function destroyHomepagePartner(HomepagePartner $homepagePartner): RedirectResponse
+    {
+        $name = $homepagePartner->name;
+
+        if ($homepagePartner->photo_path) {
+            Storage::disk('public')->delete($homepagePartner->photo_path);
+        }
+
+        $homepagePartner->delete();
+
+        ActivityLog::record('homepage_partner.deleted', Auth::guard('admin')->user(), null, ['name' => $name]);
+
+        return back()->with('success', 'Partner entfernt.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateHomepagePartner(Request $request): array
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:190'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'reviews_count' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'rating' => ['nullable', 'numeric', 'min:1', 'max:5'],
+            'jobs_count' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'member_since' => ['nullable', 'string', 'max:60'],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+            'photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        unset($data['photo']);
+
+        return $data;
+    }
+
+    private function storeUploadedPhoto(Request $request, string $folder): ?string
+    {
+        return $request->hasFile('photo')
+            ? $request->file('photo')->store($folder, 'public')
+            : null;
     }
 
     private function forgetServiceCaches(): void

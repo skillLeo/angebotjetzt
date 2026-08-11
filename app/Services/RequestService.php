@@ -144,7 +144,7 @@ class RequestService
             ['booking' => $booking->id]
         );
 
-        SafeMailer::send(fn () => Mail::to($booking->user->email)->queue(new ReviewRequestMail($booking, $signedLink)));
+        SafeMailer::send(fn () => Mail::to($booking->customerEmail())->queue(new ReviewRequestMail($booking, $signedLink)));
     }
 
     /**

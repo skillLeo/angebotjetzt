@@ -24,7 +24,7 @@ class LowRatingFeedbackMail extends BaseBrandMail
 
         return [
             "Ein Kunde hat für Auftrag <strong>{$this->booking->request->request_number}</strong> eine Bewertung von <strong>{$this->rawRating}/10</strong> abgegeben und wurde zur internen Rückmeldung statt zu Trustpilot weitergeleitet.",
-            "Kunde: <strong>{$this->booking->user->name}</strong> ({$this->booking->user->email})",
+            "Kunde: <strong>{$this->booking->customerName()}</strong> ({$this->booking->customerEmail()})",
             "Dienstleister: <strong>{$inspector->name}</strong>".($inspector->company_name ? " ({$inspector->company_name})" : ''),
             'Rückmeldung des Kunden:<br>'.($this->comment ? nl2br(e($this->comment)) : '<em>Kein zusätzlicher Kommentar.</em>'),
         ];

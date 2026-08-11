@@ -137,6 +137,7 @@ Route::middleware(['auth:inspector', EnsureInspectorOnboardingComplete::class])-
     Route::get('/', [InspectorAreaController::class, 'dashboard'])->name('dashboard');
     Route::get('/requests', [InspectorAreaController::class, 'requests'])->name('requests');
     Route::get('/requests/{serviceRequest}', [InspectorAreaController::class, 'requestDetail'])->name('requests.show');
+    Route::post('/requests/{serviceRequest}/accept', [InspectorAreaController::class, 'acceptRequest'])->name('requests.accept');
     Route::get('/requests/{serviceRequest}/offer', [InspectorAreaController::class, 'offerForm'])->name('requests.offer');
     Route::post('/requests/{serviceRequest}/offer', [InspectorAreaController::class, 'storeOffer'])->name('requests.offer.store');
     Route::get('/requests/{serviceRequest}/offer/edit', [InspectorAreaController::class, 'editOfferForm'])->name('requests.offer.edit');
@@ -190,6 +191,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/invoices/{invoice}/paid', [AdminController::class, 'markInvoicePaid'])->name('invoices.paid');
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
     Route::post('/reviews/{review}/published', [AdminController::class, 'togglePublished'])->name('reviews.published.toggle');
+    Route::delete('/reviews/{review}', [AdminController::class, 'destroyReview'])->name('reviews.destroy');
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
     Route::get('/customers/{customer}', [AdminController::class, 'customerDetail'])->name('customers.show');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
@@ -200,6 +202,21 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/service-types/{serviceType}/fields', [AdminController::class, 'serviceTypeFields'])->name('service-types.fields');
     Route::post('/service-types/{serviceType}/fields', [AdminController::class, 'storeServiceTypeField'])->name('service-types.fields.store');
     Route::delete('/service-types/{serviceType}/fields/{field}', [AdminController::class, 'destroyServiceTypeField'])->name('service-types.fields.destroy');
+    Route::get('/map-locations', [AdminController::class, 'mapLocations'])->name('map-locations');
+    Route::post('/map-locations', [AdminController::class, 'storeMapLocation'])->name('map-locations.store');
+    Route::post('/map-locations/reverse-geocode', [AdminController::class, 'reverseGeocode'])->name('map-locations.reverse-geocode');
+    Route::post('/map-locations/bulk', [AdminController::class, 'bulkMapLocations'])->name('map-locations.bulk');
+    Route::post('/map-locations/{mapLocation}/covered', [AdminController::class, 'toggleMapLocation'])->name('map-locations.covered.toggle');
+    Route::post('/map-locations/{mapLocation}', [AdminController::class, 'updateMapLocation'])->name('map-locations.update');
+    Route::delete('/map-locations/{mapLocation}', [AdminController::class, 'destroyMapLocation'])->name('map-locations.destroy');
+    Route::get('/homepage-reviews', [AdminController::class, 'homepageReviews'])->name('homepage-reviews');
+    Route::post('/homepage-reviews', [AdminController::class, 'storeHomepageReview'])->name('homepage-reviews.store');
+    Route::post('/homepage-reviews/{homepageReview}', [AdminController::class, 'updateHomepageReview'])->name('homepage-reviews.update');
+    Route::delete('/homepage-reviews/{homepageReview}', [AdminController::class, 'destroyHomepageReview'])->name('homepage-reviews.destroy');
+    Route::get('/homepage-partners', [AdminController::class, 'homepagePartners'])->name('homepage-partners');
+    Route::post('/homepage-partners', [AdminController::class, 'storeHomepagePartner'])->name('homepage-partners.store');
+    Route::post('/homepage-partners/{homepagePartner}', [AdminController::class, 'updateHomepagePartner'])->name('homepage-partners.update');
+    Route::delete('/homepage-partners/{homepagePartner}', [AdminController::class, 'destroyHomepagePartner'])->name('homepage-partners.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::post('/settings/logo', [AdminController::class, 'uploadLogo'])->name('settings.logo.upload');

@@ -19,8 +19,9 @@ class ServiceRequest extends Model
         'request_number', 'user_id', 'service_type_id', 'vehicle_make', 'vehicle_model',
         'first_registration', 'mileage', 'vin', 'fuel_type', 'transmission',
         'plz', 'ort', 'strasse', 'preferred_date', 'alternative_date', 'notes', 'answers',
+        'accident_role', 'has_lawyer',
         'contact_name', 'contact_email', 'contact_phone', 'status', 'matched_count', 'expires_at',
-        'first_offer_at', 'offer_reminder_sent_at', 'offer_final_reminder_sent_at',
+        'first_offer_at', 'offer_reminder_sent_at', 'offer_final_reminder_sent_at', 'no_offer_fallback_sent_at',
     ];
 
     protected function casts(): array
@@ -32,8 +33,26 @@ class ServiceRequest extends Model
             'first_offer_at' => 'datetime',
             'offer_reminder_sent_at' => 'datetime',
             'offer_final_reminder_sent_at' => 'datetime',
+            'no_offer_fallback_sent_at' => 'datetime',
             'answers' => 'array',
+            'has_lawyer' => 'boolean',
         ];
+    }
+
+    /** German label for the accident-role answer, for provider-facing views. */
+    public function accidentRoleLabel(): ?string
+    {
+        return match ($this->accident_role) {
+            'geschaedigter' => 'Geschädigter (unverschuldet)',
+            'verursacher' => 'Unfallverursacher',
+            'unklar' => 'Unklar',
+            default => null,
+        };
+    }
+
+    public function lawyerLabel(): ?string
+    {
+        return $this->has_lawyer === null ? null : ($this->has_lawyer ? 'Ja' : 'Nein');
     }
 
     public function user(): BelongsTo

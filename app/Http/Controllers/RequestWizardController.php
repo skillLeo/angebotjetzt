@@ -18,9 +18,21 @@ class RequestWizardController extends Controller
 {
     use PasswordValidationRules;
 
-    public function show(Request $request): Response
+    public function show(Request $request): Response|RedirectResponse
     {
+        // Externally-fulfilled services are never bookable here. Landing on
+        // the wizard with one preselected sends the customer to that
+        // service's own page, which carries the partner hand-off instead.
+        if ($preselected = $request->query('service')) {
+            $type = ServiceType::where('slug', $preselected)->first();
+
+            if ($type?->isExternal()) {
+                return redirect()->route('service-type', $type->slug);
+            }
+        }
+
         $activeTypes = ServiceType::where('is_active', true)
+            ->where('flow_mode', '!=', 'external')
             ->orderBy('sort_order')
             ->with('fields')
             ->get();
@@ -28,6 +40,7 @@ class RequestWizardController extends Controller
         return Inertia::render('wizard/RequestWizard', [
             'serviceTypes' => $activeTypes->map(fn ($t) => [
                 'id' => $t->id, 'name' => $t->name, 'slug' => $t->slug, 'description' => $t->description,
+                'flowMode' => $t->flow_mode,
             ])->values(),
             // Keyed by service_type_id so the frontend can pick the right set
             // once a service is chosen in step 1, without a second round-trip.
@@ -47,6 +60,12 @@ class RequestWizardController extends Controller
 
         $request->validate(['service_type_id' => ['required', 'exists:service_types,id']]);
         $serviceType = ServiceType::with('fields')->findOrFail($request->input('service_type_id'));
+
+        // Backstop for the external services: the UI never offers this path,
+        // so reaching here means a hand-crafted POST. Refuse it outright
+        // rather than creating a request nobody on the platform can fulfil.
+        abort_if($serviceType->isExternal(), 404);
+
         $hasCustomFields = $serviceType->fields->isNotEmpty();
 
         $rules = [
@@ -65,6 +84,9 @@ class RequestWizardController extends Controller
             'alternative_date' => ['nullable', 'date', 'after_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:3000'],
             'answers' => ['nullable', 'array'],
+            // Only asked for direct-accept services, and mandatory there.
+            'accident_role' => [$serviceType->isDirectAccept() ? 'required' : 'nullable', Rule::in(['geschaedigter', 'verursacher', 'unklar'])],
+            'has_lawyer' => [$serviceType->isDirectAccept() ? 'required' : 'nullable', 'boolean'],
             'contact_name' => ['required', 'string', 'max:120'],
             'contact_email' => ['required', 'email', 'max:190'],
             'contact_phone' => ['required', 'string', 'max:40', 'regex:/^[+0-9][0-9 \/\-()]{5,}$/'],
@@ -78,6 +100,8 @@ class RequestWizardController extends Controller
             'vin.regex' => 'Die FIN/VIN muss aus 17 Zeichen bestehen (ohne I, O und Q).',
             'first_registration.regex' => 'Bitte geben Sie die Erstzulassung im Format MM/JJJJ an, z. B. 03/2019.',
             'plz.digits' => 'Bitte geben Sie eine gültige fünfstellige Postleitzahl ein.',
+            'accident_role.required' => 'Bitte geben Sie Ihre Rolle bei dem Unfall an.',
+            'has_lawyer.required' => 'Bitte geben Sie an, ob Sie bereits einen Anwalt beauftragt haben.',
             'agb.accepted' => 'Bitte akzeptieren Sie die AGB.',
             'privacy.accepted' => 'Bitte akzeptieren Sie die Datenschutzerklärung.',
         ];
@@ -152,6 +176,7 @@ class RequestWizardController extends Controller
                 'unmatched' => $serviceRequest->status === 'unmatched',
                 'service' => $serviceRequest->serviceType->name,
                 'ort' => $serviceRequest->ort,
+                'directAccept' => $serviceRequest->serviceType->isDirectAccept(),
             ],
             // Never prompt to set a password for an email that already has an
             // account — that would only invite confusion. Offer to log in instead.

@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Mail\ContactFormMail;
 use App\Models\Booking;
 use App\Models\CategoryInterestSignal;
+use App\Models\HomepagePartner;
+use App\Models\HomepageReview;
 use App\Models\Inspector;
+use App\Models\MapLocation;
 use App\Models\Offer;
 use App\Models\Review;
 use App\Models\ServiceCategory;
@@ -46,12 +49,20 @@ class PublicController extends Controller
                     'jobs' => $i->bookings_count,
                     'since' => $i->member_since?->locale('de')->translatedFormat('F Y'),
                     'photo' => $portraits[$idx % count($portraits)],
-                    'isPlaceholder' => false,
                 ])
-                ->concat($this->placeholderProviders());
+                ->concat(HomepagePartner::orderBy('sort_order')->orderBy('id')->get()->map(fn ($p) => [
+                    'name' => $p->name,
+                    'city' => $p->city,
+                    'reviews' => $p->reviews_count,
+                    'rating' => $p->rating,
+                    'jobs' => $p->jobs_count,
+                    'since' => $p->member_since,
+                    'photo' => $p->photoUrl(),
+                ]))
+                ->values();
 
             $recentRequests = ServiceRequest::query()
-                ->with('serviceType:id,name')
+                ->with('serviceType:id,name,flow_mode')
                 ->whereIn('status', ['offers_received', 'completed', 'accepted'])
                 ->latest()
                 ->take(10)
@@ -67,7 +78,7 @@ class PublicController extends Controller
                 ]);
 
             $reviews = Review::query()
-                ->with(['user:id,name', 'inspector:id,city', 'booking.request.serviceType:id,name'])
+                ->with(['user:id,name', 'inspector:id,city', 'booking.request.serviceType:id,name,flow_mode'])
                 ->where('is_published', true)
                 ->where('rating', '>=', 4)
                 ->latest()
@@ -79,15 +90,40 @@ class PublicController extends Controller
                     'rating' => $rev->rating,
                     'service' => $rev->booking?->request?->serviceType?->name,
                     'city' => $rev->inspector?->city,
-                    'isPlaceholder' => false,
+                    'photo' => null,
                 ])
-                ->concat($this->placeholderReviews());
+                ->concat(HomepageReview::orderBy('sort_order')->orderBy('id')->get()->map(fn ($r) => [
+                    'name' => $r->name,
+                    'text' => $r->comment,
+                    'rating' => $r->rating,
+                    'service' => $r->service,
+                    'city' => $r->city,
+                    'photo' => $r->photoUrl(),
+                ]))
+                ->values();
 
-            $cityCounts = Inspector::query()
+            // A pin is green either because an admin ticked it on the
+            // Kartenstandorte screen or because approved providers actually
+            // sit there; the provider count rides along so the popup only
+            // ever states a number that's real.
+            $providerCounts = Inspector::query()
                 ->where('is_active', true)
+                ->where('is_verified', true)
                 ->selectRaw('city, COUNT(*) as count')
                 ->groupBy('city')
                 ->pluck('count', 'city');
+
+            $coverage = MapLocation::orderBy('name')->get()->map(function ($l) use ($providerCounts) {
+                $count = (int) ($providerCounts[$l->name] ?? 0);
+
+                return [
+                    'name' => $l->name,
+                    'lat' => $l->latitude,
+                    'lng' => $l->longitude,
+                    'covered' => $l->is_covered || $count > 0,
+                    'count' => $count,
+                ];
+            });
 
             return [
                 'stats' => [
@@ -99,7 +135,7 @@ class PublicController extends Controller
                 'providers' => $providers,
                 'recentRequests' => $recentRequests,
                 'reviews' => $reviews,
-                'cityCounts' => $cityCounts,
+                'coverage' => $coverage,
                 'totalReviews' => Review::count(),
             ];
         })();
@@ -154,6 +190,12 @@ class PublicController extends Controller
                     'name' => $serviceType->category->name,
                     'slug' => $serviceType->category->slug,
                 ] : null,
+                // Externally fulfilled services replace the whole booking CTA
+                // with a partner hand-off; the wizard is never offered.
+                'isExternal' => $serviceType->isExternal(),
+                'externalUrl' => $serviceType->isExternal()
+                    ? ($serviceType->external_url ?: config('partners.carspector_url')) ?: null
+                    : null,
             ],
             'others' => $this->serviceTypes()->where('slug', '!=', $serviceType->slug)->values(),
         ]);
@@ -211,7 +253,7 @@ class PublicController extends Controller
     public function reviews(): Response
     {
         return Inertia::render('public/Reviews', [
-            'reviews' => Review::with(['user:id,name', 'inspector:id,name,city', 'booking.request.serviceType:id,name'])
+            'reviews' => Review::with(['user:id,name', 'inspector:id,name,city', 'booking.request.serviceType:id,name,flow_mode'])
                 ->where('is_published', true)
                 ->latest()
                 ->paginate(12)
@@ -310,7 +352,7 @@ class PublicController extends Controller
     {
         return ServiceType::where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'description', 'image_url', 'service_category_id'])
+            ->get(['id', 'name', 'slug', 'description', 'image_url', 'service_category_id', 'flow_mode'])
             ->map(fn ($t) => [
                 'id' => $t->id,
                 'name' => $t->name,
@@ -318,63 +360,10 @@ class PublicController extends Controller
                 'description' => $t->description,
                 'image' => $t->image_url ?? config('media.hero.inspection'),
                 'categoryId' => $t->service_category_id,
+                // Lets the request pickers leave out externally fulfilled
+                // services while the browsable service lists still show them.
+                'flowMode' => $t->flow_mode,
             ]);
     }
 
-    /**
-     * Illustrative example content for launch, appended after any real
-     * reviews — clearly flagged via isPlaceholder so the frontend can label
-     * them honestly (never presented as genuine customer feedback).
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function placeholderReviews(): array
-    {
-        return [
-            ['name' => 'Michael Weber', 'text' => 'Sehr professionelle Abwicklung, das Gutachten kam schnell und war verständlich erklärt.', 'rating' => 5, 'service' => 'Unfallschadengutachten', 'city' => 'Berlin', 'isPlaceholder' => true],
-            ['name' => 'Sandra Hoffmann', 'text' => 'Faire Preise und ein sehr freundlicher Gutachter vor Ort.', 'rating' => 5, 'service' => 'Fahrzeugbewertung', 'city' => 'München', 'isPlaceholder' => true],
-            ['name' => 'Thomas Schneider', 'text' => 'Der Gebrauchtwagencheck hat mir vor dem Kauf wichtige Mängel aufgezeigt.', 'rating' => 5, 'service' => 'Gebrauchtwagencheck', 'city' => 'Hamburg', 'isPlaceholder' => true],
-            ['name' => 'Julia Becker', 'text' => 'Alles lief unkompliziert, Termin schon am nächsten Tag bekommen.', 'rating' => 4, 'service' => 'Unfallschadengutachten', 'city' => 'Köln', 'isPlaceholder' => true],
-            ['name' => 'Markus Wolf', 'text' => 'Kompetente Beratung und ein gut nachvollziehbares Gutachten.', 'rating' => 5, 'service' => 'Reparaturkosten- und Totalschadengutachten', 'city' => 'Frankfurt am Main', 'isPlaceholder' => true],
-            ['name' => 'Anna Fischer', 'text' => 'Schnelle Rückmeldung und transparente Kommunikation während des gesamten Prozesses.', 'rating' => 4, 'service' => 'Wertminderungs- und Restwertgutachten', 'city' => 'Stuttgart', 'isPlaceholder' => true],
-            ['name' => 'Daniel Krüger', 'text' => 'Die Versicherung hat das Gutachten ohne Rückfragen akzeptiert.', 'rating' => 5, 'service' => 'Versicherungs- und Rechtsgutachten', 'city' => 'Düsseldorf', 'isPlaceholder' => true],
-            ['name' => 'Laura Zimmermann', 'text' => 'Sehr zufrieden mit dem Service, würde jederzeit wieder buchen.', 'rating' => 5, 'service' => 'Fahrzeugbewertung', 'city' => 'Dortmund', 'isPlaceholder' => true],
-            ['name' => 'Peter Braun', 'text' => 'Gute Erklärung der Ergebnisse und freundlicher Kontakt.', 'rating' => 4, 'service' => 'Gebrauchtwagencheck', 'city' => 'Leipzig', 'isPlaceholder' => true],
-            ['name' => 'Nicole König', 'text' => 'Zuverlässig und pünktlich, kann ich nur empfehlen.', 'rating' => 5, 'service' => 'Spezialgutachten', 'city' => 'Bremen', 'isPlaceholder' => true],
-        ];
-    }
-
-    /**
-     * Illustrative example providers for launch — never real registered
-     * accounts, so the frontend must never link these to a profile page
-     * (see isPlaceholder in ProviderCarousel.vue).
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function placeholderProviders(): array
-    {
-        $names = [
-            ['Kfz-Gutachten Nord GmbH', 'Hamburg'],
-            ['Sachverständigenbüro Süd', 'München'],
-            ['AutoCheck Berlin', 'Berlin'],
-            ['Rhein Gutachter Team', 'Köln'],
-            ['Fahrzeugprüfung Frankfurt', 'Frankfurt am Main'],
-            ['KFZ Experten Stuttgart', 'Stuttgart'],
-            ['Gutachterbüro Rheinland', 'Düsseldorf'],
-            ['AutoWert Sachsen', 'Leipzig'],
-            ['Nordwest Kfz-Sachverständige', 'Bremen'],
-            ['Ruhrgebiet Fahrzeugcheck', 'Dortmund'],
-        ];
-
-        return collect($names)->map(fn ($n, $idx) => [
-            'name' => $n[0],
-            'city' => $n[1],
-            'reviews' => 12 + $idx,
-            'rating' => 4.8,
-            'jobs' => 20 + $idx * 3,
-            'since' => 'Januar 2026',
-            'photo' => null,
-            'isPlaceholder' => true,
-        ])->all();
-    }
 }

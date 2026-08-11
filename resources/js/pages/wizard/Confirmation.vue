@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import FormField from '@/components/forms/FormField.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { CheckCircle2, KeyRound, LogIn, Mail } from 'lucide-vue-next';
+import { CheckCircle2, Info, KeyRound, LogIn, Mail } from 'lucide-vue-next';
 import { Motion } from 'motion-v';
 
 const props = defineProps<{
-    request: { number: string; matched: number; unmatched: boolean; service: string; ort: string };
+    request: { number: string; matched: number; unmatched: boolean; service: string; ort: string; directAccept: boolean };
     canClaim: boolean;
     canLogin: boolean;
     contactEmail: string | null;
@@ -49,9 +49,27 @@ function claim() {
                         <p class="font-display font-bold text-navy-700">
                             {{ 'Dienstleister benachrichtigt' }}
                         </p>
-                        <p class="mt-1 text-sm text-ink-500">
+                        <p v-if="request.directAccept" class="mt-1 text-sm text-ink-500">
+                            Wir haben passende Sachverständige in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
+                            informiert. Sobald ein Sachverständiger Ihre Anfrage annimmt, meldet er sich direkt bei Ihnen.
+                        </p>
+                        <p v-else class="mt-1 text-sm text-ink-500">
                             Wir haben passende Dienstleister in {{ request.ort }} über Ihre Anfrage ({{ request.service }})
                             informiert. Die ersten Angebote treffen meist innerhalb weniger Stunden ein.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- No fixed price is quoted up front for this service. -->
+                <div v-if="request.directAccept" class="mt-5 flex items-start gap-4 border-t border-ink-100 pt-5">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-navy-50 text-navy-700">
+                        <Info :size="20" aria-hidden="true" />
+                    </span>
+                    <div>
+                        <p class="font-display font-bold text-navy-700">{{ 'Kein Festpreis im Voraus' }}</p>
+                        <p class="mt-1 text-sm text-ink-500">
+                            Für diese Leistung erhalten Sie vorab kein Preisangebot zum Vergleich. Das Honorar des
+                            Sachverständigen richtet sich nach der tatsächlich festgestellten Schadenhöhe.
                         </p>
                     </div>
                 </div>

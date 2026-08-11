@@ -4,7 +4,9 @@ import { usePage } from '@inertiajs/vue3';
 import {
     Banknote,
     FileText,
+    Handshake,
     LayoutDashboard,
+    MapPin,
     Package,
     Percent,
     Receipt,
@@ -33,6 +35,9 @@ const nav = computed(() => [
     { label: 'Bewertungen', href: '/admin/reviews', icon: Star, active: url.value.startsWith('/admin/reviews') },
     { label: 'Kunden', href: '/admin/customers', icon: Users, active: url.value.startsWith('/admin/customers') },
     { label: 'Dienstleistungen', href: '/admin/services', icon: Tag, active: url.value.startsWith('/admin/services') },
+    { label: 'Kartenstandorte', href: '/admin/map-locations', icon: MapPin, active: url.value.startsWith('/admin/map-locations') },
+    { label: 'Startseiten-Bewertungen', href: '/admin/homepage-reviews', icon: Star, active: url.value.startsWith('/admin/homepage-reviews') },
+    { label: 'Startseiten-Partner', href: '/admin/homepage-partners', icon: Handshake, active: url.value.startsWith('/admin/homepage-partners') },
     { label: 'Einstellungen', href: '/admin/settings', icon: Settings, active: url.value.startsWith('/admin/settings') },
     { label: 'Protokolle', href: '/admin/logs', icon: ScrollText, active: url.value.startsWith('/admin/logs') },
 ]);

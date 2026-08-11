@@ -36,7 +36,7 @@ class GuestOfferController extends Controller
         $email = $this->guestEmail($request, $serviceRequest);
         abort_unless(in_array($serviceRequest->status, ['open', 'offers_received'], true), 404);
 
-        $serviceRequest->load('serviceType:id,name');
+        $serviceRequest->load('serviceType:id,name,flow_mode');
 
         return Inertia::render('inspector/GuestOffer', [
             'email' => $email,
