@@ -40,10 +40,15 @@ return new class extends Migration
             $table->unsignedBigInteger('inspector_cents')->nullable()->change();
         });
 
-        DB::table('service_types')->where('slug', 'unfallschadengutachten')
+        // The accident-report and used-car-check services have been renamed
+        // more than once, so match every spelling that has been live rather
+        // than a single slug that may not exist in a given environment.
+        DB::table('service_types')
+            ->whereIn('slug', ['unfallgutachten', 'unfallschadengutachten'])
             ->update(['flow_mode' => 'direct_accept']);
 
-        DB::table('service_types')->where('slug', 'gebrauchtwagencheck')
+        DB::table('service_types')
+            ->whereIn('slug', ['gebrauchtwagen-check', 'gebrauchtwagencheck'])
             ->update(['flow_mode' => 'external']);
     }
 
