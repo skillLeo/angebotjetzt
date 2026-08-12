@@ -60,11 +60,26 @@ class EssentialDataSeeder extends Seeder
             ['Spezialgutachten', 'spezialgutachten', 'Zustandsbewertungen für Leasingrückgaben, Elektrofahrzeuge, Flotten, Oldtimer sowie Hagel-, Wasser-, Brand- und Vandalismusschäden.'],
         ];
 
+        // The flow-mode migration assigns these by slug, but on a fresh install
+        // it runs before this seeder exists any rows to update — so a brand new
+        // database would otherwise come up with both special services on the
+        // default offer flow. Set them here as well, and only for rows we just
+        // created, so re-seeding never overrides a mode an admin has changed.
+        $flowModes = [
+            'unfallschadengutachten' => ['direct_accept', null],
+            'gebrauchtwagencheck'    => ['external', config('partners.carspector_url')],
+        ];
+
         foreach ($types as $i => [$name, $slug, $desc]) {
-            ServiceType::updateOrCreate(['slug' => $slug], [
+            $type = ServiceType::updateOrCreate(['slug' => $slug], [
                 'service_category_id' => $auto->id, 'name' => $name,
                 'description' => $desc, 'sort_order' => $i + 1, 'is_active' => true,
             ]);
+
+            if ($type->wasRecentlyCreated && isset($flowModes[$slug])) {
+                [$mode, $url] = $flowModes[$slug];
+                $type->update(['flow_mode' => $mode, 'external_url' => $url]);
+            }
         }
     }
 }
