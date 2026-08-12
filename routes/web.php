@@ -190,6 +190,9 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     if (config('partners.bulk_invites_enabled')) {
         Route::get('/inspectors/invites', [AdminController::class, 'providerInvitesForm'])->name('inspectors.invites');
         Route::post('/inspectors/invites/preview', [AdminController::class, 'providerInvitesPreview'])->name('inspectors.invites.preview');
+        // The upload target is POST-only. Anyone arriving here by refresh, a
+        // bookmark or the back button gets the page rather than a 405.
+        Route::get('/inspectors/invites/preview', fn () => redirect()->route('admin.inspectors.invites'));
         Route::post('/inspectors/invites', [AdminController::class, 'providerInvitesStore'])->name('inspectors.invites.store');
     }
     Route::get('/inspectors/import', [AdminController::class, 'importForm'])->name('inspectors.import');

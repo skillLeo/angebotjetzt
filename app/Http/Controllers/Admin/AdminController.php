@@ -630,12 +630,16 @@ class AdminController extends Controller
      * separate from the inspector CSV import above: that one creates accounts
      * outright, this one invites people to register themselves.
      */
-    public function providerInvitesForm(): Response
+    public function providerInvitesForm(Request $request): Response
     {
-        return Inertia::render('admin/ProviderInvites', $this->providerInviteProps());
+        return Inertia::render('admin/ProviderInvites', [
+            ...$this->providerInviteProps(),
+            // Survives the redirect from the upload step below.
+            'report' => $request->session()->get('provider_invite_report'),
+        ]);
     }
 
-    public function providerInvitesPreview(Request $request): Response
+    public function providerInvitesPreview(Request $request): RedirectResponse
     {
         $request->validate(['file' => ['required', 'file', 'mimes:csv,txt', 'max:5120']]);
 
@@ -662,10 +666,11 @@ class AdminController extends Controller
 
         session(['provider_invite_emails' => collect($report)->where('ok', true)->pluck('email')->values()->all()]);
 
-        return Inertia::render('admin/ProviderInvites', [
-            ...$this->providerInviteProps(),
-            'report' => $report,
-        ]);
+        // Redirect rather than render, so the address bar stays on the invites
+        // page. Rendering straight back from the POST leaves the browser on
+        // this POST-only URL, and refreshing there produced a 405 error page.
+        return redirect()->route('admin.inspectors.invites')
+            ->with('provider_invite_report', $report);
     }
 
     public function providerInvitesStore(ProviderInviteService $invites): RedirectResponse

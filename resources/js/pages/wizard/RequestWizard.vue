@@ -109,6 +109,15 @@ onMounted(() => {
             /* ignore malformed draft */
         }
     }
+
+    // A partner service is a dead end rather than a half-finished request, so
+    // never restore one from the draft: otherwise every later visit to the
+    // wizard reopens on the hand-off instead of the service picker.
+    const restored = props.serviceTypes.find((t) => t.id === form.service_type_id);
+    if (restored?.flowMode === 'external') {
+        form.service_type_id = null;
+    }
+
     if (props.preselected) {
         const match = props.serviceTypes.find((t) => t.slug === props.preselected);
         if (match) {
@@ -125,6 +134,9 @@ watch(
     () => ({
         ...form.data(),
         photos: undefined,
+        // Same reason as the restore guard above: a partner service must not
+        // be written into the draft in the first place.
+        service_type_id: isExternal.value ? null : form.service_type_id,
         // File objects (from a dynamic file-upload field) aren't valid draft
         // data either — same reasoning as excluding photos above.
         answers: Object.fromEntries(
