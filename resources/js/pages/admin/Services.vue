@@ -4,7 +4,21 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-type ServiceTypeRow = { id: number; name: string; description: string | null; image: string | null; active: boolean };
+type FlowMode = 'offer' | 'direct_accept' | 'external';
+
+type ServiceTypeRow = { id: number; name: string; description: string | null; image: string | null; active: boolean; flowMode: FlowMode; externalUrl: string | null };
+
+// Plain-language wording, shown in the admin so the behaviour of each mode is
+// self-explanatory rather than something to ask about.
+const FLOW_MODES: Array<{ value: FlowMode; label: string; hint: string }> = [
+    { value: 'offer', label: 'Normal (Angebote einholen)', hint: 'Kunden stellen eine Anfrage, Anbieter senden Angebote, der Kunde vergleicht und beauftragt.' },
+    { value: 'direct_accept', label: 'Direkt beauftragen (ohne Angebote)', hint: 'Kunden beantworten zwei Zusatzfragen und beauftragen direkt. Es gibt kein Preisfeld und keinen Angebotsvergleich.' },
+    { value: 'external', label: 'Weiterleitung zum Partner', hint: 'Die Leistung ist sichtbar, aber nicht buchbar. Kunden werden zum Partner weitergeleitet.' },
+];
+
+function flowLabel(m: FlowMode) {
+    return FLOW_MODES.find((f) => f.value === m)?.label ?? m;
+}
 
 defineProps<{
     categories: Array<{ id: number; name: string; slug: string; active: boolean; types: ServiceTypeRow[]; interest: number }>;
@@ -20,7 +34,7 @@ const addingFor = ref<number | null>(null);
 const editingId = ref<number | null>(null);
 
 const addForm = useForm<{ name: string; description: string; photo: File | null }>({ name: '', description: '', photo: null });
-const editForm = useForm<{ name: string; description: string; photo: File | null }>({ name: '', description: '', photo: null });
+const editForm = useForm<{ name: string; description: string; photo: File | null; flow_mode: FlowMode; external_url: string }>({ name: '', description: '', photo: null, flow_mode: 'offer', external_url: '' });
 
 function startAdd(categoryId: number) {
     editingId.value = null;
@@ -48,6 +62,8 @@ function startEdit(type: ServiceTypeRow) {
     editForm.name = type.name;
     editForm.description = type.description ?? '';
     editForm.photo = null;
+    editForm.flow_mode = type.flowMode ?? 'offer';
+    editForm.external_url = type.externalUrl ?? '';
     editForm.clearErrors();
 }
 function cancelEdit() {
@@ -102,8 +118,22 @@ function remove(id: number) {
                                 <img v-if="t.image" :src="t.image" :alt="t.name" class="h-full w-full object-cover" />
                             </div>
                             <div class="min-w-0 flex-1">
-                                <p class="font-semibold text-navy-700">{{ t.name }}</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <p class="font-semibold text-navy-700">{{ t.name }}</p>
+                                    <!-- Only flagged when it deviates from the normal flow, so the
+                                         exceptions stand out instead of every row carrying a badge. -->
+                                    <span
+                                        v-if="t.flowMode && t.flowMode !== 'offer'"
+                                        class="rounded-pill px-2.5 py-0.5 text-[11px] font-bold"
+                                        :class="t.flowMode === 'external' ? 'bg-amber-100 text-amber-700' : 'bg-navy-50 text-navy-600'"
+                                    >
+                                        {{ t.flowMode === 'external' ? 'Weiterleitung zum Partner' : 'Direkt beauftragen' }}
+                                    </span>
+                                </div>
                                 <p v-if="t.description" class="mt-0.5 truncate text-sm text-ink-500">{{ t.description }}</p>
+                                <p v-if="t.flowMode === 'external' && t.externalUrl" class="mt-0.5 truncate text-xs text-ink-500">
+                                    {{ t.externalUrl }}
+                                </p>
                             </div>
                             <div class="flex shrink-0 items-center gap-1">
                                 <Link :href="`/admin/service-types/${t.id}/fields`" class="rounded-pill px-3 py-1.5 text-xs font-semibold text-green-600 hover:bg-green-50">
@@ -138,6 +168,34 @@ function remove(id: number) {
                                 <label class="mb-1 block text-xs font-semibold text-navy-700">Beschreibung</label>
                                 <textarea v-model="editForm.description" rows="2" class="w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
                                 <p v-if="editForm.errors.description" class="mt-1 text-xs text-red-600">{{ editForm.errors.description }}</p>
+
+                                <div class="rounded-card bg-sand-50 p-3">
+                                    <label class="block text-xs font-bold text-navy-700">{{ 'Ablauf dieser Leistung' }}</label>
+                                    <select
+                                        v-model="editForm.flow_mode"
+                                        class="mt-1.5 w-full rounded-card border border-ink-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                                    >
+                                        <option v-for="m in FLOW_MODES" :key="m.value" :value="m.value">{{ m.label }}</option>
+                                    </select>
+                                    <p class="mt-1.5 text-xs text-ink-500">
+                                        {{ FLOW_MODES.find((m) => m.value === editForm.flow_mode)?.hint }}
+                                    </p>
+                                    <p v-if="editForm.errors.flow_mode" class="mt-1 text-xs text-red-600">{{ editForm.errors.flow_mode }}</p>
+
+                                    <div v-if="editForm.flow_mode === 'external'" class="mt-3">
+                                        <label class="block text-xs font-bold text-navy-700">{{ 'Partner-URL' }}</label>
+                                        <input
+                                            v-model="editForm.external_url"
+                                            type="url"
+                                            placeholder="https://www.carspector.de"
+                                            class="mt-1.5 w-full rounded-card border border-ink-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                                        />
+                                        <p class="mt-1 text-xs text-ink-500">
+                                            {{ 'Dorthin werden Kunden geschickt, die diese Leistung auswählen.' }}
+                                        </p>
+                                        <p v-if="editForm.errors.external_url" class="mt-1 text-xs text-red-600">{{ editForm.errors.external_url }}</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button type="submit" :disabled="editForm.processing" class="rounded-pill bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-600 disabled:opacity-60">Speichern</button>

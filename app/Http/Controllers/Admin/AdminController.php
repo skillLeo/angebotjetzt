@@ -943,7 +943,7 @@ class AdminController extends Controller
     public function services(): Response
     {
         return Inertia::render('admin/Services', [
-            'categories' => ServiceCategory::with('serviceTypes:id,service_category_id,name,description,image_url,is_active')
+            'categories' => ServiceCategory::with('serviceTypes:id,service_category_id,name,description,image_url,is_active,flow_mode,external_url')
                 ->orderBy('sort_order')
                 ->get()
                 ->map(fn ($c) => [
@@ -957,6 +957,10 @@ class AdminController extends Controller
                         'description' => $t->description,
                         'image' => $t->image_url,
                         'active' => $t->is_active,
+                        // Surfaced so a rename can never again leave the
+                        // behaviour attached to a service nobody expects.
+                        'flowMode' => $t->flow_mode,
+                        'externalUrl' => $t->external_url,
                     ]),
                     'interest' => $c->interestSignals()->count(),
                 ]),
@@ -1005,6 +1009,13 @@ class AdminController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'description' => ['required', 'string', 'max:2000'],
             'photo' => ['nullable', 'file', 'image', 'max:4096'],
+            'flow_mode' => ['nullable', 'in:offer,direct_accept,external'],
+            // Only meaningful for the partner hand-off, and required there:
+            // an external service with no destination is a dead end.
+            'external_url' => ['nullable', 'required_if:flow_mode,external', 'url', 'max:500'],
+        ], [
+            'external_url.required_if' => 'Für eine Weiterleitung wird die Partner-URL benötigt.',
+            'external_url.url' => 'Bitte geben Sie eine vollständige URL an, inklusive https://',
         ]);
 
         $oldSlug = $serviceType->slug;
@@ -1014,6 +1025,16 @@ class AdminController extends Controller
             'name' => $data['name'],
             'description' => $data['description'],
         ]);
+
+        // The behaviour belongs to the service and must survive a rename, so
+        // it is written here explicitly rather than being inferred from the
+        // slug anywhere. Absent in the request means "leave as is".
+        if (array_key_exists('flow_mode', $data) && $data['flow_mode'] !== null) {
+            $serviceType->flow_mode = $data['flow_mode'];
+            $serviceType->external_url = $data['flow_mode'] === 'external'
+                ? $data['external_url']
+                : null;
+        }
 
         // Keep the URL in sync with the name automatically, and leave a
         // trail so the old URL redirects instead of 404ing — it may already
