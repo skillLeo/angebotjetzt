@@ -14,6 +14,7 @@ use App\Http\Controllers\RequestWizardController;
 use App\Http\Controllers\ReviewSurveyController;
 use App\Http\Controllers\SeoController;
 use App\Http\Middleware\EnsureInspectorOnboardingComplete;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -265,5 +266,22 @@ Route::redirect('/anfrage', '/request', 301);
 Route::redirect('/registrieren/gutachter', '/inspector/register', 301);
 Route::get('/konto/{path?}', fn (?string $path = null) => redirect('/account'.($path ? '/'.$path : ''), 301))->where('path', '.*');
 Route::get('/gutachter/{path?}', fn (?string $path = null) => redirect('/inspector'.($path ? '/'.$path : ''), 301))->where('path', '.*');
+
+/*
+ * Scheduler trigger for hosting without a usable cron. Runs the schedule and
+ * nothing else: it takes no command from the request, so it can only ever do
+ * what bootstrap/app.php already schedules. Disabled unless SCHEDULER_TOKEN is
+ * set, and answers 404 rather than 403 on a bad token so the endpoint does not
+ * announce itself.
+ */
+Route::get('/scheduler/{token}', function (string $token) {
+    $expected = config('scheduler.token');
+
+    abort_if(blank($expected) || ! hash_equals($expected, $token), 404);
+
+    Artisan::call('schedule:run');
+
+    return response('ok', 200)->header('Content-Type', 'text/plain');
+})->where('token', '[A-Za-z0-9]+');
 
 require __DIR__.'/settings.php';
