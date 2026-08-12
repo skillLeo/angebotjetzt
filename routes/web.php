@@ -108,6 +108,8 @@ Route::get('/offers/{serviceRequest}/view', [PublicController::class, 'viewOffer
     ->middleware('signed')->name('offers.view');
 Route::get('/requests/{serviceRequest}/view', [PublicController::class, 'viewMyRequests'])
     ->middleware('signed')->name('requests.view');
+Route::get('/requests/{serviceRequest}/order', [PublicController::class, 'viewMyOrder'])
+    ->middleware('signed')->name('requests.order.view');
 
 Route::get('/inspector/register', [InspectorRegisterController::class, 'show'])->name('gutachter.register');
 Route::post('/inspector/register', [InspectorRegisterController::class, 'store'])->middleware('throttle:10,10')->name('gutachter.register.store');
@@ -124,6 +126,10 @@ Route::get('/inspector/invite/{serviceRequest}/offer', [GuestOfferController::cl
     ->name('inspector.guest-offer.create');
 Route::post('/inspector/invite/{serviceRequest}/offer', [GuestOfferController::class, 'store'])
     ->name('inspector.guest-offer.store');
+Route::post('/inspector/invite/{serviceRequest}/accept', [GuestOfferController::class, 'accept'])
+    ->name('inspector.guest-offer.accept');
+Route::get('/inspector/invite/accepted/{booking}', [GuestOfferController::class, 'accepted'])
+    ->name('inspector.guest-offer.accepted');
 
 Route::get('/inspector/requests/{request}/direct/{inspector}', [InspectorAreaController::class, 'signedRequest'])
     ->middleware('signed')->name('inspector.requests.signed');
@@ -179,6 +185,13 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/payments', [AdminController::class, 'payments'])->name('payments');
     Route::get('/commissions', [AdminController::class, 'commissions'])->name('commissions');
     Route::get('/inspectors', [AdminController::class, 'inspectors'])->name('inspectors');
+    // Bulk provider invitations stay unreachable until the wording is signed
+    // off — see config/partners.php.
+    if (config('partners.bulk_invites_enabled')) {
+        Route::get('/inspectors/invites', [AdminController::class, 'providerInvitesForm'])->name('inspectors.invites');
+        Route::post('/inspectors/invites/preview', [AdminController::class, 'providerInvitesPreview'])->name('inspectors.invites.preview');
+        Route::post('/inspectors/invites', [AdminController::class, 'providerInvitesStore'])->name('inspectors.invites.store');
+    }
     Route::get('/inspectors/import', [AdminController::class, 'importForm'])->name('inspectors.import');
     Route::post('/inspectors/import/preview', [AdminController::class, 'importPreview'])->name('inspectors.import.preview');
     Route::post('/inspectors/import', [AdminController::class, 'importStore'])->name('inspectors.import.store');

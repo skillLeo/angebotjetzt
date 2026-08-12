@@ -6,6 +6,7 @@ import {
     FileText,
     Handshake,
     LayoutDashboard,
+    MailPlus,
     MapPin,
     Package,
     Percent,
@@ -22,6 +23,7 @@ import { computed } from 'vue';
 const page = usePage();
 const url = computed(() => page.url);
 const admin = computed(() => (page.props.auth as { admin?: { name?: string } }).admin);
+const features = computed(() => (page.props.features ?? { bulkInvites: false }) as { bulkInvites: boolean });
 
 const nav = computed(() => [
     { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, active: url.value === '/admin' },
@@ -31,7 +33,8 @@ const nav = computed(() => [
     { label: 'Zahlungen', href: '/admin/payments', icon: Banknote, active: url.value.startsWith('/admin/payments') },
     { label: 'Provisionen', href: '/admin/commissions', icon: Percent, active: url.value.startsWith('/admin/commissions') },
     { label: 'Provisionen & Rechnungen', href: '/admin/invoices', icon: Receipt, active: url.value.startsWith('/admin/invoices') },
-    { label: 'Dienstleister', href: '/admin/inspectors', icon: Users, active: url.value.startsWith('/admin/inspectors') },
+    { label: 'Dienstleister', href: '/admin/inspectors', icon: Users, active: url.value.startsWith('/admin/inspectors') && !url.value.startsWith('/admin/inspectors/invites') },
+    ...(features.value.bulkInvites ? [{ label: 'Dienstleister einladen', href: '/admin/inspectors/invites', icon: MailPlus, active: url.value.startsWith('/admin/inspectors/invites') }] : []),
     { label: 'Bewertungen', href: '/admin/reviews', icon: Star, active: url.value.startsWith('/admin/reviews') },
     { label: 'Kunden', href: '/admin/customers', icon: Users, active: url.value.startsWith('/admin/customers') },
     { label: 'Dienstleistungen', href: '/admin/services', icon: Tag, active: url.value.startsWith('/admin/services') },

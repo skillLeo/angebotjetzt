@@ -7,7 +7,9 @@ import { computed } from 'vue';
  * answers decide how the claim is handled, so they're asked before any vehicle
  * detail and travel with the request to the provider.
  */
-const props = defineProps<{ form: Record<string, unknown> }>();
+// Loosely typed on purpose: this receives Inertia's form object, whose index
+// signature doesn't line up with a plain Record.
+const props = defineProps<{ form: { accident_role: string; has_lawyer: boolean | null } }>();
 defineEmits<{ next: []; back: [] }>();
 
 const roles = [

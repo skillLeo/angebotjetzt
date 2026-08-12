@@ -49,6 +49,10 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            // Lets the admin menu hide entries whose routes aren't registered.
+            'features' => [
+                'bulkInvites' => (bool) config('partners.bulk_invites_enabled'),
+            ],
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),

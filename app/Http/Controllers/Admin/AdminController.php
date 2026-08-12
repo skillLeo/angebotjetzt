@@ -18,6 +18,7 @@ use App\Models\Invoice;
 use App\Models\MapLocation;
 use App\Models\Offer;
 use App\Models\Payment;
+use App\Models\ProviderInvitation;
 use App\Models\RequestMatch;
 use App\Models\Review;
 use App\Models\ServiceCategory;
@@ -29,6 +30,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\GeocodingService;
+use App\Services\ProviderInviteService;
 use App\Services\RequestService;
 use App\Services\WalletService;
 use App\Support\SafeMailer;
@@ -621,6 +623,124 @@ class AdminController extends Controller
             Auth::guard('admin')->user(), $inspector);
 
         return back()->with('success', $inspector->is_verified ? 'Dienstleister als geprüft markiert.' : 'Prüf-Status entfernt.');
+    }
+
+    /**
+     * Bulk provider invitations from a CSV of e-mail addresses. Deliberately
+     * separate from the inspector CSV import above: that one creates accounts
+     * outright, this one invites people to register themselves.
+     */
+    public function providerInvitesForm(): Response
+    {
+        return Inertia::render('admin/ProviderInvites', $this->providerInviteProps());
+    }
+
+    public function providerInvitesPreview(Request $request): Response
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:csv,txt', 'max:5120']]);
+
+        $report = [];
+        $seen = [];
+
+        foreach ($this->parseEmailList($request->file('file')->getRealPath()) as $entry) {
+            [$line, $email] = [$entry['line'], $entry['email']];
+            $errors = [];
+
+            if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Ungültige E-Mail-Adresse';
+            } elseif (isset($seen[mb_strtolower($email)])) {
+                $errors[] = 'Doppelt in dieser Datei';
+            } elseif (Inspector::where('email', $email)->exists()) {
+                $errors[] = 'Hat bereits ein Dienstleister-Konto';
+            } elseif (ProviderInvitation::where('email', $email)->exists()) {
+                $errors[] = 'Wurde bereits eingeladen';
+            }
+
+            $seen[mb_strtolower($email)] = true;
+            $report[] = ['line' => $line, 'email' => $email, 'errors' => $errors, 'ok' => empty($errors)];
+        }
+
+        session(['provider_invite_emails' => collect($report)->where('ok', true)->pluck('email')->values()->all()]);
+
+        return Inertia::render('admin/ProviderInvites', [
+            ...$this->providerInviteProps(),
+            'report' => $report,
+        ]);
+    }
+
+    public function providerInvitesStore(ProviderInviteService $invites): RedirectResponse
+    {
+        $emails = session('provider_invite_emails', []);
+
+        if (empty($emails)) {
+            return back()->withErrors(['file' => 'Keine gültigen Adressen vorhanden. Bitte laden Sie zuerst eine Datei hoch.']);
+        }
+
+        session()->forget('provider_invite_emails');
+
+        $queued = $invites->queue($emails, Auth::guard('admin')->user());
+        $sent = $invites->sendBatch();
+
+        ActivityLog::record('provider_invites.bulk_queued', Auth::guard('admin')->user(), null, [
+            'queued' => $queued,
+            'sent_now' => $sent,
+        ]);
+
+        return back()->with('success', $queued.' Einladung(en) eingeplant, '.$sent.' davon bereits versendet. Der Rest wird automatisch in kleinen Schritten verschickt.');
+    }
+
+    private function providerInviteProps(): array
+    {
+        return [
+            'invitations' => ProviderInvitation::latest('id')->take(200)->get()->map(fn ($i) => [
+                'id' => $i->id,
+                'email' => $i->email,
+                'sentAt' => $i->sent_at?->format('d.m.Y H:i'),
+                'registered' => $i->hasRegistered(),
+            ]),
+            'stats' => [
+                'total' => ProviderInvitation::count(),
+                'queued' => ProviderInvitation::queued()->count(),
+                'batchSize' => ProviderInviteService::BATCH_SIZE,
+            ],
+        ];
+    }
+
+    /**
+     * Accepts either a plain list of addresses, one per line, or a CSV that
+     * happens to carry an "email" column — both turn up in exports.
+     */
+    private function parseEmailList(string $path): array
+    {
+        $entries = [];
+        $handle = fopen($path, 'r');
+
+        if ($handle === false) {
+            return $entries;
+        }
+
+        $line = 0;
+        while (($raw = fgets($handle)) !== false) {
+            $line++;
+            $value = trim(str_replace(["\xEF\xBB\xBF", '"', "'"], '', $raw));
+
+            if ($value === '') {
+                continue;
+            }
+
+            // Take the first cell of a delimited row, and skip a header row.
+            $value = trim(preg_split('/[;,\t]/', $value)[0] ?? '');
+
+            if ($value === '' || mb_strtolower($value) === 'email' || mb_strtolower($value) === 'e-mail') {
+                continue;
+            }
+
+            $entries[] = ['line' => $line, 'email' => $value];
+        }
+
+        fclose($handle);
+
+        return $entries;
     }
 
     public function importForm(): Response

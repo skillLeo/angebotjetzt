@@ -129,6 +129,15 @@ class ServiceRequest extends Model
     }
 
     /**
+     * Link to this one request. Services with no offer comparison point their
+     * customer e-mails here instead of at the offers page.
+     */
+    public function orderViewUrl(): string
+    {
+        return URL::temporarySignedRoute('requests.order.view', now()->addDays(30), ['serviceRequest' => $this->id]);
+    }
+
+    /**
      * AJ + 2-digit year + 2-digit month + 4-digit sequence (e.g. AJ26080005
      * for August 2026) — replaces the old AJ-YYYY-NNNNNN format for every
      * new request going forward. Existing records keep their old-format

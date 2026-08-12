@@ -24,6 +24,17 @@ class RequestConfirmationMail extends BaseBrandMail
     {
         $r = $this->serviceRequest;
 
+        // No offers are collected for a direct-accept service, so the customer
+        // must not be told to expect any.
+        if ($r->serviceType->isDirectAccept()) {
+            return [
+                "Guten Tag {$r->contact_name},",
+                "vielen Dank für Ihre Anfrage <strong>{$r->request_number}</strong> ({$r->serviceType->name} für Ihren {$r->vehicle_make} {$r->vehicle_model}).",
+                "Passende Sachverständige in Ihrer Region ({$r->plz} {$r->ort}) wurden benachrichtigt. Sobald einer Ihre Anfrage annimmt, meldet er sich direkt bei Ihnen.",
+                'Für diese Leistung gibt es vorab keinen Festpreis: Das Honorar richtet sich nach der tatsächlich festgestellten Schadenhöhe.',
+            ];
+        }
+
         return [
             "Guten Tag {$r->contact_name},",
             "vielen Dank für Ihre Anfrage <strong>{$r->request_number}</strong> ({$r->serviceType->name} für Ihren {$r->vehicle_make} {$r->vehicle_model}).",
@@ -34,6 +45,8 @@ class RequestConfirmationMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return ['url' => $this->serviceRequest->myRequestsViewUrl(), 'label' => 'Meine Anfragen ansehen'];
+        return $this->serviceRequest->serviceType->isDirectAccept()
+            ? ['url' => $this->serviceRequest->orderViewUrl(), 'label' => 'Auftrag ansehen']
+            : ['url' => $this->serviceRequest->myRequestsViewUrl(), 'label' => 'Meine Anfragen ansehen'];
     }
 }

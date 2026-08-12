@@ -25,12 +25,17 @@ class RequestMatchedMail extends BaseBrandMail
         return [
             "Guten Tag {$r->contact_name},",
             "für Ihre Anfrage <strong>{$r->request_number}</strong> ({$r->serviceType->name} für Ihren {$r->vehicle_make} {$r->vehicle_model}) haben wir soeben einen passenden Anbieter in Ihrer Region ({$r->plz} {$r->ort}) gefunden und benachrichtigt.",
-            'Sie werden per E-Mail informiert, sobald ein Angebot eingeht.',
+            $r->serviceType->isDirectAccept()
+                ? 'Sobald der Sachverständige die Anfrage annimmt, meldet er sich direkt bei Ihnen.'
+                : 'Sie werden per E-Mail informiert, sobald ein Angebot eingeht.',
         ];
     }
 
     protected function cta(): ?array
     {
-        return ['url' => $this->serviceRequest->offersViewUrl(), 'label' => 'Anfrage ansehen'];
+        // A direct-accept service has no offers page to send anyone to.
+        return $this->serviceRequest->serviceType->isDirectAccept()
+            ? ['url' => $this->serviceRequest->orderViewUrl(), 'label' => 'Auftrag ansehen']
+            : ['url' => $this->serviceRequest->offersViewUrl(), 'label' => 'Anfrage ansehen'];
     }
 }

@@ -42,6 +42,6 @@ class DirectAcceptCustomerMail extends BaseBrandMail
 
     protected function cta(): ?array
     {
-        return null;
+        return ['url' => $this->serviceRequest->orderViewUrl(), 'label' => 'Auftrag ansehen'];
     }
 }

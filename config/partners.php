@@ -22,4 +22,18 @@ return [
 
     'carspector_url' => env('CARSPECTOR_URL', 'https://www.carspector.de'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Bulk provider invitations
+    |--------------------------------------------------------------------------
+    |
+    | Off until the client signs off on the invitation wording. While this is
+    | false the admin screen, its routes and its menu entry do not exist, so
+    | no invitation can be sent by anyone. Set BULK_INVITES_ENABLED=true in
+    | .env to switch it on; nothing else needs changing.
+    |
+    */
+
+    'bulk_invites_enabled' => (bool) env('BULK_INVITES_ENABLED', false),
+
 ];

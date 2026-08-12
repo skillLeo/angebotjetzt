@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // late — checking every 15 minutes easily keeps it within a few
         // minutes of the real 24h/48h mark either way.
         $schedule->command('app:send-offer-reminders')->everyFifteenMinutes();
+
+        // Drains bulk provider invitations a batch at a time so a large upload
+        // is spread out instead of arriving as one burst.
+        $schedule->command('app:send-provider-invites')->everyFiveMinutes()->withoutOverlapping();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['sidebar_state']);

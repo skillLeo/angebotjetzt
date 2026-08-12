@@ -321,6 +321,20 @@ class PublicController extends Controller
         );
     }
 
+    /**
+     * Same guest-safe hop, but landing on this one request rather than the
+     * list. Used by services that have no offer comparison to link to, where
+     * "your request" is the only meaningful destination.
+     */
+    public function viewMyOrder(ServiceRequest $serviceRequest): RedirectResponse
+    {
+        return GuestAccountRedirect::to(
+            $serviceRequest->contact_name,
+            $serviceRequest->contact_email,
+            route('konto.requests.show', $serviceRequest->id)
+        );
+    }
+
     public function comingSoon(ServiceCategory $category): Response
     {
         abort_if($category->is_active, 404);

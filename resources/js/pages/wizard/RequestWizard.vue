@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PartnerHandoff from '@/components/marketing/PartnerHandoff.vue';
 import WizardAccidentStep from '@/components/wizard/WizardAccidentStep.vue';
 import WizardDynamicStep, { type WizardFieldDef } from '@/components/wizard/WizardDynamicStep.vue';
 import WizardStep1 from '@/components/wizard/WizardStep1.vue';
@@ -6,13 +7,14 @@ import WizardStep2 from '@/components/wizard/WizardStep2.vue';
 import WizardStep3 from '@/components/wizard/WizardStep3.vue';
 import WizardStep4 from '@/components/wizard/WizardStep4.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { Check } from 'lucide-vue-next';
+import { ArrowLeft, Check } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
-    serviceTypes: Array<{ id: number; name: string; slug: string; description: string; flowMode: string }>;
+    serviceTypes: Array<{ id: number; name: string; slug: string; description: string; flowMode: string; externalUrl: string | null }>;
     serviceTypeFields: Record<number, WizardFieldDef[]>;
     preselected: string | null;
+    partnerUrl: string | null;
 }>();
 
 const page = usePage();
@@ -61,6 +63,12 @@ const activeType = computed(() => props.serviceTypes.find((t) => t.id === form.s
 // service and entering vehicle details. Every other service keeps exactly the
 // four steps it has always had.
 const isDirectAccept = computed(() => activeType.value?.flowMode === 'direct_accept');
+
+// Choosing a partner-fulfilled service stops the wizard here. The hand-off
+// replaces every step, so there is no way through to the booking details
+// whichever entry point selected it.
+const isExternal = computed(() => activeType.value?.flowMode === 'external');
+const partnerHandoffUrl = computed(() => activeType.value?.externalUrl ?? props.partnerUrl);
 
 const stepKeys = computed(() => [
     'service',
@@ -159,8 +167,8 @@ function submit() {
 
     <section class="bg-sand-50 px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <div class="mx-auto max-w-3xl">
-            <!-- Progress -->
-            <ol class="mb-10 flex items-center justify-between">
+            <!-- Progress: hidden once a partner service is chosen, there are no steps left to take. -->
+            <ol v-if="!isExternal" class="mb-10 flex items-center justify-between">
                 <li v-for="(label, i) in steps" :key="label" class="flex flex-1 items-center">
                     <div class="flex flex-col items-center">
                         <span
@@ -185,7 +193,21 @@ function submit() {
             </ol>
 
             <div class="rounded-panel border border-ink-100 bg-white p-6 shadow-card sm:p-8">
-                <WizardStep1 v-if="currentKey === 'service'" :form="form" :service-types="serviceTypes" @next="next" />
+                <!-- Interception. Takes priority over every step, so selecting a
+                     partner service can never continue into the booking details. -->
+                <div v-if="isExternal">
+                    <PartnerHandoff :url="partnerHandoffUrl" inline />
+                    <button
+                        type="button"
+                        class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-ink-500 transition hover:text-navy-700"
+                        @click="form.service_type_id = null"
+                    >
+                        <ArrowLeft :size="16" aria-hidden="true" />
+                        {{ 'Andere Leistung wählen' }}
+                    </button>
+                </div>
+
+                <WizardStep1 v-else-if="currentKey === 'service'" :form="form" :service-types="serviceTypes" @next="next" />
                 <WizardAccidentStep v-else-if="currentKey === 'accident'" :form="form" @next="next" @back="back" />
                 <WizardStep2 v-else-if="currentKey === 'vehicle' && !activeFields.length" :form="form" v-model:photos="photos" @next="next" @back="back" />
                 <WizardDynamicStep v-else-if="currentKey === 'vehicle'" :form="form" :fields="activeFields" @next="next" @back="back" />

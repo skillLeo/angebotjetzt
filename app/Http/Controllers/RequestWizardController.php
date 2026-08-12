@@ -20,27 +20,20 @@ class RequestWizardController extends Controller
 
     public function show(Request $request): Response|RedirectResponse
     {
-        // Externally-fulfilled services are never bookable here. Landing on
-        // the wizard with one preselected sends the customer to that
-        // service's own page, which carries the partner hand-off instead.
-        if ($preselected = $request->query('service')) {
-            $type = ServiceType::where('slug', $preselected)->first();
-
-            if ($type?->isExternal()) {
-                return redirect()->route('service-type', $type->slug);
-            }
-        }
-
+        // Externally-fulfilled services stay visible and selectable here so
+        // customers can find them, but choosing one stops the wizard dead and
+        // shows the partner hand-off instead of continuing into the steps.
         $activeTypes = ServiceType::where('is_active', true)
-            ->where('flow_mode', '!=', 'external')
             ->orderBy('sort_order')
             ->with('fields')
             ->get();
 
         return Inertia::render('wizard/RequestWizard', [
+            'partnerUrl' => config('partners.carspector_url') ?: null,
             'serviceTypes' => $activeTypes->map(fn ($t) => [
                 'id' => $t->id, 'name' => $t->name, 'slug' => $t->slug, 'description' => $t->description,
                 'flowMode' => $t->flow_mode,
+                'externalUrl' => $t->isExternal() ? ($t->external_url ?: config('partners.carspector_url')) ?: null : null,
             ])->values(),
             // Keyed by service_type_id so the frontend can pick the right set
             // once a service is chosen in step 1, without a second round-trip.

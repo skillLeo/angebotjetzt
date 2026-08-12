@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PartnerHandoff from '@/components/marketing/PartnerHandoff.vue';
 import Reveal from '@/components/marketing/Reveal.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -98,45 +99,11 @@ const benefits = computed(() => [
         </div>
     </section>
 
-    <!-- Partner-fulfilled services (Gebrauchtwagen-Check): client-supplied copy. -->
+    <!-- Partner-fulfilled services (Gebrauchtwagen-Check). Same component the
+         wizard uses, so the copy and destination stay identical everywhere. -->
     <section v-if="serviceType.isExternal" class="bg-sand-50 py-16 lg:py-24">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-panel border border-ink-100 bg-white p-8 shadow-card sm:p-10">
-                <p class="text-eyebrow text-green-600">{{ 'In Kooperation mit CarSpector' }}</p>
-                <h2 class="text-section mt-3 text-navy-700">{{ 'Der Gebrauchtwagen-Check' }}</h2>
-
-                <div class="mt-6 text-[15px] leading-relaxed text-ink-700">
-                    <p>
-                        Für professionelle Gebrauchtwagenchecks arbeiten wir mit Carspector zusammen. Dort können Sie
-                        Ihr Wunschfahrzeug unabhängig prüfen lassen und erhalten anschließend einen ausführlichen
-                        Zustandsbericht.
-                    </p>
-                </div>
-
-                <div class="mt-8">
-                    <a
-                        v-if="serviceType.externalUrl"
-                        :href="serviceType.externalUrl"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-pill bg-green-500 px-7 py-3.5 text-[15px] font-bold text-white transition hover:bg-green-600"
-                    >
-                        {{ 'Jetzt bei CarSpector buchen' }}
-                        <ExternalLink :size="18" aria-hidden="true" />
-                    </a>
-                    <span
-                        v-else
-                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-pill bg-ink-300 px-7 py-3.5 text-[15px] font-bold text-white"
-                        aria-disabled="true"
-                    >
-                        {{ 'Jetzt bei CarSpector buchen' }}
-                        <ExternalLink :size="18" aria-hidden="true" />
-                    </span>
-                    <p v-if="!serviceType.externalUrl" class="mt-3 text-sm text-ink-500">
-                        {{ 'Der Link zum Partnerangebot wird in Kürze freigeschaltet.' }}
-                    </p>
-                </div>
-            </div>
+            <PartnerHandoff :url="serviceType.externalUrl" />
         </div>
     </section>
 

@@ -18,7 +18,7 @@ const service = ref('');
 const location = ref('');
 
 const servicesForCategory = computed(() =>
-    props.serviceTypes.filter((t) => String(t.categoryId) === category.value && t.flowMode !== 'external'),
+    props.serviceTypes.filter((t) => String(t.categoryId) === category.value),
 );
 
 watch(category, () => (service.value = ''));
