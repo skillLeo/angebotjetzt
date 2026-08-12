@@ -6,10 +6,7 @@
         <title>{{ $title ?? 'Fehler' }} – AngebotJetzt</title>
         <link rel="icon" href="/favicon.ico" sizes="any">
 
-        <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
-        <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-        <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800,900&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-
+        {{-- Fonts come bundled inside app.css, same as every other page. --}}
         @vite(['resources/css/app.css'])
     </head>
     <body class="relative min-h-screen overflow-hidden bg-sand-50 font-sans antialiased">

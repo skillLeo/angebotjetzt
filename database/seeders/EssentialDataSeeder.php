@@ -8,6 +8,7 @@ use App\Models\ServiceType;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Structural reference data the application cannot function without:
@@ -22,14 +23,46 @@ use Illuminate\Support\Facades\Hash;
  */
 class EssentialDataSeeder extends Seeder
 {
+    /**
+     * Creates the admin account only when none exists yet.
+     *
+     * Deliberately never touches an existing admin's password: this seeder is
+     * documented as safe to re-run on a live database, and an update here would
+     * silently reset a password the client had changed in the panel.
+     *
+     * No password is stored in this file. On a genuinely fresh install the
+     * first one comes from ADMIN_INITIAL_PASSWORD, or is generated at random
+     * and printed once, so nothing secret ever lives in the repository.
+     */
+    private function ensureAdminExists(): void
+    {
+        $email = env('ADMIN_EMAIL', 'admin@angebotjetzt.de');
+
+        if (Admin::where('email', $email)->exists()) {
+            $this->command?->info("Admin {$email} already exists — password left untouched.");
+
+            return;
+        }
+
+        $password = env('ADMIN_INITIAL_PASSWORD') ?: Str::password(20);
+
+        Admin::create([
+            'email' => $email,
+            'name' => 'Plattform-Administrator',
+            'password' => Hash::make($password),
+            'email_verified_at' => now(),
+        ]);
+
+        $this->command?->warn("Admin account created: {$email}");
+        $this->command?->warn("Initial password: {$password}");
+        $this->command?->warn('Change it after the first login. It is not stored anywhere else.');
+    }
+
     public function run(): void
     {
         Setting::set('commission_percent', 10);
 
-        Admin::updateOrCreate(
-            ['email' => 'admin@angebotjetzt.de'],
-            ['name' => 'Plattform-Administrator', 'password' => Hash::make('AdminSecure2026!'), 'email_verified_at' => now()]
-        );
+        $this->ensureAdminExists();
 
         $categories = [
             ['Kfz-Gutachten', 'kfz-gutachten', 'car', 'Unabhängige Kfz-Sachverständige für Gutachten und Bewertungen.', true, 1],

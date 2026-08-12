@@ -40,10 +40,9 @@
         @endphp
         <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 
-        <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
-        <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-        <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800,900&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-
+        {{-- Satoshi and Cabinet Grotesk are bundled with our own assets now
+             (resources/css/fonts.css), so there is no third-party request to
+             wait on and no flash of system text on a first visit. --}}
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])

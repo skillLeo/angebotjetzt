@@ -19,8 +19,10 @@ async function checkSidebar(page, label, issues) {
   // ===== ADMIN =====
   console.log('=== ADMIN ===');
   await page.goto(BASE + '/admin/login', { waitUntil: 'networkidle' });
-  await page.locator('input[type="email"]').first().fill('admin@angebotjetzt.de');
-  await page.locator('input[type="password"]').first().fill('AdminSecure2026!');
+  // Credentials come from the environment so no real password sits in the repo:
+  //   ADMIN_EMAIL=... ADMIN_PASSWORD=... node _test_all_nav.cjs
+  await page.locator('input[type="email"]').first().fill(process.env.ADMIN_EMAIL || 'admin@angebotjetzt.de');
+  await page.locator('input[type="password"]').first().fill(process.env.ADMIN_PASSWORD || '');
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'networkidle', timeout: 10000 }).catch(() => {}),
     page.locator('button[type="submit"]').first().click(),
