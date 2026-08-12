@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
  */
 class ReviewSurveyController extends Controller
 {
-    public function show(Booking $booking): Response|RedirectResponse
+    public function show(Request $request, Booking $booking): Response|RedirectResponse
     {
         if ($booking->review) {
             return redirect('/')->with('success', 'Sie haben für diesen Auftrag bereits eine Bewertung abgegeben. Vielen Dank!');
@@ -40,6 +40,11 @@ class ReviewSurveyController extends Controller
                 'number' => $booking->request->request_number,
                 'service' => $booking->request->serviceType->name,
             ],
+            // Set when arriving straight from the confirmation link, so the
+            // page opens by acknowledging the confirmation and then carries
+            // on into the rating as one flow rather than two pages. The
+            // rating itself is unchanged either way.
+            'justConfirmed' => $request->boolean('confirmed'),
         ]);
     }
 

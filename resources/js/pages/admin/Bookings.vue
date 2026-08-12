@@ -38,8 +38,8 @@ const columns = [
                 <option value="">Alle Status</option>
                 <option value="accepted">Angenommen</option>
                 <option value="in_progress">In Bearbeitung</option>
-                <option value="completed_by_inspector">Abgeschlossen (Dienstleister)</option>
-                <option value="confirmed">Bestätigt</option>
+                <option value="completed_by_inspector">Wartet auf Kundenbestätigung</option>
+                <option value="confirmed">Bestätigt &amp; abgeschlossen</option>
                 <option value="cancelled">Storniert</option>
                 <option value="refunded">Erstattet</option>
             </select>

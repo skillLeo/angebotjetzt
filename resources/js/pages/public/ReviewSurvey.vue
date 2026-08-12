@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Star } from 'lucide-vue-next';
+import { Check, Star } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps<{
     booking: { id: number; number: string; service: string };
+    // True when the customer arrived straight from confirming the completion.
+    justConfirmed?: boolean;
 }>();
 
 const form = useForm<{ rating: number | null; comment: string }>({ rating: null, comment: '' });
@@ -21,10 +23,24 @@ function submit() {
 
     <section class="flex min-h-[70vh] items-center bg-sand-50 px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto w-full max-w-xl rounded-panel border border-ink-100 bg-white p-7 shadow-card sm:p-10">
-            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-green-50 text-green-600">
+            <!-- Arriving from the confirmation link: acknowledge that first,
+                 then continue into the rating below as one flow. -->
+            <div v-if="justConfirmed" class="mb-8 border-b border-ink-100 pb-8 text-center">
+                <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-green-500 text-white">
+                    <Check :size="28" aria-hidden="true" />
+                </span>
+                <h2 class="text-section mt-5 text-navy-700">{{ 'Danke!' }}</h2>
+                <p class="mt-2 text-ink-500">
+                    {{ 'Sie haben den Abschluss des Auftrags bestätigt. Der Auftrag ist damit abgeschlossen.' }}
+                </p>
+            </div>
+
+            <span v-if="!justConfirmed" class="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-green-50 text-green-600">
                 <Star :size="26" aria-hidden="true" />
             </span>
-            <h1 class="text-section mt-5 text-center text-navy-700">{{ 'Wie war Ihr Auftrag?' }}</h1>
+            <h1 class="text-section mt-5 text-center text-navy-700">
+                {{ justConfirmed ? 'Wie zufrieden waren Sie?' : 'Wie war Ihr Auftrag?' }}
+            </h1>
             <p class="mt-2 text-center text-ink-500">{{ `${booking.service} · ${booking.number}` }}</p>
 
             <form class="mt-8 space-y-6" @submit.prevent="submit">

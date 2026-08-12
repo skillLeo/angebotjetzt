@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\BookingConfirmationController;
 use App\Http\Controllers\Auth\InspectorAuthController;
 use App\Http\Controllers\Auth\InspectorRegisterController;
 use App\Http\Controllers\Customer\CustomerAreaController;
@@ -20,6 +21,11 @@ use Inertia\Inertia;
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+
+// Customer confirms the provider actually finished, then lands on the rating.
+// Signed rather than authenticated, because guest bookings have no login.
+Route::get('/bookings/{booking}/confirm-completion', [BookingConfirmationController::class, 'confirm'])
+    ->middleware('signed')->name('bookings.confirm-completion');
 
 Route::get('/reviews/{booking}/survey', [ReviewSurveyController::class, 'show'])
     ->middleware('signed')->name('reviews.survey.show');

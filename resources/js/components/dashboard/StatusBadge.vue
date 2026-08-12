@@ -16,7 +16,8 @@ const clsMap: Record<string, string> = {
     awaiting_payment: 'bg-amber-100 text-amber-700',
     paid: 'bg-green-50 text-green-700',
     in_progress: 'bg-navy-50 text-navy-600',
-    completed_by_inspector: 'bg-green-50 text-green-700',
+    // Amber, not green: this one is still waiting on someone.
+    completed_by_inspector: 'bg-amber-100 text-amber-700',
     confirmed: 'bg-green-100 text-green-700',
     refunded: 'bg-ink-100 text-ink-500',
     pending: 'bg-amber-100 text-amber-700',
@@ -36,8 +37,10 @@ const labelMap: Record<string, string> = {
     awaiting_payment: 'Zahlung ausstehend',
     paid: 'Bezahlt',
     in_progress: 'In Bearbeitung',
-    completed_by_inspector: 'Abgeschlossen (Anbieter)',
-    confirmed: 'Bestätigt',
+    // Names the party being waited on, so this in-between state is not read
+    // as "finished" in the admin list.
+    completed_by_inspector: 'Wartet auf Kundenbestätigung',
+    confirmed: 'Bestätigt & abgeschlossen',
     refunded: 'Erstattet',
     pending: 'Ausstehend',
     failed: 'Fehlgeschlagen',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CommissionInvoiceMail;
 use App\Mail\DirectAcceptCustomerMail;
 use App\Mail\InspectorVerifyEmailMail;
+use App\Mail\JobCompletionConfirmationMail;
 use App\Mail\NewOfferMail;
 use App\Mail\OfferUpdatedMail;
 use App\Models\ActivityLog;
@@ -633,6 +634,18 @@ class InspectorAreaController extends Controller
         if ($invoice) {
             SafeMailer::send(fn () => Mail::to($inspector->email)->queue(new CommissionInvoiceMail($invoice)));
         }
+
+        // Ask the customer to confirm the work really was done. The review
+        // request deliberately waits until they do — see
+        // BookingConfirmationController.
+        $confirmLink = URL::temporarySignedRoute(
+            'bookings.confirm-completion',
+            now()->addDays(30),
+            ['booking' => $booking->id]
+        );
+
+        SafeMailer::send(fn () => Mail::to($booking->customerEmail())
+            ->queue(new JobCompletionConfirmationMail($booking, $confirmLink)));
 
         ActivityLog::record('booking.completed_by_inspector', $inspector, $booking, $isDirectAccept ? [
             'final_fee_cents' => $booking->offer->price_cents,
