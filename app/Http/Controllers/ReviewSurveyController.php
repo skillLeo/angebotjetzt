@@ -73,8 +73,14 @@ class ReviewSurveyController extends Controller
         // would otherwise re-notify admin about feedback they've already seen.
         if ($review->wasRecentlyCreated && $data['rating'] <= 7) {
             $booking->loadMissing(['inspector', 'user', 'request']);
-            SafeMailer::send(fn () => Mail::to(config('mail.from.address'))
-                ->queue(new LowRatingFeedbackMail($booking, $data['rating'], $data['comment'] ?? null)));
+
+            // Deferred until after the response: the queue runs sync here, so
+            // sending inline made the customer wait ~9 seconds on a dead
+            // button after submitting a low rating — long enough to look
+            // broken and invite a second submit. Admin gets the same mail,
+            // just after the redirect has already been sent.
+            defer(fn () => SafeMailer::send(fn () => Mail::to(config('mail.from.address'))
+                ->queue(new LowRatingFeedbackMail($booking, $data['rating'], $data['comment'] ?? null))));
         }
 
         if ($data['rating'] >= 8) {
