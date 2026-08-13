@@ -2,9 +2,14 @@
 import HowItWorks from '@/components/home/HowItWorks.vue';
 import FaqAccordion from '@/components/marketing/FaqAccordion.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
+import { provideSiteContent, type SiteContentMap } from '@/composables/useSiteContent';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
+const props = defineProps<{ content?: SiteContentMap }>();
+
+// The reused HowItWorks section reads the same copy the homepage does.
+provideSiteContent(() => props.content);
 
 const faq = computed(() => [
     { q: 'Ist die Anfrage wirklich kostenlos?', a: 'Ja. Anfrage und Angebotsvergleich sind für Kunden vollständig kostenlos und unverbindlich.' },

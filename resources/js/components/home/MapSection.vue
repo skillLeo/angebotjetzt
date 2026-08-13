@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import GermanyMap from '@/components/marketing/GermanyMap.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { MapPin } from 'lucide-vue-next';
 import { computed } from 'vue';
 
+const c = useSiteContent();
 
 defineProps<{
     coverage: Array<{ name: string; lat: number; lng: number; covered: boolean; count: number }>;
@@ -22,7 +24,11 @@ const activity = computed(() => [
 <template>
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Bundesweit'" :line1="'Geprüfte Anbieter'" :line2="'in ganz Deutschland'" />
+            <SectionHeading
+                :eyebrow="c('home.map.eyebrow', 'Bundesweit')"
+                :line1="c('home.map.line1', 'Geprüfte Anbieter')"
+                :line2="c('home.map.line2', 'in ganz Deutschland')"
+            />
 
             <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
                 <GermanyMap :coverage="coverage" />
@@ -35,7 +41,7 @@ const activity = computed(() => [
                             />
                             <span class="relative inline-flex h-2.5 w-2.5 rounded-pill bg-green-500" />
                         </span>
-                        <h3 class="font-display text-lg font-bold text-navy-700">{{ 'Live-Aktivität' }}</h3>
+                        <h3 class="font-display text-lg font-bold text-navy-700">{{ c('home.map.activity_title', 'Live-Aktivität') }}</h3>
                     </div>
                     <ul class="mt-5 space-y-3">
                         <li
@@ -50,7 +56,7 @@ const activity = computed(() => [
                             </span>
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-navy-700">
-                                    {{ 'Neue Anfrage in' }} {{ item.city }}
+                                    {{ c('home.map.activity_prefix', 'Neue Anfrage in') }} {{ item.city }}
                                 </p>
                                 <p class="text-sm text-ink-500">{{ item.service }} · {{ item.time }}</p>
                             </div>

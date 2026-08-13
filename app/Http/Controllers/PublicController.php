@@ -15,6 +15,7 @@ use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\ServiceType;
 use App\Models\ServiceTypeRedirect;
+use App\Models\SiteContent;
 use App\Support\GuestAccountRedirect;
 use App\Support\SafeMailer;
 use Illuminate\Http\RedirectResponse;
@@ -143,6 +144,9 @@ class PublicController extends Controller
         return Inertia::render('Home', [
             'categories' => $this->categories(),
             'serviceTypes' => $this->serviceTypes(),
+            // Admin-editable copy for every section, already resolved against
+            // the built-in defaults.
+            'content' => SiteContent::group('home'),
             ...$data,
         ]);
     }
@@ -203,7 +207,12 @@ class PublicController extends Controller
 
     public function howItWorks(): Response
     {
-        return Inertia::render('public/HowItWorks');
+        // This page reuses the homepage's HowItWorks section, so it reads the
+        // same admin-editable copy — otherwise editing the steps would leave
+        // the two pages saying different things.
+        return Inertia::render('public/HowItWorks', [
+            'content' => SiteContent::group('home'),
+        ]);
     }
 
     public function forInspectors(): Response
@@ -271,22 +280,30 @@ class PublicController extends Controller
 
     public function imprint(): Response
     {
-        return Inertia::render('public/legal/Imprint');
+        return Inertia::render('public/legal/Imprint', [
+            'content' => SiteContent::legalPage('imprint'),
+        ]);
     }
 
     public function privacy(): Response
     {
-        return Inertia::render('public/legal/Privacy');
+        return Inertia::render('public/legal/Privacy', [
+            'content' => SiteContent::legalPage('privacy'),
+        ]);
     }
 
     public function terms(): Response
     {
-        return Inertia::render('public/legal/Terms');
+        return Inertia::render('public/legal/Terms', [
+            'content' => SiteContent::legalPage('terms'),
+        ]);
     }
 
     public function cookies(): Response
     {
-        return Inertia::render('public/legal/Cookies');
+        return Inertia::render('public/legal/Cookies', [
+            'content' => SiteContent::legalPage('cookies'),
+        ]);
     }
 
     /**

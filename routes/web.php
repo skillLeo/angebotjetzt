@@ -240,6 +240,10 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/homepage-partners', [AdminController::class, 'storeHomepagePartner'])->name('homepage-partners.store');
     Route::post('/homepage-partners/{homepagePartner}', [AdminController::class, 'updateHomepagePartner'])->name('homepage-partners.update');
     Route::delete('/homepage-partners/{homepagePartner}', [AdminController::class, 'destroyHomepagePartner'])->name('homepage-partners.destroy');
+    Route::get('/homepage-content', [AdminController::class, 'homepageContent'])->name('homepage-content');
+    Route::post('/homepage-content', [AdminController::class, 'updateHomepageContent'])->name('homepage-content.update');
+    Route::get('/legal-content', [AdminController::class, 'legalContent'])->name('legal-content');
+    Route::post('/legal-content/{page}', [AdminController::class, 'updateLegalContent'])->name('legal-content.update');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::post('/settings/logo', [AdminController::class, 'uploadLogo'])->name('settings.logo.upload');

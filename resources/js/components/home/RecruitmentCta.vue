@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import HandDrawnFrame from '@/components/marketing/HandDrawnFrame.vue';
 import Reveal from '@/components/marketing/Reveal.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { Link } from '@inertiajs/vue3';
 
 defineProps<{
     image: string;
 }>();
 
+const c = useSiteContent();
 </script>
 
 <template>
@@ -15,26 +17,26 @@ defineProps<{
             <div class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="p-8 sm:p-12 lg:p-16">
                     <Reveal>
-                        <p class="text-eyebrow mb-5 text-green-400">{{ 'Für Anbieter' }}</p>
+                        <p class="text-eyebrow mb-5 text-green-400">{{ c('home.recruitment.eyebrow', 'Für Anbieter') }}</p>
                         <h2 class="text-section text-white">
-                            {{ 'Mehr Aufträge.' }}<br />
-                            <span class="text-green-400">{{ 'Kein Papierkram.' }}</span>
+                            {{ c('home.recruitment.line1', 'Mehr Aufträge.') }}<br />
+                            <span class="text-green-400">{{ c('home.recruitment.line2', 'Kein Papierkram.') }}</span>
                         </h2>
                         <p class="text-lead mt-6 max-w-lg text-navy-100">
-                            {{ 'Erhalten Sie passende Anfragen aus Ihrem Servicegebiet automatisch per E-Mail. Sie bestimmen Ihre Preise selbst, verwalten Ihr Guthaben im Wallet und lassen sich auszahlen, wann immer Sie möchten.' }}
+                            {{ c('home.recruitment.body', 'Erhalten Sie passende Anfragen aus Ihrem Servicegebiet automatisch per E-Mail. Sie bestimmen Ihre Preise selbst, verwalten Ihr Guthaben im Wallet und lassen sich auszahlen, wann immer Sie möchten.') }}
                         </p>
                         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                             <Link
                                 href="/for-inspectors"
                                 class="rounded-pill bg-green-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-green-600"
                             >
-                                {{ 'Als Anbieter registrieren' }}
+                                {{ c('home.recruitment.cta_primary', 'Als Anbieter registrieren') }}
                             </Link>
                             <Link
                                 href="/for-inspectors"
                                 class="rounded-pill border border-navy-500 px-7 py-3.5 text-center text-[15px] font-bold text-white transition hover:bg-navy-800"
                             >
-                                {{ 'Mehr erfahren' }}
+                                {{ c('home.recruitment.cta_secondary', 'Mehr erfahren') }}
                             </Link>
                         </div>
                     </Reveal>

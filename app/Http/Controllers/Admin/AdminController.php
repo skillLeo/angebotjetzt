@@ -27,13 +27,16 @@ use App\Models\ServiceType;
 use App\Models\ServiceTypeField;
 use App\Models\ServiceTypeRedirect;
 use App\Models\Setting;
+use App\Models\SiteContent;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\GeocodingService;
 use App\Services\ProviderInviteService;
 use App\Services\RequestService;
 use App\Services\WalletService;
+use App\Support\RichTextSanitizer;
 use App\Support\SafeMailer;
+use App\Support\SiteContentRegistry;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -1455,6 +1458,104 @@ class AdminController extends Controller
         ActivityLog::record('service_type_field.deleted', Auth::guard('admin')->user(), $serviceType, ['label' => $field->label]);
 
         return back()->with('success', 'Feld entfernt.');
+    }
+
+    /**
+     * "Startseite" — every editable string on the homepage, grouped by the
+     * section it appears in. The field structure comes from the registry so
+     * this screen and the frontend can never drift apart.
+     */
+    public function homepageContent(): Response
+    {
+        $values = SiteContent::group('home');
+
+        return Inertia::render('admin/HomepageContent', [
+            'sections' => collect(SiteContentRegistry::homeSections())->map(fn ($section) => [
+                'key' => $section['key'],
+                'label' => $section['label'],
+                'hint' => $section['hint'] ?? null,
+                'fields' => collect($section['fields'])->map(fn ($field) => [
+                    'key' => $field['key'],
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'hint' => $field['hint'] ?? null,
+                    'value' => $values[$field['key']] ?? '',
+                ])->all(),
+            ])->all(),
+        ]);
+    }
+
+    public function updateHomepageContent(Request $request): RedirectResponse
+    {
+        $allowed = array_keys(array_filter(
+            SiteContentRegistry::groups(),
+            fn ($group) => $group === 'home',
+        ));
+
+        $request->validate([
+            'values' => ['required', 'array'],
+            'values.*' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        // Only keys this screen actually owns get written, so a crafted
+        // payload cannot reach the legal-page HTML through this endpoint.
+        $values = array_intersect_key($request->input('values'), array_flip($allowed));
+
+        SiteContent::setMany(array_map(fn ($value) => (string) $value, $values));
+
+        ActivityLog::record('site_content.homepage_updated', Auth::guard('admin')->user(), null, [
+            'keys' => count($values),
+        ]);
+
+        return back()->with('success', 'Startseiten-Inhalte gespeichert.');
+    }
+
+    /**
+     * "Rechtliche Seiten" — title, "Stand" line and rich-text body for each
+     * of the four legal pages.
+     */
+    public function legalContent(): Response
+    {
+        $values = SiteContent::group('legal');
+
+        return Inertia::render('admin/LegalContent', [
+            'pages' => collect(SiteContentRegistry::legalPages())->map(fn ($page) => [
+                'key' => $page['key'],
+                'label' => $page['label'],
+                'url' => $page['url'],
+                'fields' => collect($page['fields'])->map(fn ($field) => [
+                    'key' => $field['key'],
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'value' => $values[$field['key']] ?? '',
+                ])->all(),
+            ])->all(),
+        ]);
+    }
+
+    public function updateLegalContent(Request $request, string $page): RedirectResponse
+    {
+        $definition = collect(SiteContentRegistry::legalPages())->firstWhere('key', $page);
+
+        abort_if($definition === null, 404);
+
+        $request->validate([
+            'title' => ['required', 'string', 'max:200'],
+            'updated' => ['nullable', 'string', 'max:100'],
+            'body' => ['required', 'string', 'max:120000'],
+        ]);
+
+        SiteContent::setMany([
+            "legal.{$page}.title" => $request->string('title')->trim()->value(),
+            "legal.{$page}.updated" => $request->string('updated')->trim()->value(),
+            "legal.{$page}.body" => RichTextSanitizer::clean($request->input('body')),
+        ]);
+
+        ActivityLog::record('site_content.legal_updated', Auth::guard('admin')->user(), null, [
+            'page' => $page,
+        ]);
+
+        return back()->with('success', $definition['label'].' gespeichert.');
     }
 
     public function settings(): Response

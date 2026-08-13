@@ -11,12 +11,13 @@ import TestimonialBand from '@/components/home/TestimonialBand.vue';
 import FaqAccordion from '@/components/marketing/FaqAccordion.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
 import StarRating from '@/components/marketing/StarRating.vue';
+import { provideSiteContent, type SiteContentMap } from '@/composables/useSiteContent';
 import { Head } from '@inertiajs/vue3';
 import { BadgeCheck, CircleDollarSign } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 
-defineProps<{
+const props = defineProps<{
     categories: Array<{ id: number; name: string; slug: string; icon: string; description: string; is_active: boolean }>;
     serviceTypes: Array<{ id: number; name: string; slug: string; description: string; image: string; categoryId: number; flowMode: string }>;
     stats: { bookings: number; inspectors: number; avgOffers: number; avgResponseHours: number };
@@ -25,21 +26,34 @@ defineProps<{
     reviews: Array<{ name: string; text: string | null; rating: number; service: string | null; city: string | null; photo: string | null }>;
     coverage: Array<{ name: string; lat: number; lng: number; covered: boolean; count: number }>;
     totalReviews: number;
+    content?: SiteContentMap;
 }>();
+
+// Publishes the admin-editable copy to every section component below, and
+// hands back the reader for this page's own inline text.
+const c = provideSiteContent(() => props.content);
 
 const heroImage = 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=1200&auto=format&fit=crop';
 const testimonialPerson = 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=700&auto=format&fit=crop';
 const recruitmentImage = 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=900&auto=format&fit=crop';
 
-const faqItems = computed(() => [
-    { q: 'Was kostet mich eine Anfrage?', a: 'Ihre Anfrage und der Angebotsvergleich sind für Sie als Kunde vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des Anbieters, den Sie beauftragen.' },
-    { q: 'Wie schnell erhalte ich Angebote?', a: 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein. Da wir alle passenden Anbieter aus Ihrer Region automatisch benachrichtigen, erhalten Sie meist mehrere Angebote zum Vergleich.' },
-    { q: 'Sind die Anbieter geprüft?', a: 'Ja. Alle Anbieter auf AngebotJetzt durchlaufen eine Prüfung, bevor sie Anfragen erhalten. Viele stammen aus unserem etablierten Netzwerk und sind seit Jahren aktiv.' },
-    { q: 'Wie funktioniert die Bezahlung?', a: 'Sie bezahlen sicher online im Moment der Beauftragung – direkt über unsere verschlüsselte Zahlungsabwicklung. Kein Papierkram, keine Vorkasse per Überweisung.' },
-    { q: 'Kann ich zwischen mehreren Angeboten wählen?', a: 'Selbstverständlich. Sie sehen alle eingegangenen Angebote übersichtlich nebeneinander – mit Preis, Anbieterprofil und Bewertung – und entscheiden in Ruhe, wen Sie beauftragen.' },
-]);
+// A question or answer left blank in admin drops that entry from the list.
+const faqItems = computed(() =>
+    [
+        { q: c('home.faq.q1', 'Was kostet mich eine Anfrage?'), a: c('home.faq.a1', 'Ihre Anfrage und der Angebotsvergleich sind für Sie als Kunde vollständig kostenlos und unverbindlich. Sie zahlen ausschließlich den Preis des Anbieters, den Sie beauftragen.') },
+        { q: c('home.faq.q2', 'Wie schnell erhalte ich Angebote?'), a: c('home.faq.a2', 'In der Regel treffen die ersten Angebote innerhalb weniger Stunden ein. Da wir alle passenden Anbieter aus Ihrer Region automatisch benachrichtigen, erhalten Sie meist mehrere Angebote zum Vergleich.') },
+        { q: c('home.faq.q3', 'Sind die Anbieter geprüft?'), a: c('home.faq.a3', 'Ja. Alle Anbieter auf AngebotJetzt durchlaufen eine Prüfung, bevor sie Anfragen erhalten. Viele stammen aus unserem etablierten Netzwerk und sind seit Jahren aktiv.') },
+        { q: c('home.faq.q4', 'Wie funktioniert die Bezahlung?'), a: c('home.faq.a4', 'Sie bezahlen sicher online im Moment der Beauftragung – direkt über unsere verschlüsselte Zahlungsabwicklung. Kein Papierkram, keine Vorkasse per Überweisung.') },
+        { q: c('home.faq.q5', 'Kann ich zwischen mehreren Angeboten wählen?'), a: c('home.faq.a5', 'Selbstverständlich. Sie sehen alle eingegangenen Angebote übersichtlich nebeneinander – mit Preis, Anbieterprofil und Bewertung – und entscheiden in Ruhe, wen Sie beauftragen.') },
+    ].filter((item) => item.q.trim() !== '' && item.a.trim() !== ''),
+);
 
-const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoche', 'Capital'];
+const press = computed(() =>
+    c('home.press.names', 'Handelsblatt, Gründerszene, t3n, FOCUS, WirtschaftsWoche, Capital')
+        .split(',')
+        .map((name) => name.trim())
+        .filter((name) => name !== ''),
+);
 </script>
 
 <template>
@@ -55,10 +69,10 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <section class="bg-white pt-10 pb-4 lg:pt-14">
         <div class="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
             <div class="flex items-center gap-4 rounded-card border border-ink-100 bg-white p-5">
-                <span class="font-display text-3xl font-extrabold text-navy-700">4,9</span>
+                <span class="font-display text-3xl font-extrabold text-navy-700">{{ c('home.trust.rating', '4,9') }}</span>
                 <div>
                     <StarRating :rating="5" :size="15" />
-                    <p class="mt-1 text-sm text-ink-500">{{ totalReviews }}{{ '+ Bewertungen' }}</p>
+                    <p class="mt-1 text-sm text-ink-500">{{ totalReviews }}{{ c('home.trust.reviews_suffix', '+ Bewertungen') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-4 rounded-card border border-ink-100 bg-white p-5">
@@ -66,8 +80,8 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
                     <CircleDollarSign :size="22" aria-hidden="true" />
                 </span>
                 <div>
-                    <p class="font-display text-lg font-bold text-navy-700">{{ '0 € für Ihre Anfrage' }}</p>
-                    <p class="text-sm text-ink-500">{{ 'Kostenlos & unverbindlich' }}</p>
+                    <p class="font-display text-lg font-bold text-navy-700">{{ c('home.trust.badge2_title', '0 € für Ihre Anfrage') }}</p>
+                    <p class="text-sm text-ink-500">{{ c('home.trust.badge2_text', 'Kostenlos & unverbindlich') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-4 rounded-card border border-ink-100 bg-white p-5">
@@ -75,8 +89,8 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
                     <BadgeCheck :size="22" aria-hidden="true" />
                 </span>
                 <div>
-                    <p class="font-display text-lg font-bold text-navy-700">{{ 'Geprüfte Anbieter' }}</p>
-                    <p class="text-sm text-ink-500">{{ 'In ganz Deutschland' }}</p>
+                    <p class="font-display text-lg font-bold text-navy-700">{{ c('home.trust.badge3_title', 'Geprüfte Anbieter') }}</p>
+                    <p class="text-sm text-ink-500">{{ c('home.trust.badge3_text', 'In ganz Deutschland') }}</p>
                 </div>
             </div>
         </div>
@@ -85,7 +99,11 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <!-- 04 SERVICE CATEGORY GRID -->
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Unsere Services'" :line1="'Für jeden Bedarf'" :line2="'der passende Anbieter'" />
+            <SectionHeading
+                :eyebrow="c('home.categories.eyebrow', 'Unsere Services')"
+                :line1="c('home.categories.line1', 'Für jeden Bedarf')"
+                :line2="c('home.categories.line2', 'der passende Anbieter')"
+            />
             <div class="mt-10">
                 <FutureCategories :categories="categories" />
             </div>
@@ -98,7 +116,11 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <!-- 06 LIVE REQUESTS CAROUSEL -->
     <section v-if="recentRequests.length" class="bg-sand-50 py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Aktuelle Anfragen'" :line1="'Diese Anfragen suchen'" :line2="'gerade den passenden Anbieter'" />
+            <SectionHeading
+                :eyebrow="c('home.live.eyebrow', 'Aktuelle Anfragen')"
+                :line1="c('home.live.line1', 'Diese Anfragen suchen')"
+                :line2="c('home.live.line2', 'gerade den passenden Anbieter')"
+            />
             <div class="mt-8">
                 <LiveRequestsCarousel :requests="recentRequests" />
             </div>
@@ -117,7 +139,11 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <!-- 10 PROVIDER CARDS CAROUSEL -->
     <section v-if="providers.length" class="bg-white py-14 lg:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'Unser Netzwerk'" :line1="'Unsere geprüften'" :line2="'Anbieter'" />
+            <SectionHeading
+                :eyebrow="c('home.providers.eyebrow', 'Unser Netzwerk')"
+                :line1="c('home.providers.line1', 'Unsere geprüften')"
+                :line2="c('home.providers.line2', 'Anbieter')"
+            />
             <div class="mt-8">
                 <ProviderCarousel :providers="providers" />
             </div>
@@ -131,7 +157,7 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <section class="bg-sand-50 py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="rounded-panel bg-white px-6 py-8 shadow-card">
-                <p class="text-eyebrow mb-6 text-center text-ink-500">{{ 'Bekannt aus' }}</p>
+                <p class="text-eyebrow mb-6 text-center text-ink-500">{{ c('home.press.label', 'Bekannt aus') }}</p>
                 <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
                     <span
                         v-for="name in press"
@@ -148,7 +174,12 @@ const press = ['Handelsblatt', 'Gründerszene', 't3n', 'FOCUS', 'WirtschaftsWoch
     <!-- 14 FAQ ACCORDION -->
     <section class="bg-white py-16 lg:py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading centered :eyebrow="'Häufige Fragen'" :line1="'Alles, was Sie'" :line2="'wissen müssen'" />
+            <SectionHeading
+                centered
+                :eyebrow="c('home.faq.eyebrow', 'Häufige Fragen')"
+                :line1="c('home.faq.line1', 'Alles, was Sie')"
+                :line2="c('home.faq.line2', 'wissen müssen')"
+            />
             <div class="mt-10">
                 <FaqAccordion :items="faqItems" />
             </div>

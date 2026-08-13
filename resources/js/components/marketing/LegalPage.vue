@@ -3,7 +3,13 @@ import { Head } from '@inertiajs/vue3';
 import { FileText, List } from 'lucide-vue-next';
 import { nextTick, onMounted, ref, useTemplateRef } from 'vue';
 
-defineProps<{ title: string; updated?: string }>();
+/**
+ * `body` carries admin-authored HTML from the legal-content screen. It is
+ * sanitised server-side before it is stored (see RichTextSanitizer) and can
+ * only be written by an authenticated administrator. Pages that pass their
+ * markup through the default slot instead leave it unset.
+ */
+defineProps<{ title: string; updated?: string; body?: string }>();
 
 const proseRef = useTemplateRef('proseRef');
 const toc = ref<Array<{ id: string; text: string }>>([]);
@@ -81,7 +87,8 @@ onMounted(async () => {
                 </div>
             </aside>
 
-            <div ref="proseRef" class="legal-prose max-w-3xl space-y-5 text-[15px] leading-relaxed text-ink-700">
+            <div v-if="body" ref="proseRef" class="legal-prose max-w-3xl space-y-5 text-[15px] leading-relaxed text-ink-700" v-html="body" />
+            <div v-else ref="proseRef" class="legal-prose max-w-3xl space-y-5 text-[15px] leading-relaxed text-ink-700">
                 <slot />
             </div>
         </div>

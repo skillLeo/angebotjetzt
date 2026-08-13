@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AnimatedCounter from '@/components/marketing/AnimatedCounter.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -11,12 +12,31 @@ const props = defineProps<{
     };
 }>();
 
+const c = useSiteContent();
+
+/** The admin-set figure, ignored if it is not a usable number. */
+function figure(key: string, fallback: number): number {
+    const parsed = Number(c(key, String(fallback)).replace(',', '.'));
+
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+/**
+ * The unit shown after a counter, spaced from the number here rather than in
+ * the stored value: Laravel trims request input, so a leading space typed in
+ * admin would never survive the save.
+ */
+function unit(key: string, fallback: string): string {
+    const value = c(key, fallback).trim();
+
+    return value === '' ? '' : ` ${value}`;
+}
 
 const items = computed(() => [
-    { value: Math.max(props.stats.bookings, 8000), suffix: '+', label: 'Aufträge vermittelt', decimals: 0 },
-    { value: Math.max(props.stats.inspectors, 25), suffix: '', label: 'Geprüfte Anbieter', decimals: 0 },
-    { value: props.stats.avgOffers || 3.2, suffix: '', label: 'Ø Angebote pro Anfrage', decimals: 1 },
-    { value: props.stats.avgResponseHours || 3, suffix: ' Std.', label: 'Ø Antwortzeit', decimals: 0 },
+    { value: Math.max(props.stats.bookings, figure('home.stats.min1', 8000)), suffix: '+', label: c('home.stats.label1', 'Aufträge vermittelt'), decimals: 0 },
+    { value: Math.max(props.stats.inspectors, figure('home.stats.min2', 25)), suffix: '', label: c('home.stats.label2', 'Geprüfte Anbieter'), decimals: 0 },
+    { value: props.stats.avgOffers || figure('home.stats.min3', 3.2), suffix: '', label: c('home.stats.label3', 'Ø Angebote pro Anfrage'), decimals: 1 },
+    { value: props.stats.avgResponseHours || figure('home.stats.min4', 3), suffix: unit('home.stats.suffix4', 'Std.'), label: c('home.stats.label4', 'Ø Antwortzeit'), decimals: 0 },
 ]);
 </script>
 

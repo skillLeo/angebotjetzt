@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import Reveal from '@/components/marketing/Reveal.vue';
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { CheckCircle2, MapPin } from 'lucide-vue-next';
 import { computed } from 'vue';
 
+const c = useSiteContent();
 
 const steps = computed(() => [
-    { n: '01', title: 'Anfrage stellen', text: 'Beschreiben Sie, welche Leistung Sie benötigen, und Ihre Region. In zwei Minuten erledigt – kostenlos und unverbindlich.' },
-    { n: '02', title: 'Angebote vergleichen', text: 'Geprüfte Anbieter aus Ihrer Nähe senden Ihnen individuelle Preisangebote. Sie sehen alle Angebote übersichtlich nebeneinander.' },
-    { n: '03', title: 'Anbieter beauftragen', text: 'Wählen Sie das beste Angebot und beauftragen Sie Ihren Anbieter verbindlich. Die Zahlung vereinbaren Sie anschließend direkt miteinander.' },
+    { n: '01', title: c('home.how.step1_title', 'Anfrage stellen'), text: c('home.how.step1_text', 'Beschreiben Sie, welche Leistung Sie benötigen, und Ihre Region. In zwei Minuten erledigt – kostenlos und unverbindlich.') },
+    { n: '02', title: c('home.how.step2_title', 'Angebote vergleichen'), text: c('home.how.step2_text', 'Geprüfte Anbieter aus Ihrer Nähe senden Ihnen individuelle Preisangebote. Sie sehen alle Angebote übersichtlich nebeneinander.') },
+    { n: '03', title: c('home.how.step3_title', 'Anbieter beauftragen'), text: c('home.how.step3_text', 'Wählen Sie das beste Angebot und beauftragen Sie Ihren Anbieter verbindlich. Die Zahlung vereinbaren Sie anschließend direkt miteinander.') },
 ]);
 </script>
 
 <template>
     <section class="bg-white py-16 lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading :eyebrow="'In drei Schritten'" :line1="'So funktioniert'" :line2="'AngebotJetzt'" />
+            <SectionHeading
+                :eyebrow="c('home.how.eyebrow', 'In drei Schritten')"
+                :line1="c('home.how.line1', 'So funktioniert')"
+                :line2="c('home.how.line2', 'AngebotJetzt')"
+            />
 
             <div class="mt-10 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <ol class="relative">

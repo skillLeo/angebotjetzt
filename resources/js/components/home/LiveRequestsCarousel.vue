@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useSiteContent } from '@/composables/useSiteContent';
 import { formatEuroShort } from '@/lib/format';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-vue-next';
 import { ref } from 'vue';
 
+const c = useSiteContent();
 
 defineProps<{
     requests: Array<{
@@ -70,7 +72,7 @@ function scroll(dir: number) {
                         {{ req.plz }} {{ req.ort }}
                     </p>
                     <div class="mt-4 flex items-center justify-between">
-                        <span class="text-sm text-ink-500">{{ 'Angebote ab' }}</span>
+                        <span class="text-sm text-ink-500">{{ c('home.live.price_label', 'Angebote ab') }}</span>
                         <span
                             class="rounded-pill bg-green-50 px-3.5 py-1.5 font-display text-base font-extrabold text-green-700"
                         >

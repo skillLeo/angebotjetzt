@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 /**
  * Structural reference data the application cannot function without:
  * the 7 homepage categories, the 7 Kfz-Gutachten service types, the
- * commission setting, and one admin account.
+ * commission setting, one admin account, and the editable homepage and
+ * legal-page copy.
  *
  * This is safe to run on a live production database — it contains no
  * demo/fake customers, inspectors, or bookings. Run it once after the
@@ -63,6 +64,10 @@ class EssentialDataSeeder extends Seeder
         Setting::set('commission_percent', 10);
 
         $this->ensureAdminExists();
+
+        // The editable homepage/legal copy, seeded with the site's current
+        // wording so the admin screens open with real content.
+        $this->call(SiteContentSeeder::class);
 
         $categories = [
             ['Kfz-Gutachten', 'kfz-gutachten', 'car', 'Unabhängige Kfz-Sachverständige für Gutachten und Bewertungen.', true, 1],

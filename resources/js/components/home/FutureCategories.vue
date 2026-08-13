@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Reveal from '@/components/marketing/Reveal.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { Link } from '@inertiajs/vue3';
 import {
     Car,
@@ -16,6 +17,7 @@ defineProps<{
     categories: Array<{ id: number; name: string; slug: string; icon: string; is_active: boolean }>;
 }>();
 
+const c = useSiteContent();
 
 const icons: Record<string, Component> = {
     car: Car,
@@ -44,7 +46,7 @@ const icons: Record<string, Component> = {
                     </span>
                     <div class="min-w-0">
                         <p class="font-display leading-snug font-bold text-navy-700">{{ cat.name }}</p>
-                        <span class="mt-1 inline-block text-sm font-semibold text-green-600">{{ 'Angebote erhalten' }}</span>
+                        <span class="mt-1 inline-block text-sm font-semibold text-green-600">{{ c('home.categories.cta', 'Angebote erhalten') }}</span>
                     </div>
                 </Link>
                 <Link
@@ -62,7 +64,7 @@ const icons: Record<string, Component> = {
                         <span
                             class="mt-1 inline-block rounded-pill bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-500"
                         >
-                            {{ 'Demnächst' }}
+                            {{ c('home.categories.soon_badge', 'Demnächst') }}
                         </span>
                     </div>
                 </Link>

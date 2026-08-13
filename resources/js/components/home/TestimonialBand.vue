@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import SectionHeading from '@/components/marketing/SectionHeading.vue';
+import { useSiteContent } from '@/composables/useSiteContent';
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { ref } from 'vue';
 
+const c = useSiteContent();
 
 defineProps<{
     reviews: Array<{
@@ -29,9 +31,9 @@ function scroll(dir: number) {
             <SectionHeading
                 centered
                 inverted
-                :eyebrow="'Kundenstimmen'"
-                :line1="'Tausende zufriedene Kunden'"
-                :line2="'vertrauen AngebotJetzt'"
+                :eyebrow="c('home.testimonials.eyebrow', 'Kundenstimmen')"
+                :line1="c('home.testimonials.line1', 'Tausende zufriedene Kunden')"
+                :line2="c('home.testimonials.line2', 'vertrauen AngebotJetzt')"
             />
 
             <div class="relative mt-10">
@@ -58,7 +60,7 @@ function scroll(dir: number) {
                                 class="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-white px-4 py-2.5 text-sm font-bold whitespace-nowrap text-green-700 shadow-lift"
                             >
                                 <CheckCircle2 :size="16" aria-hidden="true" />
-                                {{ 'Bewertung abgegeben' }}
+                                {{ c('home.testimonials.photo_badge', 'Bewertung abgegeben') }}
                             </span>
                         </div>
 
@@ -68,7 +70,7 @@ function scroll(dir: number) {
                             <span
                                 class="w-fit rounded-pill bg-green-50 px-3 py-1 text-xs font-bold tracking-wide text-green-700 uppercase"
                             >
-                                {{ 'Positiv' }}
+                                {{ c('home.testimonials.badge', 'Positiv') }}
                             </span>
                             <p class="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
                                 „{{ rev.text }}"
